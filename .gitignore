@@ -4,8 +4,6 @@ node_modules/
 # IDE
 /.idea
 /.awcache
-/.vscode
-/.devcontainer
 *.code-workspace
 
 # bundle
@@ -34,3 +32,9 @@ yarn-error.log
 /packages/graphql
 /benchmarks/memory
 build/config\.gypi
+
+# build
+dist/
+
+# secrets
+.env
