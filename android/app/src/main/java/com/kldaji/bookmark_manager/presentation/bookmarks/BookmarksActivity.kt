@@ -1,4 +1,4 @@
-package com.kldaji.bookmark_manager.ui.bookmarks
+package com.kldaji.bookmark_manager.presentation.bookmarks
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,7 +19,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
-import com.kldaji.bookmark_manager.ui.theme.BookmarkmanagerTheme
+import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 import kotlinx.coroutines.launch
 
 class BookmarksActivity : ComponentActivity() {
