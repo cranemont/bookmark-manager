@@ -13,7 +13,7 @@
             android:theme="@style/Theme.Bookmarkmanager"
             tools:targetApi="31">
         <activity
-                android:name=".MainActivity"
+                android:name=".ui.bookmarks.BookmarksActivity"
                 android:exported="true"
                 android:theme="@style/Theme.Bookmarkmanager">
             <intent-filter>
