@@ -1,4 +1,4 @@
-package com.kldaji.bookmark_manager.ui.theme
+package com.kldaji.bookmark_manager.presentation.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes
