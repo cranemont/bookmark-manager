@@ -20,7 +20,6 @@ const manifest: chrome.runtime.ManifestV3 = {
       js: ["src/pages/content/index.js"],
     },
   ],
-  devtools_page: "src/pages/devtools/index.html",
   web_accessible_resources: [
     {
       resources: ["assets/js/*.js", "icon-128.png", "icon-34.png"],
