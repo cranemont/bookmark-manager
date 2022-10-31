@@ -1,5 +1,6 @@
 package com.kldaji.bookmark_manager.presentation.bookmarks
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -25,6 +26,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
+import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 import kotlinx.coroutines.launch
 
@@ -70,7 +72,10 @@ class BookmarksActivity : ComponentActivity() {
 						)
 					},
 					floatingActionButton = {
-						FloatingActionButton(onClick = { /* TODO : 북마크 추가 화면으로 이동 */ }) {
+						FloatingActionButton(onClick = {
+							val intent = Intent(this, AddBookmarkActivity::class.java)
+							startActivity(intent)
+						}) {
 							Icon(
 								imageVector = Icons.Default.Add,
 								contentDescription = "북마크 추가 화면으로 이동"
@@ -152,12 +157,10 @@ class BookmarksActivity : ComponentActivity() {
 												maxLines = 3,
 												overflow = TextOverflow.Ellipsis
 											)
-
 										}
 									}
 								}
 							}
-
 						}
 					}
 				}
