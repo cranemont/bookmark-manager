@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 
 class AddBookmarkActivity : ComponentActivity() {
@@ -58,7 +59,11 @@ class AddBookmarkActivity : ComponentActivity() {
 							},
 							backgroundColor = Color.White,
 							navigationIcon = {
-								IconButton(onClick = { /*TODO: 북마크 리스트 화면으로 이동 */ }) {
+								IconButton(onClick = {
+									val intent = Intent(this, BookmarksActivity::class.java)
+									startActivity(intent)
+									finish()
+								}) {
 									Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "북마크 리스트 화면으로 이동")
 								}
 							}
