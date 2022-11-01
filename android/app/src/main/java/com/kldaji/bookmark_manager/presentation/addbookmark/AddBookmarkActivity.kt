@@ -103,11 +103,15 @@ class AddBookmarkActivity : ComponentActivity() {
 											width = 1.dp,
 											color = Color.DarkGray
 										)
-										.padding(8.dp),
+										.padding(horizontal = 16.dp, vertical = 8.dp),
 									horizontalArrangement = Arrangement.SpaceBetween,
 									verticalAlignment = Alignment.CenterVertically
 								) {
-									Text(text = "TAGS")
+									Text(
+										text = "TAGS",
+										fontWeight = FontWeight.Bold,
+										color = Color.Black
+									)
 									if (!isExpanded) Icon(imageVector = Icons.Default.ExpandMore, contentDescription = "태그 리스트 확장")
 									else Icon(imageVector = Icons.Default.ExpandLess, contentDescription = "태그 리스트 축소")
 								}
