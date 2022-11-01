@@ -16,10 +16,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,10 +113,29 @@ class AddBookmarkActivity : ComponentActivity() {
 								}
 
 								if (isExpanded) {
+									Row(
+										modifier = modifier
+											.padding(top = 6.dp)
+											.clickable {  },
+										verticalAlignment = Alignment.CenterVertically
+									) {
+										Icon(
+											imageVector = Icons.Default.Add,
+											contentDescription = "태그 추가",
+											tint = Color.Blue
+										)
+										Text(
+											text = "ADD TAG",
+											color = Color.Blue,
+											fontSize = 14.sp,
+											fontWeight = FontWeight.Bold
+										)
+									}
+
 									LazyHorizontalStaggeredGrid(
 										modifier = modifier
 											.height(140.dp)
-											.padding(top = 16.dp),
+											.padding(top = 12.dp),
 										rows = StaggeredGridCells.Fixed(3),
 									) {
 										items(items = tags) { tag ->
