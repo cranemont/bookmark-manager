@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 
@@ -46,12 +49,16 @@ class AddBookmarkActivity : ComponentActivity() {
 			Log.d(TAG, url)
 		}
 
+		val bookmarksViewModel: BookmarksViewModel by viewModels()
+
 		setContent {
 			BookmarkmanagerTheme {
 				val modifier = Modifier
 				var isExpanded by remember { mutableStateOf(false) }
 
-				val tags = listOf("SPORTS", "COMPUTER SCIENCE", "YOUTUBE", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE")
+				val tags = bookmarksViewModel.tags.drop(1) // remove "ALL" tag
+				var selectedTags by remember { mutableStateOf(listOf<String>()) }
+
 				var title by remember { mutableStateOf(TextFieldValue("")) }
 				var url by remember { mutableStateOf(TextFieldValue("")) }
 				var description by remember { mutableStateOf(TextFieldValue("")) }
@@ -103,8 +110,8 @@ class AddBookmarkActivity : ComponentActivity() {
 									verticalAlignment = Alignment.CenterVertically
 								) {
 									Text(text = "TAGS")
-									if (!isExpanded) Icon(imageVector = Icons.Default.ExpandMore, contentDescription = "")
-									else Icon(imageVector = Icons.Default.ExpandLess, contentDescription = "")
+									if (!isExpanded) Icon(imageVector = Icons.Default.ExpandMore, contentDescription = "태그 리스트 확장")
+									else Icon(imageVector = Icons.Default.ExpandLess, contentDescription = "태그 리스트 축소")
 								}
 
 								if (isExpanded) {
@@ -117,8 +124,25 @@ class AddBookmarkActivity : ComponentActivity() {
 										items(items = tags) { tag ->
 											Chip(
 												modifier = modifier.padding(end = 8.dp, bottom = 8.dp),
-												onClick = { /*TODO*/ }
+												onClick = {
+													val newSelectedTags = selectedTags.toMutableList()
+
+													if (newSelectedTags.contains(tag)) newSelectedTags.remove(tag)
+													else newSelectedTags.add(tag)
+
+													selectedTags = newSelectedTags
+												},
+												leadingIcon = {
+													if (selectedTags.contains(tag)) {
+														Icon(
+															Icons.Default.Check,
+															contentDescription = "태그 선택"
+														)
+													}
+												},
+												colors = if (selectedTags.contains(tag)) ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary) else ChipDefaults.chipColors()
 											) {
+
 												Text(
 													modifier = modifier.padding(end = 4.dp),
 													text = tag
