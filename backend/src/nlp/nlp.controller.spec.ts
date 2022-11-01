@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
+import { OneAIService } from 'src/oneai/oneai.service'
 import { NlpController } from './nlp.controller'
+import { NlpService } from './nlp.service'
 
 describe('NlpController', () => {
   let controller: NlpController
@@ -7,6 +9,7 @@ describe('NlpController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [NlpController],
+      providers: [NlpService, { provide: OneAIService, useValue: {} }],
     }).compile()
 
     controller = module.get<NlpController>(NlpController)
