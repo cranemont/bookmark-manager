@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common'
-import { OneaiService } from './oneai.service'
+import OneAI from 'oneai'
+import { OneAIService } from './oneai.service'
 
 @Module({
-  providers: [OneaiService],
-  exports: [OneaiModule],
+  providers: [OneAIService],
+  exports: [OneAIService],
 })
-export class OneaiModule {}
+export class OneAIModule {}
