@@ -15,6 +15,7 @@
         <activity
                 android:name=".presentation.bookmarks.BookmarksActivity"
                 android:exported="true"
+                android:launchMode="singleTask"
                 android:theme="@style/Theme.Bookmarkmanager">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
