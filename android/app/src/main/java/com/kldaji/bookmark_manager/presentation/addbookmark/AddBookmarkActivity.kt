@@ -5,14 +5,19 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,10 +37,9 @@ class AddBookmarkActivity : ComponentActivity() {
 		const val TAG = "AddBookmarkActivity"
 	}
 
-	@OptIn(ExperimentalMaterialApi::class)
+	@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-
 
 		intent.getStringExtra(Intent.EXTRA_TEXT)?.let { url ->
 			// TODO: Call API
@@ -46,7 +49,9 @@ class AddBookmarkActivity : ComponentActivity() {
 		setContent {
 			BookmarkmanagerTheme {
 				val modifier = Modifier
-				val tags = listOf("SPORTS", "YOUTUBE")
+				var isExpanded by remember { mutableStateOf(false) }
+
+				val tags = listOf("SPORTS", "COMPUTER SCIENCE", "YOUTUBE", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE")
 				var title by remember { mutableStateOf(TextFieldValue("")) }
 				var url by remember { mutableStateOf(TextFieldValue("")) }
 				var description by remember { mutableStateOf(TextFieldValue("")) }
@@ -80,32 +85,48 @@ class AddBookmarkActivity : ComponentActivity() {
 						horizontalAlignment = Alignment.CenterHorizontally
 					) {
 						Column {
-							LazyRow(modifier = modifier.fillMaxWidth()) {
-
-								items(items = tags) { tag ->
-									Chip(
-										modifier = modifier.padding(end = 8.dp),
-										onClick = { /*TODO*/ }
-									) {
-										Text(
-											modifier = modifier.padding(end = 4.dp),
-											text = "# $tag"
+							Column(
+								modifier = modifier
+									.fillMaxWidth()
+									.animateContentSize()
+							) {
+								Row(
+									modifier = modifier
+										.fillMaxWidth()
+										.clickable { isExpanded = !isExpanded }
+										.border(
+											width = 1.dp,
+											color = Color.DarkGray
 										)
+										.padding(8.dp),
+									horizontalArrangement = Arrangement.SpaceBetween,
+									verticalAlignment = Alignment.CenterVertically
+								) {
+									Text(text = "TAGS")
+									if (!isExpanded) Icon(imageVector = Icons.Default.ExpandMore, contentDescription = "")
+									else Icon(imageVector = Icons.Default.ExpandLess, contentDescription = "")
+								}
+
+								if (isExpanded) {
+									LazyHorizontalStaggeredGrid(
+										modifier = modifier
+											.height(140.dp)
+											.padding(top = 16.dp),
+										rows = StaggeredGridCells.Fixed(3),
+									) {
+										items(items = tags) { tag ->
+											Chip(
+												modifier = modifier.padding(end = 8.dp, bottom = 8.dp),
+												onClick = { /*TODO*/ }
+											) {
+												Text(
+													modifier = modifier.padding(end = 4.dp),
+													text = tag
+												)
+											}
+										}
 									}
 								}
-							}
-
-							Row(
-								modifier = modifier.clickable { },
-								verticalAlignment = Alignment.CenterVertically
-							) {
-								Icon(imageVector = Icons.Default.Add, contentDescription = "태그 추가", tint = Color.Blue)
-								Text(
-									text = "ADD TAG",
-									fontSize = 14.sp,
-									fontWeight = FontWeight.Bold,
-									color = Color.Blue
-								)
 							}
 
 							OutlinedTextField(
