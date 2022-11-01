@@ -1,19 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { AllowedSkill } from './oneai.allowedSkill'
-// import OneAI from 'oneai'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const OneAI = require('oneai')
-import { Output } from 'oneai/lib/src/classes'
 import { ConfigService } from '@nestjs/config'
+
+import { Output } from 'oneai/lib/src/classes'
+import { AllowedSkill } from './oneai.allowedSkill'
+import OneAI from 'oneai'
 
 @Injectable()
 export class OneAIService {
-  private readonly oneAI: typeof OneAI
   private readonly skillMapper: { [key in AllowedSkill]: any }
 
-  constructor(private readonly config: ConfigService) {
-    // private readonly skillMapper: { [key in AllowedSkill]: any }, // @Inject('ONEAI') private readonly oneAI: OneAI,
-    this.oneAI = new OneAI(config.get('ONE_AI_API_KEY'))
+  constructor(
+    @Inject('OneAI') private readonly oneAI: OneAI,
+    private readonly config: ConfigService,
+  ) {
     this.skillMapper = {
       [AllowedSkill.HtmlToArticle]: this.oneAI.skills.htmlToArticle(),
       [AllowedSkill.Summarize]: this.oneAI.skills.summarize(),
@@ -35,14 +34,14 @@ export class OneAIService {
     return await this.runPipeline(
       [
         // option 1
-        AllowedSkill.HtmlToArticle,
-        AllowedSkill.Summarize,
-        AllowedSkill.Keywords,
+        // AllowedSkill.HtmlToArticle,
+        // AllowedSkill.Summarize,
+        // AllowedSkill.Keywords,
 
         // option 2
-        // AllowedSkill.HtmlToArticle,
-        // AllowedSkill.Topics,
-        // AllowedSkill.Summarize,
+        AllowedSkill.HtmlToArticle,
+        AllowedSkill.Topics,
+        AllowedSkill.Summarize,
       ],
       url,
     )
