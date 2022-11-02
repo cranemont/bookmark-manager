@@ -1,12 +1,11 @@
 import {
   Body,
   Controller,
-  Get,
   InternalServerErrorException,
   Logger,
-  Param,
   Post,
 } from '@nestjs/common'
+import { UrlValidationPipe } from 'src/pipes/url-validation.pipe'
 import { NlpService } from './nlp.service'
 
 @Controller('nlp')
@@ -15,9 +14,9 @@ export class NlpController {
 
   // TODO: 캐시 붙이기
   @Post('summarize')
-  async summarizeByUrl(@Body('url') url: string) {
+  async summarizeUrl(@Body('url', UrlValidationPipe) url: string) {
     try {
-      return await this.nplService.summarizeByUrl(url)
+      return await this.nplService.summarizeUrl(url)
     } catch (err) {
       Logger.error(err)
       return new InternalServerErrorException()
