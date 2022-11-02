@@ -1,10 +1,10 @@
 package com.kldaji.bookmark_manager.data.repository
 
-import com.kldaji.bookmark_manager.data.source.local.Bookmark
+import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
 
 interface BookmarkRepository {
-	fun getAll(): List<Bookmark>
-	fun insert(bookmark: Bookmark)
-	fun update(bookmark: Bookmark)
-	fun delete(bookmark: Bookmark)
+	fun getAll(): List<BookmarkUiState>
+	fun insert(bookmarkUiState: BookmarkUiState)
+	fun update(bookmarkUiState: BookmarkUiState)
+	fun delete(bookmarkUiState: BookmarkUiState)
 }
