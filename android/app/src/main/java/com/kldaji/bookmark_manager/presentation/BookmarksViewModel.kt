@@ -1,9 +1,15 @@
 package com.kldaji.bookmark_manager.presentation
 
 import androidx.lifecycle.ViewModel
+import com.kldaji.bookmark_manager.data.repository.BookmarkRepository
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class BookmarksViewModel : ViewModel() {
+@HiltViewModel
+class BookmarksViewModel @Inject constructor(
+	private val bookmarkRepository: BookmarkRepository
+) : ViewModel() {
 
 	val tags = listOf("ALL", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE")
 	private val _bookmarks = listOf(
