@@ -12,7 +12,7 @@ class BookmarksViewModel @Inject constructor(
 ) : ViewModel() {
 
 	val tags = listOf("ALL", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE")
-	private val _bookmarks = listOf(
+	private val _bookmarks = mutableListOf(
 		BookmarkUiState(
 			id = 0L,
 			tags = listOf("SPORTS"),
@@ -49,4 +49,21 @@ class BookmarksViewModel @Inject constructor(
 				else -> _bookmarks.filter { bookmark -> bookmark.tags.contains(tag) }
 			}
 		}
+
+	fun addBookmark(
+		tags: List<String>,
+		title: String,
+		url: String,
+		description: String
+	) {
+		_bookmarks.add(
+			BookmarkUiState(
+				id = 4L,
+				tags = tags,
+				title = title,
+				url = url,
+				description = description
+			)
+		)
+	}
 }
