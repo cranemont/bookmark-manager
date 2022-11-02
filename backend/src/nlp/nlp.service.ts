@@ -5,9 +5,7 @@ import { OneAIService } from 'src/oneai/oneai.service'
 export class NlpService {
   constructor(private readonly oneAIService: OneAIService) {}
 
-  async summarizeByUrl(url: string) {
-    const output = await this.oneAIService.summarizeUrl(url)
-    return output
-    return 'summarized Text'
+  async summarizeUrl(url: string) {
+    return await this.oneAIService.summarizeUrl(url)
   }
 }

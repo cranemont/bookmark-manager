@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 
 import { Output } from 'oneai/lib/src/classes'
 import { AllowedSkill } from './oneai.allowedSkill'
+import { SummarizeUrlResponseDto } from './dto/oneai-response.dto'
 import OneAI from 'oneai'
 
 @Injectable()
@@ -30,21 +31,12 @@ export class OneAIService {
     ).run(input)
   }
 
-  async summarizeUrl(url: string) {
-    return await this.runPipeline(
-      [
-        // option 1
-        // AllowedSkill.HtmlToArticle,
-        // AllowedSkill.Summarize,
-        // AllowedSkill.Keywords,
-
-        // option 2
-        AllowedSkill.HtmlToArticle,
-        AllowedSkill.Topics,
-        AllowedSkill.Summarize,
-      ],
+  async summarizeUrl(url: string): Promise<SummarizeUrlResponseDto> {
+    const output = await this.runPipeline(
+      [AllowedSkill.HtmlToArticle, AllowedSkill.Topics, AllowedSkill.Summarize],
       url,
     )
+    return new SummarizeUrlResponseDto(output.htmlArticle)
   }
 
   async summarizeText(text: string) {
