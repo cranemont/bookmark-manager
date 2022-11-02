@@ -28,8 +28,10 @@ import com.google.accompanist.pager.rememberPagerState
 import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class BookmarksActivity : ComponentActivity() {
 
 	companion object {

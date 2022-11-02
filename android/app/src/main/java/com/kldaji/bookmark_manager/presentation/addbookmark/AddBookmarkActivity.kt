@@ -31,7 +31,9 @@ import androidx.compose.ui.unit.sp
 import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AddBookmarkActivity : ComponentActivity() {
 
 	companion object {
