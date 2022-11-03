@@ -122,7 +122,7 @@ class AddBookmarkActivity : ComponentActivity() {
 									Row(
 										modifier = modifier
 											.padding(top = 6.dp)
-											.clickable {  },
+											.clickable { },
 										verticalAlignment = Alignment.CenterVertically
 									) {
 										Icon(
@@ -213,7 +213,12 @@ class AddBookmarkActivity : ComponentActivity() {
 							modifier = modifier
 								.width(250.dp)
 								.padding(horizontal = 24.dp),
-							onClick = { /*TODO*/ },
+							onClick = {
+								bookmarksViewModel.addBookmark(selectedTags, title.text, url.text, description.text)
+								val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
+								startActivity(intent)
+								finish()
+							},
 							colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
 							enabled = true
 						) {
