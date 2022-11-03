@@ -11,11 +11,11 @@ class BookmarkRepositoryImpl @Inject constructor(
 	private val bookmarkLocalDataSource: BookmarkLocalDataSource
 ) : BookmarkRepository {
 
-	override fun getAll(): Flow<BookmarkUiState> {
+	override fun getAll(): Flow<List<BookmarkUiState>> {
 		return bookmarkLocalDataSource
 			.getAll()
-			.map { bookmark ->
-				Mapper.bookmarkToBookmarkUiState(bookmark)
+			.map { bookmarks ->
+				bookmarks.map { bookmark -> Mapper.bookmarkToBookmarkUiState(bookmark) }
 			}
 	}
 

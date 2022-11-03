@@ -7,7 +7,7 @@ class BookmarkLocalDataSourceImpl @Inject constructor(
 	private val bookmarkDao: BookmarkDao
 ) : BookmarkLocalDataSource {
 
-	override fun getAll(): Flow<Bookmark> {
+	override fun getAll(): Flow<List<Bookmark>> {
 		return bookmarkDao.getAll()
 	}
 

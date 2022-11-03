@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface BookmarkDao {
 
 	@Query("SELECT * FROM Bookmark")
-	fun getAll(): Flow<Bookmark>
+	fun getAll(): Flow<List<Bookmark>>
 
 	@Insert
 	suspend fun insert(bookmark: Bookmark)
