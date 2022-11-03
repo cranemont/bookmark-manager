@@ -18,6 +18,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,7 +57,7 @@ class AddBookmarkActivity : ComponentActivity() {
 				val modifier = Modifier
 				var isExpanded by remember { mutableStateOf(false) }
 
-				val tags = bookmarksViewModel.tags.drop(1) // remove "ALL" tag
+				val tags by bookmarksViewModel.tags.observeAsState(mutableListOf())
 				var selectedTags by remember { mutableStateOf(listOf<String>()) }
 
 				var title by remember { mutableStateOf(TextFieldValue("")) }
@@ -144,31 +145,31 @@ class AddBookmarkActivity : ComponentActivity() {
 											.padding(top = 12.dp),
 										rows = StaggeredGridCells.Fixed(3),
 									) {
-										items(items = tags) { tag ->
+										items(items = tags) { tagUiState ->
 											Chip(
 												modifier = modifier.padding(end = 8.dp, bottom = 8.dp),
 												onClick = {
 													val newSelectedTags = selectedTags.toMutableList()
 
-													if (newSelectedTags.contains(tag)) newSelectedTags.remove(tag)
-													else newSelectedTags.add(tag)
+													if (newSelectedTags.contains(tagUiState.name)) newSelectedTags.remove(tagUiState.name)
+													else newSelectedTags.add(tagUiState.name)
 
 													selectedTags = newSelectedTags
 												},
 												leadingIcon = {
-													if (selectedTags.contains(tag)) {
+													if (selectedTags.contains(tagUiState.name)) {
 														Icon(
 															Icons.Default.Check,
 															contentDescription = "태그 선택"
 														)
 													}
 												},
-												colors = if (selectedTags.contains(tag)) ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary) else ChipDefaults.chipColors()
+												colors = if (selectedTags.contains(tagUiState.name)) ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary) else ChipDefaults.chipColors()
 											) {
 
 												Text(
 													modifier = modifier.padding(end = 4.dp),
-													text = tag
+													text = tagUiState.name
 												)
 											}
 										}
