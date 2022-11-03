@@ -10,4 +10,4 @@ cd backend
 yarn install
 
 echo "DATABASE_URL=\"postgresql://postgres:5432@localhost:5432/cabstone?schema=public\"" > .env
-echo "ONE_AI_API_KEY=\"$API_KEY\"" > .env
+echo "ONE_AI_API_KEY=\"$API_KEY\"" >> .env
