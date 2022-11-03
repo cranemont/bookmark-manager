@@ -8,12 +8,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -24,11 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
@@ -64,6 +68,9 @@ class AddBookmarkActivity : ComponentActivity() {
 				var url by remember { mutableStateOf(TextFieldValue("")) }
 				var description by remember { mutableStateOf(TextFieldValue("")) }
 
+				var isShowDialog by remember { mutableStateOf(false) }
+				var tag by remember { mutableStateOf(TextFieldValue("")) }
+
 				Scaffold(
 					topBar = {
 						TopAppBar(
@@ -83,6 +90,62 @@ class AddBookmarkActivity : ComponentActivity() {
 						)
 					}
 				) { paddingValues ->
+
+					if (isShowDialog) {
+						Dialog(onDismissRequest = {
+							isShowDialog = false
+							tag = TextFieldValue("")
+						}) {
+							Column(
+								modifier = modifier
+									.fillMaxWidth()
+									.wrapContentHeight()
+									.clip(RoundedCornerShape(12.dp))
+									.background(Color.White)
+									.padding(vertical = 8.dp),
+								horizontalAlignment = Alignment.CenterHorizontally,
+								verticalArrangement = Arrangement.Center
+							) {
+								OutlinedTextField(
+									value = tag,
+									onValueChange = { tag = it },
+									label = {
+										Text(text = "TAG")
+									},
+									maxLines = 1,
+									singleLine = true
+								)
+
+								Row(
+									modifier = modifier
+										.fillMaxWidth()
+										.padding(top = 8.dp),
+									horizontalArrangement = Arrangement.SpaceEvenly
+								) {
+									Button(
+										onClick = {
+											isShowDialog = false
+											tag = TextFieldValue("")
+										},
+										colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+									) {
+										Text(text = "취소")
+									}
+
+									Button(
+										onClick = {
+											bookmarksViewModel.addTag(tag.text)
+											isShowDialog = false
+											tag = TextFieldValue("")
+										},
+										colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+									) {
+										Text(text = "추가")
+									}
+								}
+							}
+						}
+					}
 
 					Column(
 						modifier = modifier
@@ -123,7 +186,7 @@ class AddBookmarkActivity : ComponentActivity() {
 									Row(
 										modifier = modifier
 											.padding(top = 6.dp)
-											.clickable { },
+											.clickable { isShowDialog = !isShowDialog },
 										verticalAlignment = Alignment.CenterVertically
 									) {
 										Icon(

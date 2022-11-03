@@ -19,19 +19,18 @@ class BookmarksViewModel @Inject constructor(
 
 	private val _bookmarks = MutableStateFlow(listOf<BookmarkUiState>())
 	val bookmarks: LiveData<List<List<BookmarkUiState>>>
-	get() = combine(_bookmarks, _tags) { bookmarkUiStates, tagUiStates ->
-		(listOf(TagUiState(name = "ALL")) + tagUiStates).mapIndexed { index, tagUiState ->
-			when (index) {
-				0 -> bookmarkUiStates // ALL
-				else -> bookmarkUiStates.filter { bookmark -> bookmark.tags.contains(tagUiState.name) }
+		get() = combine(_bookmarks, _tags) { bookmarkUiStates, tagUiStates ->
+			(listOf(TagUiState(name = "ALL")) + tagUiStates).mapIndexed { index, tagUiState ->
+				when (index) {
+					0 -> bookmarkUiStates // ALL
+					else -> bookmarkUiStates.filter { bookmark -> bookmark.tags.contains(tagUiState.name) }
+				}
 			}
-		}
-	}.asLiveData()
+		}.asLiveData()
 
 	private val _tags = MutableStateFlow(listOf<TagUiState>())
 	val tags: LiveData<List<TagUiState>>
 		get() = _tags.asLiveData()
-
 	val tagsWithAll: LiveData<List<TagUiState>>
 		get() = _tags
 			.asLiveData()
@@ -46,6 +45,8 @@ class BookmarksViewModel @Inject constructor(
 				.collect { newBookmarks ->
 					_bookmarks.value = newBookmarks
 				}
+		}
+		viewModelScope.launch {
 			tagRepository
 				.getAll()
 				.collect { newTags ->
@@ -69,6 +70,12 @@ class BookmarksViewModel @Inject constructor(
 					description = description
 				)
 			)
+		}
+	}
+
+	fun addTag(tag: String) {
+		viewModelScope.launch {
+			tagRepository.insert(TagUiState(name = tag))
 		}
 	}
 }
