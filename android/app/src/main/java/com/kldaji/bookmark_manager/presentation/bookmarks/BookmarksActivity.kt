@@ -2,7 +2,6 @@ package com.kldaji.bookmark_manager.presentation.bookmarks
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,6 +13,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,26 +35,19 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class BookmarksActivity : ComponentActivity() {
 
-	companion object {
-		const val TAG = "BookmarksActivity"
-	}
-
 	@OptIn(ExperimentalPagerApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
 		val bookmarksViewModel: BookmarksViewModel by viewModels()
 		val tags = bookmarksViewModel.tags
-		val bookmarks = bookmarksViewModel.bookmarks
-		bookmarks.forEach {
-			Log.d(TAG, it.toString())
-		}
 
 		setContent {
 			BookmarkmanagerTheme {
 				val modifier = Modifier
 				val pagerState = rememberPagerState()
 				val coroutineScope = rememberCoroutineScope()
+				val bookmarks by bookmarksViewModel.bookmarks.observeAsState(mutableListOf())
 
 				Scaffold(
 					topBar = {
