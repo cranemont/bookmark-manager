@@ -1,19 +1,20 @@
 package com.kldaji.bookmark_manager.data.source.local
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookmarkDao {
 
 	@Query("SELECT * FROM Bookmark")
-	fun getAll(): List<Bookmark>
+	fun getAll(): Flow<Bookmark>
 
 	@Insert
-	fun insert(bookmark: Bookmark)
+	suspend fun insert(bookmark: Bookmark)
 
 	@Update
-	fun update(bookmark: Bookmark)
+	suspend fun update(bookmark: Bookmark)
 
 	@Delete
-	fun delete(bookmark: Bookmark)
+	suspend fun delete(bookmark: Bookmark)
 }
