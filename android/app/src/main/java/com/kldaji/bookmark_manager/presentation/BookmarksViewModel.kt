@@ -2,6 +2,7 @@ package com.kldaji.bookmark_manager.presentation
 
 import androidx.lifecycle.*
 import com.kldaji.bookmark_manager.data.repository.BookmarkRepository
+import com.kldaji.bookmark_manager.data.repository.TagRepository
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(
-	private val bookmarkRepository: BookmarkRepository
+	private val bookmarkRepository: BookmarkRepository,
+	private val tagRepository: TagRepository
 ) : ViewModel() {
 
 	val tags = listOf("ALL", "SPORTS", "COMPUTER SCIENCE", "YOUTUBE")
@@ -35,7 +37,6 @@ class BookmarksViewModel @Inject constructor(
 					_bookmarks.value = newBookmarks
 				}
 		}
-
 	}
 
 	fun addBookmark(
