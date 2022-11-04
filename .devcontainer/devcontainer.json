@@ -3,7 +3,7 @@
   "dockerComposeFile": ["docker-compose.yml"],
   "service": "bookmark-manager",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "./scripts/setup.backend.sh",
+  "postCreateCommand": "./scripts/setup.sh",
   "remoteUser": "node",
   "customizations": {
     "vscode": {
