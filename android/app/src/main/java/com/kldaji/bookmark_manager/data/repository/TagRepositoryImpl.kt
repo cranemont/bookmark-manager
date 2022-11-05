@@ -23,7 +23,8 @@ class TagRepositoryImpl @Inject constructor(
 		tagLocalDataSource.insert(Mapper.tagUiStateToTag(tagUiState))
 	}
 
-	override suspend fun delete(tagUiState: TagUiState) {
-		tagLocalDataSource.delete(Mapper.tagUiStateToTag(tagUiState))
+	override suspend fun delete(tagUiStates: List<TagUiState>) {
+		val tags = tagUiStates.map { tagUiState -> Mapper.tagUiStateToTag(tagUiState) }
+		tagLocalDataSource.delete(tags)
 	}
 }

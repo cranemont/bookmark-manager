@@ -13,5 +13,5 @@ interface TagDao {
 	suspend fun insert(tag: Tag)
 
 	@Delete
-	suspend fun delete(tag: Tag)
+	suspend fun delete(tags: List<Tag>)
 }

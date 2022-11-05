@@ -15,7 +15,7 @@ class TagLocalDataSourceImpl @Inject constructor(
 		tagDao.insert(tag)
 	}
 
-	override suspend fun delete(tag: Tag) {
-		tagDao.delete(tag)
+	override suspend fun delete(tags: List<Tag>) {
+		tagDao.delete(tags)
 	}
 }

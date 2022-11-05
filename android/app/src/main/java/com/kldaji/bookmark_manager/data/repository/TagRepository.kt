@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface TagRepository {
 	fun getAll(): Flow<List<TagUiState>>
 	suspend fun insert(tagUiState: TagUiState)
-	suspend fun delete(tagUiState: TagUiState)
+	suspend fun delete(tagUiStates: List<TagUiState>)
 }

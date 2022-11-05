@@ -63,6 +63,7 @@ class AddBookmarkActivity : ComponentActivity() {
 
 				val tags by bookmarksViewModel.tags.observeAsState(mutableListOf())
 				var selectedTags by remember { mutableStateOf(listOf<String>()) }
+				var addedTags by remember { mutableStateOf(listOf<String>()) }
 
 				var title by remember { mutableStateOf(TextFieldValue("")) }
 				var url by remember { mutableStateOf(TextFieldValue("")) }
@@ -109,9 +110,7 @@ class AddBookmarkActivity : ComponentActivity() {
 								OutlinedTextField(
 									value = tag,
 									onValueChange = { tag = it },
-									label = {
-										Text(text = "TAG")
-									},
+									label = { Text(text = "TAG") },
 									maxLines = 1,
 									singleLine = true
 								)
@@ -135,6 +134,13 @@ class AddBookmarkActivity : ComponentActivity() {
 									Button(
 										onClick = {
 											bookmarksViewModel.addTag(tag.text)
+											val newAddedTags = addedTags.toMutableList()
+											newAddedTags.add(tag.text)
+											addedTags = newAddedTags
+
+											val newSelectedTags = selectedTags.toMutableList()
+											newSelectedTags.add(tag.text)
+											selectedTags = newSelectedTags
 											isShowDialog = false
 											tag = TextFieldValue("")
 										},
@@ -278,6 +284,7 @@ class AddBookmarkActivity : ComponentActivity() {
 								.width(250.dp)
 								.padding(horizontal = 24.dp),
 							onClick = {
+								bookmarksViewModel.deleteTags(tags, addedTags.filterNot { tag -> selectedTags.contains(tag) })
 								bookmarksViewModel.addBookmark(selectedTags, title.text, url.text, description.text)
 								val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
 								startActivity(intent)

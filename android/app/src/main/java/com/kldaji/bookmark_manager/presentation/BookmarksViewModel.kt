@@ -78,4 +78,17 @@ class BookmarksViewModel @Inject constructor(
 			tagRepository.insert(TagUiState(name = tag))
 		}
 	}
+
+	fun deleteTags(tagUiStates: List<TagUiState>, deletedTagNames: List<String>) {
+		viewModelScope.launch {
+			val deletedTagUiStates = mutableListOf<TagUiState>()
+
+			deletedTagNames.forEach { tagName: String ->
+				val deletedTagUiState = tagUiStates.find { tagUiState -> tagUiState.name == tagName }
+
+				if (deletedTagUiState != null) deletedTagUiStates.add(deletedTagUiState)
+			}
+			tagRepository.delete(deletedTagUiStates)
+		}
+	}
 }
