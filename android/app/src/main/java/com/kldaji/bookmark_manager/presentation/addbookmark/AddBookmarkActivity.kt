@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
@@ -45,6 +46,8 @@ class AddBookmarkActivity : ComponentActivity() {
 		const val TAG = "AddBookmarkActivity"
 	}
 
+	private lateinit var callback: OnBackPressedCallback
+
 	@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -72,6 +75,17 @@ class AddBookmarkActivity : ComponentActivity() {
 				var isShowDialog by remember { mutableStateOf(false) }
 				var tag by remember { mutableStateOf(TextFieldValue("")) }
 
+
+				callback = object : OnBackPressedCallback(true) {
+					override fun handleOnBackPressed() {
+						bookmarksViewModel.deleteTags(tags, addedTags)
+						val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
+						startActivity(intent)
+						finish()
+					}
+				}
+				onBackPressedDispatcher.addCallback(this, callback)
+
 				Scaffold(
 					topBar = {
 						TopAppBar(
@@ -81,6 +95,7 @@ class AddBookmarkActivity : ComponentActivity() {
 							backgroundColor = Color.White,
 							navigationIcon = {
 								IconButton(onClick = {
+									bookmarksViewModel.deleteTags(tags, addedTags)
 									val intent = Intent(this, BookmarksActivity::class.java)
 									startActivity(intent)
 									finish()
@@ -302,5 +317,11 @@ class AddBookmarkActivity : ComponentActivity() {
 				}
 			}
 		}
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+
+		callback.remove()
 	}
 }
