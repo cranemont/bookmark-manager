@@ -40,7 +40,6 @@ class BookmarksActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 
 		val bookmarksViewModel: BookmarksViewModel by viewModels()
-		val tags = bookmarksViewModel.tags
 
 		setContent {
 			BookmarkmanagerTheme {
@@ -48,6 +47,7 @@ class BookmarksActivity : ComponentActivity() {
 				val pagerState = rememberPagerState()
 				val coroutineScope = rememberCoroutineScope()
 				val bookmarks by bookmarksViewModel.bookmarks.observeAsState(mutableListOf())
+				val tags by bookmarksViewModel.tagsWithAll.observeAsState(mutableListOf())
 
 				Scaffold(
 					topBar = {
@@ -89,9 +89,9 @@ class BookmarksActivity : ComponentActivity() {
 							backgroundColor = Color.White,
 							edgePadding = 0.dp
 						) {
-							tags.forEachIndexed { index, title ->
+							tags.forEachIndexed { index, tagUiState ->
 								Tab(
-									text = { Text(text = title) },
+									text = { Text(text = tagUiState.name) },
 									selected = pagerState.currentPage == index,
 									onClick = {
 										coroutineScope.launch {

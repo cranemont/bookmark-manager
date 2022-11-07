@@ -4,30 +4,36 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
@@ -39,6 +45,8 @@ class AddBookmarkActivity : ComponentActivity() {
 	companion object {
 		const val TAG = "AddBookmarkActivity"
 	}
+
+	private lateinit var callback: OnBackPressedCallback
 
 	@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,12 +64,27 @@ class AddBookmarkActivity : ComponentActivity() {
 				val modifier = Modifier
 				var isExpanded by remember { mutableStateOf(false) }
 
-				val tags = bookmarksViewModel.tags.drop(1) // remove "ALL" tag
+				val tags by bookmarksViewModel.tags.observeAsState(mutableListOf())
 				var selectedTags by remember { mutableStateOf(listOf<String>()) }
+				var addedTags by remember { mutableStateOf(listOf<String>()) }
 
 				var title by remember { mutableStateOf(TextFieldValue("")) }
 				var url by remember { mutableStateOf(TextFieldValue("")) }
 				var description by remember { mutableStateOf(TextFieldValue("")) }
+
+				var isShowDialog by remember { mutableStateOf(false) }
+				var tag by remember { mutableStateOf(TextFieldValue("")) }
+
+
+				callback = object : OnBackPressedCallback(true) {
+					override fun handleOnBackPressed() {
+						bookmarksViewModel.deleteTags(tags, addedTags)
+						val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
+						startActivity(intent)
+						finish()
+					}
+				}
+				onBackPressedDispatcher.addCallback(this, callback)
 
 				Scaffold(
 					topBar = {
@@ -72,6 +95,7 @@ class AddBookmarkActivity : ComponentActivity() {
 							backgroundColor = Color.White,
 							navigationIcon = {
 								IconButton(onClick = {
+									bookmarksViewModel.deleteTags(tags, addedTags)
 									val intent = Intent(this, BookmarksActivity::class.java)
 									startActivity(intent)
 									finish()
@@ -82,6 +106,67 @@ class AddBookmarkActivity : ComponentActivity() {
 						)
 					}
 				) { paddingValues ->
+
+					if (isShowDialog) {
+						Dialog(onDismissRequest = {
+							isShowDialog = false
+							tag = TextFieldValue("")
+						}) {
+							Column(
+								modifier = modifier
+									.fillMaxWidth()
+									.wrapContentHeight()
+									.clip(RoundedCornerShape(12.dp))
+									.background(Color.White)
+									.padding(vertical = 8.dp),
+								horizontalAlignment = Alignment.CenterHorizontally,
+								verticalArrangement = Arrangement.Center
+							) {
+								OutlinedTextField(
+									value = tag,
+									onValueChange = { tag = it },
+									label = { Text(text = "TAG") },
+									maxLines = 1,
+									singleLine = true
+								)
+
+								Row(
+									modifier = modifier
+										.fillMaxWidth()
+										.padding(top = 8.dp),
+									horizontalArrangement = Arrangement.SpaceEvenly
+								) {
+									Button(
+										onClick = {
+											isShowDialog = false
+											tag = TextFieldValue("")
+										},
+										colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+									) {
+										Text(text = "취소")
+									}
+
+									Button(
+										onClick = {
+											bookmarksViewModel.addTag(tag.text)
+											val newAddedTags = addedTags.toMutableList()
+											newAddedTags.add(tag.text)
+											addedTags = newAddedTags
+
+											val newSelectedTags = selectedTags.toMutableList()
+											newSelectedTags.add(tag.text)
+											selectedTags = newSelectedTags
+											isShowDialog = false
+											tag = TextFieldValue("")
+										},
+										colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+									) {
+										Text(text = "추가")
+									}
+								}
+							}
+						}
+					}
 
 					Column(
 						modifier = modifier
@@ -122,7 +207,7 @@ class AddBookmarkActivity : ComponentActivity() {
 									Row(
 										modifier = modifier
 											.padding(top = 6.dp)
-											.clickable { },
+											.clickable { isShowDialog = !isShowDialog },
 										verticalAlignment = Alignment.CenterVertically
 									) {
 										Icon(
@@ -144,31 +229,31 @@ class AddBookmarkActivity : ComponentActivity() {
 											.padding(top = 12.dp),
 										rows = StaggeredGridCells.Fixed(3),
 									) {
-										items(items = tags) { tag ->
+										items(items = tags) { tagUiState ->
 											Chip(
 												modifier = modifier.padding(end = 8.dp, bottom = 8.dp),
 												onClick = {
 													val newSelectedTags = selectedTags.toMutableList()
 
-													if (newSelectedTags.contains(tag)) newSelectedTags.remove(tag)
-													else newSelectedTags.add(tag)
+													if (newSelectedTags.contains(tagUiState.name)) newSelectedTags.remove(tagUiState.name)
+													else newSelectedTags.add(tagUiState.name)
 
 													selectedTags = newSelectedTags
 												},
 												leadingIcon = {
-													if (selectedTags.contains(tag)) {
+													if (selectedTags.contains(tagUiState.name)) {
 														Icon(
 															Icons.Default.Check,
 															contentDescription = "태그 선택"
 														)
 													}
 												},
-												colors = if (selectedTags.contains(tag)) ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary) else ChipDefaults.chipColors()
+												colors = if (selectedTags.contains(tagUiState.name)) ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary) else ChipDefaults.chipColors()
 											) {
 
 												Text(
 													modifier = modifier.padding(end = 4.dp),
-													text = tag
+													text = tagUiState.name
 												)
 											}
 										}
@@ -214,6 +299,7 @@ class AddBookmarkActivity : ComponentActivity() {
 								.width(250.dp)
 								.padding(horizontal = 24.dp),
 							onClick = {
+								bookmarksViewModel.deleteTags(tags, addedTags.filterNot { tag -> selectedTags.contains(tag) })
 								bookmarksViewModel.addBookmark(selectedTags, title.text, url.text, description.text)
 								val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
 								startActivity(intent)
@@ -231,5 +317,11 @@ class AddBookmarkActivity : ComponentActivity() {
 				}
 			}
 		}
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+
+		callback.remove()
 	}
 }

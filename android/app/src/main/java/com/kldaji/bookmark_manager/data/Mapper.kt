@@ -1,7 +1,9 @@
 package com.kldaji.bookmark_manager.data
 
 import com.kldaji.bookmark_manager.data.source.local.Bookmark
+import com.kldaji.bookmark_manager.data.source.local.Tag
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
+import com.kldaji.bookmark_manager.presentation.bookmarks.TagUiState
 
 object Mapper {
 
@@ -22,6 +24,20 @@ object Mapper {
 			title = bookmarkUiState.title,
 			url = bookmarkUiState.url,
 			description = bookmarkUiState.description
+		)
+	}
+
+	fun tagToTagUiState(tag: Tag): TagUiState {
+		return TagUiState(
+			id = tag.id,
+			name = tag.name
+		)
+	}
+
+	fun tagUiStateToTag(tagUiState: TagUiState): Tag {
+		return Tag(
+			id = tagUiState.id,
+			name = tagUiState.name
 		)
 	}
 }
