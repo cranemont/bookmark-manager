@@ -1,7 +1,7 @@
 package com.kldaji.bookmark_manager.data
 
-import com.kldaji.bookmark_manager.data.source.local.Bookmark
 import com.kldaji.bookmark_manager.data.source.local.Tag
+import com.kldaji.bookmark_manager.data.entity.Bookmark
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
 import com.kldaji.bookmark_manager.presentation.bookmarks.TagUiState
 

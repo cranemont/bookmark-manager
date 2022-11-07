@@ -1,14 +1,20 @@
 package com.kldaji.bookmark_manager.data.repository
 
 import com.kldaji.bookmark_manager.data.Mapper
+import com.kldaji.bookmark_manager.data.entity.BookmarkBody
+import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 import com.kldaji.bookmark_manager.data.source.local.BookmarkLocalDataSource
+import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSource
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
+import com.kldaji.bookmark_manager.util.Result
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class BookmarkRepositoryImpl @Inject constructor(
-	private val bookmarkLocalDataSource: BookmarkLocalDataSource
+	private val bookmarkLocalDataSource: BookmarkLocalDataSource,
+	private val bookmarkRemoteDataSource: BookmarkRemoteDataSource
 ) : BookmarkRepository {
 
 	override fun getAll(): Flow<List<BookmarkUiState>> {
@@ -29,5 +35,9 @@ class BookmarkRepositoryImpl @Inject constructor(
 
 	override suspend fun delete(bookmarkUiState: BookmarkUiState) {
 		bookmarkLocalDataSource.delete(Mapper.bookmarkUiStateToBookmark(bookmarkUiState))
+	}
+
+	override suspend fun getBookmarkResponse(bookmarkBody: BookmarkBody): Flow<Result<BookmarkResponse>> = flow {
+		emit(bookmarkRemoteDataSource.getBookmarkResponse(bookmarkBody))
 	}
 }

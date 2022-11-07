@@ -1,6 +1,7 @@
 package com.kldaji.bookmark_manager.data.source.local
 
 import androidx.room.*
+import com.kldaji.bookmark_manager.data.entity.Bookmark
 import kotlinx.coroutines.flow.Flow
 
 @Dao

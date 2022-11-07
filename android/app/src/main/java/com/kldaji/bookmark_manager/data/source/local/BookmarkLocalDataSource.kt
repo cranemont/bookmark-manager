@@ -1,5 +1,6 @@
 package com.kldaji.bookmark_manager.data.source.local
 
+import com.kldaji.bookmark_manager.data.entity.Bookmark
 import kotlinx.coroutines.flow.Flow
 
 interface BookmarkLocalDataSource {

@@ -1,6 +1,8 @@
 package com.kldaji.bookmark_manager.presentation
 
 import androidx.lifecycle.*
+import com.kldaji.bookmark_manager.data.entity.BookmarkBody
+import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 import com.kldaji.bookmark_manager.data.repository.BookmarkRepository
 import com.kldaji.bookmark_manager.data.repository.TagRepository
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
@@ -37,6 +39,10 @@ class BookmarksViewModel @Inject constructor(
 			.map { tagUiStates ->
 				listOf(TagUiState(name = "ALL")) + tagUiStates
 			}
+
+	private val _bookmarkResponse = MutableStateFlow(BookmarkResponse())
+	val bookmarkResponse: LiveData<BookmarkResponse>
+		get() = _bookmarkResponse.asLiveData()
 
 	init {
 		viewModelScope.launch {
@@ -89,6 +95,23 @@ class BookmarksViewModel @Inject constructor(
 				if (deletedTagUiState != null) deletedTagUiStates.add(deletedTagUiState)
 			}
 			tagRepository.delete(deletedTagUiStates)
+		}
+	}
+
+	fun setBookmarkResponse(url: String) {
+		viewModelScope.launch {
+			bookmarkRepository.getBookmarkResponse(BookmarkBody(url))
+				.collect { result ->
+					when (result) {
+						is com.kldaji.bookmark_manager.util.Result.NetworkError -> {
+							println("NETWORK ERROR")
+						}
+						is com.kldaji.bookmark_manager.util.Result.GenericError -> {
+							println("GENERIC ERROR")
+						}
+						is com.kldaji.bookmark_manager.util.Result.Success -> _bookmarkResponse.value = result.data
+					}
+				}
 		}
 	}
 }

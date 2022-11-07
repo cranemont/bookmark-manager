@@ -20,11 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,22 +39,17 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class AddBookmarkActivity : ComponentActivity() {
 
-	companion object {
-		const val TAG = "AddBookmarkActivity"
-	}
-
 	private lateinit var callback: OnBackPressedCallback
 
 	@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-		intent.getStringExtra(Intent.EXTRA_TEXT)?.let { url ->
-			// TODO: Call API
-			Log.d(TAG, url)
-		}
-
 		val bookmarksViewModel: BookmarksViewModel by viewModels()
+
+		intent.getStringExtra(Intent.EXTRA_TEXT)?.let { url ->
+			bookmarksViewModel.setBookmarkResponse(url)
+		}
 
 		setContent {
 			BookmarkmanagerTheme {
@@ -75,6 +67,25 @@ class AddBookmarkActivity : ComponentActivity() {
 				var isShowDialog by remember { mutableStateOf(false) }
 				var tag by remember { mutableStateOf(TextFieldValue("")) }
 
+				val bookmarkResponse by bookmarksViewModel.bookmarkResponse.observeAsState()
+
+				LaunchedEffect(key1 = bookmarkResponse) {
+					bookmarkResponse?.let {
+						title = TextFieldValue(it.title)
+						description = TextFieldValue(it.summary)
+
+						it.topics.forEach { tag ->
+							bookmarksViewModel.addTag(tag)
+							val newAddedTags = addedTags.toMutableList()
+							newAddedTags.add(tag)
+							addedTags = newAddedTags
+
+							val newSelectedTags = selectedTags.toMutableList()
+							newSelectedTags.add(tag)
+							selectedTags = newSelectedTags
+						}
+					}
+				}
 
 				callback = object : OnBackPressedCallback(true) {
 					override fun handleOnBackPressed() {
