@@ -1,4 +1,4 @@
-package com.kldaji.bookmark_manager.data.source.local
+package com.kldaji.bookmark_manager.data.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
