@@ -2,7 +2,6 @@ package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -12,6 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -68,6 +68,7 @@ class AddBookmarkActivity : ComponentActivity() {
 				var tag by remember { mutableStateOf(TextFieldValue("")) }
 
 				val bookmarkResponse by bookmarksViewModel.bookmarkResponse.observeAsState()
+				val isShowProgressBar by bookmarksViewModel.isShowProgressBar.observeAsState()
 
 				LaunchedEffect(key1 = bookmarkResponse) {
 					bookmarkResponse?.let {
@@ -176,6 +177,21 @@ class AddBookmarkActivity : ComponentActivity() {
 									}
 								}
 							}
+						}
+					}
+
+					if (isShowProgressBar == true) {
+						Box(modifier = Modifier
+							.fillMaxSize()
+							.clickable(
+								indication = null, // disable ripple effect
+								interactionSource = remember { MutableInteractionSource() },
+								onClick = { }
+							)
+							.background(color = Color.Black.copy(alpha = 0.3f)),
+							contentAlignment = Alignment.Center
+						) {
+							CircularProgressIndicator()
 						}
 					}
 

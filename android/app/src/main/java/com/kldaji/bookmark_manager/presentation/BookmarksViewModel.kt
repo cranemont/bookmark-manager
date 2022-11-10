@@ -44,6 +44,10 @@ class BookmarksViewModel @Inject constructor(
 	val bookmarkResponse: LiveData<BookmarkResponse>
 		get() = _bookmarkResponse.asLiveData()
 
+	private val _isShowProgressBar = MutableLiveData<Boolean>()
+	val isShowProgressBar: LiveData<Boolean>
+		get() = _isShowProgressBar
+
 	init {
 		viewModelScope.launch {
 			bookmarkRepository
@@ -100,6 +104,7 @@ class BookmarksViewModel @Inject constructor(
 
 	fun setBookmarkResponse(url: String) {
 		viewModelScope.launch {
+			showProgressBar()
 			bookmarkRepository.getBookmarkResponse(BookmarkBody(url))
 				.collect { result ->
 					when (result) {
@@ -111,7 +116,16 @@ class BookmarksViewModel @Inject constructor(
 						}
 						is com.kldaji.bookmark_manager.util.Result.Success -> _bookmarkResponse.value = result.data
 					}
+					hideProgressBar()
 				}
 		}
+	}
+
+	private fun showProgressBar() {
+		_isShowProgressBar.value = true
+	}
+
+	private fun hideProgressBar() {
+		_isShowProgressBar.value = false
 	}
 }
