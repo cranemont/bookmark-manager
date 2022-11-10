@@ -2,12 +2,14 @@ import Joi from 'joi'
 import { Output } from 'oneai/lib/src/classes'
 
 export class SummarizeUrlResponseDto {
+  url: string
   title: string
   thumbnail: string
   tags: Array<string>
   summary: string
 
-  constructor(oneAIResponse: Output) {
+  constructor(url: string, oneAIResponse: Output) {
+    this.url = url
     this.title = Joi.attempt(
       oneAIResponse.htmlFields.find((field) => field.name === 'title').value,
       Joi.string().allow('').default(null),
