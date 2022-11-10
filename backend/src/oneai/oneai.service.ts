@@ -36,7 +36,7 @@ export class OneAIService {
       [AllowedSkill.HtmlToArticle, AllowedSkill.Topics, AllowedSkill.Summarize],
       url,
     )
-    return new SummarizeUrlResponseDto(output.htmlArticle)
+    return new SummarizeUrlResponseDto(url, output.htmlArticle)
   }
 
   async summarizeText(text: string) {
