@@ -7,21 +7,22 @@ export class SummarizeUrlResponseDto {
   tags: Array<string>
   summary: string
 
-  constructor(output: Output) {
+  constructor(oneAIResponse: Output) {
     this.title = Joi.attempt(
-      output.htmlFields.find((field) => field.name === 'title').value,
+      oneAIResponse.htmlFields.find((field) => field.name === 'title').value,
       Joi.string().allow('').default(null),
     )
     this.thumbnail = Joi.attempt(
-      output.htmlFields.find((field) => field.name === 'thumbnail').value,
+      oneAIResponse.htmlFields.find((field) => field.name === 'thumbnail')
+        .value,
       Joi.string().allow('').default(null),
     )
     this.tags = Joi.attempt(
-      output.topics.map((topic) => topic.value),
+      oneAIResponse.topics.map((topic) => topic.value),
       Joi.array().items(Joi.string().allow('')).default([]),
     )
     this.summary = Joi.attempt(
-      output.summary.text,
+      oneAIResponse.summary.text,
       Joi.string().allow('').default(null),
     )
   }
