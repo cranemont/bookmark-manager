@@ -63,6 +63,7 @@ const Tag = styled.div`
   font-size: 12px;
   padding: 8px;
   background-color: #d4d4d4;
+  cursor: pointer;
 `;
 
 const TextArea = styled.textarea`
@@ -89,11 +90,25 @@ const Button = styled.button`
 
 const Popup = () => {
   const [name, setName] = useState("");
+  const [tagName, setTagName] = useState("");
   const groups = [{ id: 1, name: "그룹1" }]; // TODO: state화 하고 API 연결
-  const tags = []; // TODO: state화 하고 API 연결
+  const [tags, setTags] = useState([]);
 
   const send = (type: "add" | "panel") => {
     chrome.runtime.sendMessage({ type });
+  };
+
+  const onTagInputEnter = (e) => {
+    if (e.key === "Enter") {
+      if (!tags.includes(tagName)) {
+        setTags([...tags, tagName]);
+      }
+      setTagName("");
+    }
+  };
+
+  const onTagClick = (e) => {
+    setTags(tags.filter((value) => value != e.target.textContent));
   };
 
   return (
@@ -118,14 +133,22 @@ const Popup = () => {
       </RowContainer>
       <RowContainer>
         <Label>Tags</Label>
-        <Input />
+        <Input
+          onKeyDown={onTagInputEnter}
+          onChange={(e) => setTagName(e.target.value)}
+          value={tagName}
+        />
       </RowContainer>
       <TagContainer>
-        {tags.map(({ id, name }) => (
-          <Tag key={id}>{name}</Tag>
+        {tags.map((value, index) => (
+          <Tag key={index} onClick={onTagClick}>
+            {value}
+          </Tag>
         ))}
       </TagContainer>
-      <Label>Summary</Label>
+      <RowContainer>
+        <Label>Summary</Label>
+      </RowContainer>
       <RowContainer>
         <TextArea></TextArea>
       </RowContainer>
