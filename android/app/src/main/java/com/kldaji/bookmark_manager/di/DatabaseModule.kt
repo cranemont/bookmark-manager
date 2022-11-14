@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.kldaji.bookmark_manager.data.source.local.BookmarkDao
 import com.kldaji.bookmark_manager.data.source.local.BookmarkDatabase
-import com.kldaji.bookmark_manager.data.source.local.TagDao
+import com.kldaji.bookmark_manager.data.source.local.GroupDao
 import com.kldaji.bookmark_manager.util.StringListTypeConverter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -48,8 +48,8 @@ object DatabaseModule {
 
 	@Singleton
 	@Provides
-	fun providesTagDao(bookmarkDatabase: BookmarkDatabase): TagDao {
-		return bookmarkDatabase.tagDao()
+	fun providesGroupDao(bookmarkDatabase: BookmarkDatabase): GroupDao {
+		return bookmarkDatabase.groupDao()
 	}
 
 }

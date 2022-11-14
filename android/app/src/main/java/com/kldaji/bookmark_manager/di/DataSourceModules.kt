@@ -2,8 +2,8 @@ package com.kldaji.bookmark_manager.di
 
 import com.kldaji.bookmark_manager.data.source.local.BookmarkLocalDataSource
 import com.kldaji.bookmark_manager.data.source.local.BookmarkLocalDataSourceImpl
-import com.kldaji.bookmark_manager.data.source.local.TagLocalDataSource
-import com.kldaji.bookmark_manager.data.source.local.TagLocalDataSourceImpl
+import com.kldaji.bookmark_manager.data.source.local.GroupLocalDataSource
+import com.kldaji.bookmark_manager.data.source.local.GroupLocalDataSourceImpl
 import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSource
 import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSourceImpl
 import com.kldaji.bookmark_manager.data.source.remote.BookmarkApi
@@ -29,7 +29,7 @@ abstract class DataSourceModule {
 
 	@Singleton
 	@Binds
-	abstract fun bindsTagLocalDataSource(tagkLocalDataSourceImpl: TagLocalDataSourceImpl): TagLocalDataSource
+	abstract fun bindsGroupLocalDataSource(groupLocalDataSourceImpl: GroupLocalDataSourceImpl): GroupLocalDataSource
 
 	@Singleton
 	@Binds

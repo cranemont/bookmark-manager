@@ -6,22 +6,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +31,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,146 +40,111 @@ class AddBookmarkActivity : ComponentActivity() {
 
 	private lateinit var callback: OnBackPressedCallback
 
-	@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+	@OptIn(ExperimentalMaterialApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-		val bookmarksViewModel: BookmarksViewModel by viewModels()
+		val addBookmarkViewModel: AddBookmarkViewModel by viewModels()
 
 		intent.getStringExtra(Intent.EXTRA_TEXT)?.let { url ->
-			bookmarksViewModel.setBookmarkResponse(url)
+			addBookmarkViewModel.setBookmarkResponse(url)
 		}
+
+		callback = object : OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+				startBookmarkActivity()
+			}
+		}
+		onBackPressedDispatcher.addCallback(this, callback)
 
 		setContent {
 			BookmarkmanagerTheme {
 				val modifier = Modifier
-				var isExpanded by remember { mutableStateOf(false) }
+				val addBookmarkUiState = addBookmarkViewModel.addBookmarkUiState
+				val scaffoldState = rememberScaffoldState()
 
-				val tags by bookmarksViewModel.tags.observeAsState(mutableListOf())
-				var selectedTags by remember { mutableStateOf(listOf<String>()) }
-				var addedTags by remember { mutableStateOf(listOf<String>()) }
-
-				var title by remember { mutableStateOf(TextFieldValue("")) }
-				var url by remember { mutableStateOf(TextFieldValue("")) }
-				var description by remember { mutableStateOf(TextFieldValue("")) }
-
-				var isShowDialog by remember { mutableStateOf(false) }
-				var tag by remember { mutableStateOf(TextFieldValue("")) }
-
-				val bookmarkResponse by bookmarksViewModel.bookmarkResponse.observeAsState()
-				val isShowProgressBar by bookmarksViewModel.isShowProgressBar.observeAsState()
-
-				LaunchedEffect(key1 = bookmarkResponse) {
-					bookmarkResponse?.let {
-						title = TextFieldValue(it.title)
-						description = TextFieldValue(it.summary)
-
-						it.topics.forEach { tag ->
-							bookmarksViewModel.addTag(tag)
-							val newAddedTags = addedTags.toMutableList()
-							newAddedTags.add(tag)
-							addedTags = newAddedTags
-
-							val newSelectedTags = selectedTags.toMutableList()
-							newSelectedTags.add(tag)
-							selectedTags = newSelectedTags
-						}
+				LaunchedEffect(key1 = addBookmarkUiState.bookmarkResponse) {
+					addBookmarkUiState.bookmarkResponse?.let {
+						addBookmarkViewModel.setTitle(TextFieldValue(it.title))
+						addBookmarkViewModel.setDescription(TextFieldValue(it.summary))
+						addBookmarkViewModel.addTags(it.topics)
 					}
 				}
 
-				callback = object : OnBackPressedCallback(true) {
-					override fun handleOnBackPressed() {
-						bookmarksViewModel.deleteTags(tags, addedTags)
-						val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
-						startActivity(intent)
-						finish()
+				LaunchedEffect(key1 = addBookmarkUiState.isDuplicatedTag) {
+					if (addBookmarkUiState.isDuplicatedTag) {
+						scaffoldState.snackbarHostState.showSnackbar("중복된 태그입니다.")
+						addBookmarkViewModel.doneDuplicatedTag()
 					}
 				}
-				onBackPressedDispatcher.addCallback(this, callback)
+
+				LaunchedEffect(key1 = addBookmarkUiState.isDuplicatedGroup) {
+					if (addBookmarkUiState.isDuplicatedGroup) {
+						scaffoldState.snackbarHostState.showSnackbar("중복된 그룹입니다.")
+						addBookmarkViewModel.doneDuplicatedGroup()
+					}
+				}
 
 				Scaffold(
 					topBar = {
 						TopAppBar(
-							title = {
-								Text(text = "Add Bookmark")
-							},
+							title = { Text(text = "Add Bookmark") },
 							backgroundColor = Color.White,
 							navigationIcon = {
-								IconButton(onClick = {
-									bookmarksViewModel.deleteTags(tags, addedTags)
-									val intent = Intent(this, BookmarksActivity::class.java)
-									startActivity(intent)
-									finish()
-								}) {
+								IconButton(onClick = { startBookmarkActivity() }) {
 									Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "북마크 리스트 화면으로 이동")
 								}
 							}
 						)
-					}
+					},
+					scaffoldState = scaffoldState
 				) { paddingValues ->
 
-					if (isShowDialog) {
-						Dialog(onDismissRequest = {
-							isShowDialog = false
-							tag = TextFieldValue("")
-						}) {
-							Column(
-								modifier = modifier
-									.fillMaxWidth()
-									.wrapContentHeight()
-									.clip(RoundedCornerShape(12.dp))
-									.background(Color.White)
-									.padding(vertical = 8.dp),
-								horizontalAlignment = Alignment.CenterHorizontally,
-								verticalArrangement = Arrangement.Center
-							) {
-								OutlinedTextField(
-									value = tag,
-									onValueChange = { tag = it },
-									label = { Text(text = "TAG") },
-									maxLines = 1,
-									singleLine = true
-								)
-
-								Row(
-									modifier = modifier
-										.fillMaxWidth()
-										.padding(top = 8.dp),
-									horizontalArrangement = Arrangement.SpaceEvenly
-								) {
-									Button(
-										onClick = {
-											isShowDialog = false
-											tag = TextFieldValue("")
-										},
-										colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
-									) {
-										Text(text = "취소")
-									}
-
-									Button(
-										onClick = {
-											bookmarksViewModel.addTag(tag.text)
-											val newAddedTags = addedTags.toMutableList()
-											newAddedTags.add(tag.text)
-											addedTags = newAddedTags
-
-											val newSelectedTags = selectedTags.toMutableList()
-											newSelectedTags.add(tag.text)
-											selectedTags = newSelectedTags
-											isShowDialog = false
-											tag = TextFieldValue("")
-										},
-										colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
-									) {
-										Text(text = "추가")
-									}
-								}
+					if (addBookmarkUiState.isShowAddTagDialog) {
+						AddDialog(
+							modifier = modifier,
+							onDismissRequest = {
+								addBookmarkViewModel.hideAddTagDialog()
+								addBookmarkViewModel.setNewTag(TextFieldValue(""))
+							},
+							textFieldValue = addBookmarkUiState.newTag,
+							textFileValueOnChange = { addBookmarkViewModel.setNewTag(it) },
+							label = "TAG",
+							onCancel = {
+								addBookmarkViewModel.hideAddTagDialog()
+								addBookmarkViewModel.setNewTag(TextFieldValue(""))
+							},
+							onConfirm = {
+								addBookmarkViewModel.hideAddTagDialog()
+								addBookmarkViewModel.addTag(addBookmarkUiState.newTag.text)
+								addBookmarkViewModel.setNewTag(TextFieldValue(""))
 							}
-						}
+						)
 					}
 
-					if (isShowProgressBar == true) {
+					if (addBookmarkUiState.isShowAddGroupDialog) {
+						AddDialog(
+							modifier = modifier,
+							onDismissRequest = {
+								addBookmarkViewModel.hideAddGroupDialog()
+								addBookmarkViewModel.setNewGroup(TextFieldValue(""))
+							},
+							textFieldValue = addBookmarkUiState.newGroup,
+							textFileValueOnChange = { addBookmarkViewModel.setNewGroup(it) },
+							label = "GROUP",
+							onCancel = {
+								addBookmarkViewModel.hideAddGroupDialog()
+								addBookmarkViewModel.setNewGroup(TextFieldValue(""))
+							},
+							onConfirm = {
+								addBookmarkViewModel.hideAddGroupDialog()
+								addBookmarkViewModel.addGroup(addBookmarkUiState.newGroup.text)
+								addBookmarkViewModel.setNewGroup(TextFieldValue(""))
+							}
+						)
+					}
+
+					if (addBookmarkUiState.isShowProgressBar) {
 						Box(modifier = Modifier
 							.fillMaxSize()
 							.clickable(
@@ -204,85 +168,110 @@ class AddBookmarkActivity : ComponentActivity() {
 						horizontalAlignment = Alignment.CenterHorizontally
 					) {
 						Column {
-							Column(
-								modifier = modifier
-									.fillMaxWidth()
-									.animateContentSize()
+							Row(
+								modifier = modifier.padding(start = 6.dp, bottom = 6.dp),
+								verticalAlignment = Alignment.CenterVertically
 							) {
+								Text(
+									text = "TAGS",
+									fontSize = 16.sp,
+									color = Color.Black
+								)
 								Row(
 									modifier = modifier
-										.fillMaxWidth()
-										.clickable { isExpanded = !isExpanded }
-										.border(
-											width = 1.dp,
-											color = Color.DarkGray
-										)
-										.padding(horizontal = 16.dp, vertical = 8.dp),
-									horizontalArrangement = Arrangement.SpaceBetween,
+										.padding(start = 16.dp)
+										.clickable { addBookmarkViewModel.showAddTagDialog() },
 									verticalAlignment = Alignment.CenterVertically
 								) {
 									Text(
-										text = "TAGS",
-										fontWeight = FontWeight.Bold,
-										color = Color.Black
+										text = "ADD TAG",
+										color = Color.Blue,
+										fontSize = 12.sp,
+										fontWeight = FontWeight.Bold
 									)
-									if (!isExpanded) Icon(imageVector = Icons.Default.ExpandMore, contentDescription = "태그 리스트 확장")
-									else Icon(imageVector = Icons.Default.ExpandLess, contentDescription = "태그 리스트 축소")
 								}
+							}
 
-								if (isExpanded) {
-									Row(
-										modifier = modifier
-											.padding(top = 6.dp)
-											.clickable { isShowDialog = !isShowDialog },
-										verticalAlignment = Alignment.CenterVertically
-									) {
-										Icon(
-											imageVector = Icons.Default.Add,
-											contentDescription = "태그 추가",
-											tint = Color.Blue
-										)
-										Text(
-											text = "ADD TAG",
-											color = Color.Blue,
-											fontSize = 14.sp,
-											fontWeight = FontWeight.Bold
-										)
+							LazyRow(
+								modifier = modifier
+									.fillMaxWidth()
+									.border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(4.dp)),
+							) {
+								if (addBookmarkUiState.tags.isEmpty()) {
+									item {
+										Column(
+											modifier = modifier
+												.padding(8.dp),
+											verticalArrangement = Arrangement.Center
+										) {
+											Text(
+												modifier = modifier.padding(8.dp),
+												text = "please add tags",
+												color = Color.LightGray
+											)
+										}
 									}
-
-									LazyHorizontalStaggeredGrid(
-										modifier = modifier
-											.height(140.dp)
-											.padding(top = 12.dp),
-										rows = StaggeredGridCells.Fixed(3),
-									) {
-										items(items = tags) { tagUiState ->
-											Chip(
-												modifier = modifier.padding(end = 8.dp, bottom = 8.dp),
-												onClick = {
-													val newSelectedTags = selectedTags.toMutableList()
-
-													if (newSelectedTags.contains(tagUiState.name)) newSelectedTags.remove(tagUiState.name)
-													else newSelectedTags.add(tagUiState.name)
-
-													selectedTags = newSelectedTags
-												},
-												leadingIcon = {
-													if (selectedTags.contains(tagUiState.name)) {
-														Icon(
-															Icons.Default.Check,
-															contentDescription = "태그 선택"
-														)
-													}
-												},
-												colors = if (selectedTags.contains(tagUiState.name)) ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary) else ChipDefaults.chipColors()
-											) {
-
-												Text(
-													modifier = modifier.padding(end = 4.dp),
-													text = tagUiState.name
+								} else {
+									items(items = addBookmarkUiState.tags) { tag ->
+										Chip(
+											modifier = modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+											onClick = { addBookmarkViewModel.removeTag(tag) },
+											leadingIcon = {
+												Icon(
+													Icons.Default.Check,
+													contentDescription = "태그 선택"
 												)
+											},
+											colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary)
+										) {
+
+											Text(
+												modifier = modifier.padding(end = 4.dp),
+												text = tag
+											)
+										}
+									}
+								}
+							}
+
+							ExposedDropdownMenuBox(
+								modifier = modifier
+									.fillMaxWidth()
+									.padding(top = 24.dp),
+								expanded = addBookmarkUiState.isShowGroups,
+								onExpandedChange = {
+									if (it) addBookmarkViewModel.showGroups()
+									else addBookmarkViewModel.hideGroups()
+								}
+							) {
+								OutlinedTextField(
+									modifier = modifier.fillMaxWidth(),
+									readOnly = true,
+									label = { Text(text = "GROUP") },
+									value = addBookmarkUiState.selectedGroup,
+									onValueChange = {},
+									trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = addBookmarkUiState.isShowGroups) },
+									colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+								)
+
+								ExposedDropdownMenu(
+									expanded = addBookmarkUiState.isShowGroups,
+									onDismissRequest = { addBookmarkViewModel.hideGroups() }
+								) {
+									addBookmarkUiState.groupUiStates.forEach { groupUiState ->
+										DropdownMenuItem(
+											onClick = {
+												addBookmarkViewModel.setSelectedGroup(groupUiState.name)
+												addBookmarkViewModel.hideGroups()
 											}
+										) {
+											Text(text = groupUiState.name)
+										}
+									}
+									DropdownMenuItem(onClick = { addBookmarkViewModel.showAddGroupDialog() }) {
+										Row {
+											Icon(imageVector = Icons.Default.AddCircle, contentDescription = "그룹 추가")
+											Text(text = "그룹 추가")
 										}
 									}
 								}
@@ -292,8 +281,8 @@ class AddBookmarkActivity : ComponentActivity() {
 								modifier = modifier
 									.fillMaxWidth()
 									.padding(top = 16.dp, bottom = 8.dp),
-								value = url,
-								onValueChange = { url = it },
+								value = addBookmarkUiState.url,
+								onValueChange = { addBookmarkViewModel.setUrl(it) },
 								label = { Text(text = "URL") },
 								maxLines = 1,
 								singleLine = true
@@ -303,8 +292,8 @@ class AddBookmarkActivity : ComponentActivity() {
 								modifier = modifier
 									.fillMaxWidth()
 									.padding(vertical = 8.dp),
-								value = title,
-								onValueChange = { title = it },
+								value = addBookmarkUiState.title,
+								onValueChange = { addBookmarkViewModel.setTitle(it) },
 								label = { Text(text = "TITLE") },
 								maxLines = 1,
 								singleLine = true
@@ -315,8 +304,8 @@ class AddBookmarkActivity : ComponentActivity() {
 									.fillMaxWidth()
 									.height(200.dp)
 									.padding(vertical = 8.dp),
-								value = description,
-								onValueChange = { description = it },
+								value = addBookmarkUiState.description,
+								onValueChange = { addBookmarkViewModel.setDescription(it) },
 								label = { Text(text = "DESCRIPTION") },
 							)
 						}
@@ -326,11 +315,8 @@ class AddBookmarkActivity : ComponentActivity() {
 								.width(250.dp)
 								.padding(horizontal = 24.dp),
 							onClick = {
-								bookmarksViewModel.deleteTags(tags, addedTags.filterNot { tag -> selectedTags.contains(tag) })
-								bookmarksViewModel.addBookmark(selectedTags, title.text, url.text, description.text)
-								val intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)
-								startActivity(intent)
-								finish()
+								addBookmarkViewModel.addBookmarkUiState()
+								startBookmarkActivity()
 							},
 							colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
 							enabled = true
@@ -344,6 +330,64 @@ class AddBookmarkActivity : ComponentActivity() {
 				}
 			}
 		}
+	}
+
+	@Composable
+	fun AddDialog(
+		modifier: Modifier,
+		onDismissRequest: () -> Unit,
+		textFieldValue: TextFieldValue,
+		textFileValueOnChange: (TextFieldValue) -> Unit,
+		label: String,
+		onCancel: () -> Unit,
+		onConfirm: () -> Unit
+	) {
+		Dialog(onDismissRequest = { onDismissRequest() }) {
+			Column(
+				modifier = modifier
+					.fillMaxWidth()
+					.wrapContentHeight()
+					.clip(RoundedCornerShape(12.dp))
+					.background(Color.White)
+					.padding(vertical = 8.dp),
+				horizontalAlignment = Alignment.CenterHorizontally,
+				verticalArrangement = Arrangement.Center
+			) {
+				OutlinedTextField(
+					value = textFieldValue,
+					onValueChange = { textFileValueOnChange(it) },
+					label = { Text(text = label) },
+					maxLines = 1,
+					singleLine = true
+				)
+
+				Row(
+					modifier = modifier
+						.fillMaxWidth()
+						.padding(top = 8.dp),
+					horizontalArrangement = Arrangement.SpaceEvenly
+				) {
+					Button(
+						onClick = { onCancel() },
+						colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+					) {
+						Text(text = "취소")
+					}
+
+					Button(
+						onClick = { onConfirm() },
+						colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+					) {
+						Text(text = "추가")
+					}
+				}
+			}
+		}
+	}
+
+	private fun startBookmarkActivity(intent: Intent = Intent(this@AddBookmarkActivity, BookmarksActivity::class.java)) {
+		startActivity(intent)
+		finish()
 	}
 
 	override fun onDestroy() {
