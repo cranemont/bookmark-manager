@@ -2,6 +2,7 @@ package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -63,6 +64,8 @@ class AddBookmarkActivity : ComponentActivity() {
 				val addBookmarkUiState = addBookmarkViewModel.addBookmarkUiState
 				val scaffoldState = rememberScaffoldState()
 
+				Log.d("AddBookmarkActivity", addBookmarkUiState.newTag.text)
+
 				LaunchedEffect(key1 = addBookmarkUiState.bookmarkResponse) {
 					addBookmarkUiState.bookmarkResponse?.let {
 						addBookmarkViewModel.setTitle(TextFieldValue(it.title))
@@ -103,21 +106,14 @@ class AddBookmarkActivity : ComponentActivity() {
 					if (addBookmarkUiState.isShowAddTagDialog) {
 						AddDialog(
 							modifier = modifier,
-							onDismissRequest = {
-								addBookmarkViewModel.hideAddTagDialog()
-								addBookmarkViewModel.setNewTag(TextFieldValue(""))
-							},
+							onDismissRequest = { addBookmarkViewModel.hideAddTagDialog() },
 							textFieldValue = addBookmarkUiState.newTag,
-							textFileValueOnChange = { addBookmarkViewModel.setNewTag(it) },
+							textFieldValueOnChange = { addBookmarkViewModel.setNewTag(it) },
 							label = "TAG",
-							onCancel = {
-								addBookmarkViewModel.hideAddTagDialog()
-								addBookmarkViewModel.setNewTag(TextFieldValue(""))
-							},
+							onCancel = { addBookmarkViewModel.hideAddTagDialog() },
 							onConfirm = {
 								addBookmarkViewModel.hideAddTagDialog()
 								addBookmarkViewModel.addTag(addBookmarkUiState.newTag.text)
-								addBookmarkViewModel.setNewTag(TextFieldValue(""))
 							}
 						)
 					}
@@ -125,21 +121,14 @@ class AddBookmarkActivity : ComponentActivity() {
 					if (addBookmarkUiState.isShowAddGroupDialog) {
 						AddDialog(
 							modifier = modifier,
-							onDismissRequest = {
-								addBookmarkViewModel.hideAddGroupDialog()
-								addBookmarkViewModel.setNewGroup(TextFieldValue(""))
-							},
+							onDismissRequest = { addBookmarkViewModel.hideAddGroupDialog() },
 							textFieldValue = addBookmarkUiState.newGroup,
-							textFileValueOnChange = { addBookmarkViewModel.setNewGroup(it) },
+							textFieldValueOnChange = { addBookmarkViewModel.setNewGroup(it) },
 							label = "GROUP",
-							onCancel = {
-								addBookmarkViewModel.hideAddGroupDialog()
-								addBookmarkViewModel.setNewGroup(TextFieldValue(""))
-							},
+							onCancel = { addBookmarkViewModel.hideAddGroupDialog() },
 							onConfirm = {
 								addBookmarkViewModel.hideAddGroupDialog()
 								addBookmarkViewModel.addGroup(addBookmarkUiState.newGroup.text)
-								addBookmarkViewModel.setNewGroup(TextFieldValue(""))
 							}
 						)
 					}
@@ -340,7 +329,7 @@ class AddBookmarkActivity : ComponentActivity() {
 		modifier: Modifier,
 		onDismissRequest: () -> Unit,
 		textFieldValue: TextFieldValue,
-		textFileValueOnChange: (TextFieldValue) -> Unit,
+		textFieldValueOnChange: (TextFieldValue) -> Unit,
 		label: String,
 		onCancel: () -> Unit,
 		onConfirm: () -> Unit
@@ -358,7 +347,7 @@ class AddBookmarkActivity : ComponentActivity() {
 			) {
 				OutlinedTextField(
 					value = textFieldValue,
-					onValueChange = { textFileValueOnChange(it) },
+					onValueChange = { textFieldValueOnChange(it) },
 					label = { Text(text = label) },
 					maxLines = 1,
 					singleLine = true

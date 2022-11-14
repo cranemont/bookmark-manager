@@ -91,7 +91,10 @@ class AddBookmarkViewModel @Inject constructor(
 	}
 
 	fun hideAddGroupDialog() {
-		addBookmarkUiState = addBookmarkUiState.copy(isShowAddGroupDialog = false)
+		addBookmarkUiState = addBookmarkUiState.copy(
+			isShowAddGroupDialog = false,
+			newGroup = TextFieldValue("")
+		)
 	}
 
 	fun setBookmarkResponse(url: String) {
@@ -144,15 +147,22 @@ class AddBookmarkViewModel @Inject constructor(
 	}
 
 	fun hideAddTagDialog() {
-		addBookmarkUiState = addBookmarkUiState.copy(isShowAddTagDialog = false)
+		addBookmarkUiState = addBookmarkUiState.copy(
+			isShowAddTagDialog = false,
+			newTag = TextFieldValue("")
+		)
 	}
 
 	fun setNewTag(textFieldValue: TextFieldValue) {
-		addBookmarkUiState = addBookmarkUiState.copy(newTag = textFieldValue)
+		if (addBookmarkUiState.isShowAddTagDialog) {
+			addBookmarkUiState = addBookmarkUiState.copy(newTag = textFieldValue)
+		}
 	}
 
 	fun setNewGroup(textFieldValue: TextFieldValue) {
-		addBookmarkUiState = addBookmarkUiState.copy(newGroup = textFieldValue)
+		if (addBookmarkUiState.isShowAddGroupDialog) {
+			addBookmarkUiState = addBookmarkUiState.copy(newGroup = textFieldValue)
+		}
 	}
 
 	fun doneDuplicatedTag() {
