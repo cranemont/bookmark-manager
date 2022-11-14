@@ -1,92 +1,137 @@
-import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import setting from "@assets/img/setting.svg";
-import profile from "@assets/img/profile.svg";
-import bookmark from "@assets/img/bookmark.svg";
-import sync from "@assets/img/sync.svg";
-import backup from "@assets/img/backup.svg";
+import { useState } from "react";
 
 const PopupContainer = styled.div`
-  width: 200px;
-  min-height: 100px;
+  width: 320px;
+  padding: 20px;
+  background-color: #f3f3f3;
+  font-family: Pretendard, serif;
 `;
 
-const Container = styled.div`
+const Title = styled.h1`
+  font-size: 20px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0;
+`;
+
+const RowContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  min-height: 40px;
-  gap: 8px;
+  margin-top: 16px;
 `;
 
-const Name = styled.div`
+const TagContainer = styled(RowContainer)`
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-start;
+`;
+
+const Label = styled.h2`
   font-size: 16px;
+  font-weight: bold;
+  color: #3c3c3c;
+  margin: 0;
 `;
 
-const SettingIcon = styled.img`
-  width: 20px;
-  height: 20px;
+const Input = styled.input`
+  box-sizing: border-box;
+  width: 250px;
+  border-radius: 8px;
+  border: thin solid #eeeeee;
+  font-size: 16px;
+  padding: 8px;
+  background-color: #ffffff;
 `;
 
-const SettingButton = styled.a`
-  cursor: pointer;
+const Select = styled.select`
+  box-sizing: border-box;
+  width: 250px;
+  border-radius: 8px;
+  border: thin solid #eeeeee;
+  font-size: 16px;
+  padding: 8px;
+  background-color: #ffffff;
 `;
 
-const ProfileContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: end;
-  gap: 8px;
+const Tag = styled.div`
+  box-sizing: border-box;
+  width: fit-content;
+  border-radius: 8px;
+  font-size: 12px;
+  padding: 8px;
+  background-color: #d4d4d4;
 `;
 
-const ProfileImg = styled.img`
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #becccc;
-`;
-
-const Icon = styled.img`
-  width: 28px;
-  height: 28px;
-  filter: invert(100%);
-`;
-
-const IconButton = styled.a`
+const TextArea = styled.textarea`
+  box-sizing: border-box;
   width: 100%;
-  height: 40px;
-  background-color: #1abc9b;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  min-height: 100px;
+  resize: none;
+  border-radius: 8px;
+  font-size: 16px;
+  padding: 8px;
+  border: thin solid #eeeeee;
+`;
+
+const Button = styled.button`
+  width: 100%;
+  border-radius: 8px;
+  border: thin solid #eeeeee;
+  font-size: 16px;
+  padding: 12px;
+  background-color: #242830;
+  color: #ffffff;
+  font-weight: bold;
 `;
 
 const Popup = () => {
+  const [name, setName] = useState("");
+  const groups = [{ id: 1, name: "그룹1" }]; // TODO: state화 하고 API 연결
+  const tags = []; // TODO: state화 하고 API 연결
+
+  const send = (type: "add" | "panel") => {
+    chrome.runtime.sendMessage({ type });
+  };
+
   return (
     <PopupContainer>
-      <Container>
-        <ProfileContainer>
-          <ProfileImg src={profile} />
-          <Name>홍길동</Name>
-        </ProfileContainer>
-        <SettingButton>
-          <SettingIcon src={setting} alt="setting button" />
-        </SettingButton>
-      </Container>
-      <Container css={css({ marginTop: "12px" })}>
-        <IconButton>
-          <Icon src={bookmark} />
-        </IconButton>
-        <IconButton>
-          <Icon src={sync} />
-        </IconButton>
-        <IconButton>
-          <Icon src={backup} />
-        </IconButton>
-      </Container>
+      <Title>Add Bookmark</Title>
+      <RowContainer>
+        <Label>Name</Label>
+        <Input onChange={(e) => setName(e.target.value)} value={name} />
+      </RowContainer>
+      <RowContainer>
+        <Label>Group</Label>
+        <Select>
+          <option value={0} key={0} disabled selected>
+            선택
+          </option>
+          {groups.map(({ id, name }) => (
+            <option value={id} key={id}>
+              {name}
+            </option>
+          ))}
+        </Select>
+      </RowContainer>
+      <RowContainer>
+        <Label>Tags</Label>
+        <Input />
+      </RowContainer>
+      <TagContainer>
+        {tags.map(({ id, name }) => (
+          <Tag key={id}>{name}</Tag>
+        ))}
+      </TagContainer>
+      <Label>Summary</Label>
+      <RowContainer>
+        <TextArea></TextArea>
+      </RowContainer>
+      <RowContainer>
+        <Button onClick={() => send("panel")}>Add</Button>
+      </RowContainer>
     </PopupContainer>
   );
 };
