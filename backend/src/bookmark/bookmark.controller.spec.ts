@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { BookmarkController } from './bookmark.controller'
+import { BookmarkWebController } from './bookmark-web.controller'
 
 describe('BookmarkController', () => {
-  let controller: BookmarkController
+  let controller: BookmarkWebController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [BookmarkController],
+      controllers: [BookmarkWebController],
     }).compile()
 
-    controller = module.get<BookmarkController>(BookmarkController)
+    controller = module.get<BookmarkWebController>(BookmarkWebController)
   })
 
   it('should be defined', () => {
