@@ -36,4 +36,10 @@ class BookmarksViewModel @Inject constructor(
 				}
 		}
 	}
+
+	fun removeGroup(groupUiState: GroupUiState) {
+		viewModelScope.launch {
+			groupRepository.delete(groupUiState)
+		}
+	}
 }

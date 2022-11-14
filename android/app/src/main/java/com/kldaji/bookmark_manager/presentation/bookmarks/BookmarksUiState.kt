@@ -8,4 +8,6 @@ data class BookmarksUiState(
 	val filteredBookmarkUiStates: List<List<BookmarkUiState>> = groupUiStates.map { groupUiState ->
 		bookmarkUiStates.filter { bookmarkUiState -> bookmarkUiState.group == groupUiState.name }
 	}
+
+	fun isEmpty(filteredBookmarkUiState: List<BookmarkUiState>) = filteredBookmarkUiState.isEmpty()
 }

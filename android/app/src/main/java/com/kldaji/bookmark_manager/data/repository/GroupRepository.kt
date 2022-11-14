@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface GroupRepository {
 	fun getAll(): Flow<List<GroupUiState>>
 	suspend fun insert(groupUiState: GroupUiState)
-	suspend fun delete(groupUiStates: List<GroupUiState>)
+	suspend fun delete(groupUiState: GroupUiState)
 }

@@ -108,42 +108,46 @@ class BookmarksActivity : ComponentActivity() {
 								modifier = modifier.fillMaxSize(),
 								contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
 							) {
-								items(items = bookmarksUiState.filteredBookmarkUiStates[pageIndex]) { bookmarkUiState ->
+								if (bookmarksUiState.isEmpty(bookmarksUiState.filteredBookmarkUiStates[pageIndex])) {
+									bookmarksViewModel.removeGroup(bookmarksUiState.groupUiStates[pageIndex])
+								} else {
+									items(items = bookmarksUiState.filteredBookmarkUiStates[pageIndex]) { bookmarkUiState ->
 
-									Card(
-										modifier = modifier
-											.fillMaxWidth()
-											.padding(vertical = 8.dp),
-										shape = RoundedCornerShape(size = 18.dp),
-										backgroundColor = Color.LightGray
-									) {
-										Column(
+										Card(
 											modifier = modifier
-												.padding(vertical = 16.dp, horizontal = 20.dp)
+												.fillMaxWidth()
+												.padding(vertical = 8.dp),
+											shape = RoundedCornerShape(size = 18.dp),
+											backgroundColor = Color.LightGray
 										) {
-											Text(
-												text = bookmarkUiState.title,
-												color = Color.Black,
-												fontWeight = FontWeight.Bold,
-												fontSize = 20.sp,
-												maxLines = 1,
-												overflow = TextOverflow.Ellipsis
-											)
-											Text(
-												modifier = modifier.padding(bottom = 16.dp),
-												text = bookmarkUiState.url,
-												color = Color.Gray,
-												fontSize = 14.sp,
-												maxLines = 1,
-												overflow = TextOverflow.Ellipsis
-											)
-											Text(
-												text = bookmarkUiState.description,
-												color = Color.Black,
-												fontSize = 14.sp,
-												maxLines = 3,
-												overflow = TextOverflow.Ellipsis
-											)
+											Column(
+												modifier = modifier
+													.padding(vertical = 16.dp, horizontal = 20.dp)
+											) {
+												Text(
+													text = bookmarkUiState.title,
+													color = Color.Black,
+													fontWeight = FontWeight.Bold,
+													fontSize = 20.sp,
+													maxLines = 1,
+													overflow = TextOverflow.Ellipsis
+												)
+												Text(
+													modifier = modifier.padding(bottom = 16.dp),
+													text = bookmarkUiState.url,
+													color = Color.Gray,
+													fontSize = 14.sp,
+													maxLines = 1,
+													overflow = TextOverflow.Ellipsis
+												)
+												Text(
+													text = bookmarkUiState.description,
+													color = Color.Black,
+													fontSize = 14.sp,
+													maxLines = 3,
+													overflow = TextOverflow.Ellipsis
+												)
+											}
 										}
 									}
 								}

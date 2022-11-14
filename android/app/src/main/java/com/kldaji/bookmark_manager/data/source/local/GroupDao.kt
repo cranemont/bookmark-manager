@@ -13,5 +13,5 @@ interface GroupDao {
 	suspend fun insert(group: Group)
 
 	@Delete
-	suspend fun delete(groups: List<Group>)
+	suspend fun delete(group: Group)
 }

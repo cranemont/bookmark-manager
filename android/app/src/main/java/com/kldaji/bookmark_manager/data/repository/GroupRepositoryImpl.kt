@@ -23,8 +23,7 @@ class GroupRepositoryImpl @Inject constructor(
 		groupLocalDataSource.insert(Mapper.groupUiStateToGroup(groupUiState))
 	}
 
-	override suspend fun delete(groupUiStates: List<GroupUiState>) {
-		val tags = groupUiStates.map { tagUiState -> Mapper.groupUiStateToGroup(tagUiState) }
-		groupLocalDataSource.delete(tags)
+	override suspend fun delete(groupUiState: GroupUiState) {
+		groupLocalDataSource.delete(Mapper.groupUiStateToGroup(groupUiState))
 	}
 }
