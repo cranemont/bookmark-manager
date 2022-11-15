@@ -1,6 +1,6 @@
+import Panel from "@pages/panel/Panel";
 import React from "react";
 import { createRoot } from "react-dom/client";
-import Options from "@pages/options/Options";
 import refreshOnUpdate from "virtual:reload-on-update-in-view";
 
 refreshOnUpdate("pages/options");
@@ -11,7 +11,7 @@ function init() {
     throw new Error("Can not find AppContainer");
   }
   const root = createRoot(appContainer);
-  root.render(<Options />);
+  root.render(<Panel />);
 }
 
 init();
