@@ -5,8 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,7 +35,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class BookmarksActivity : ComponentActivity() {
 
-	@OptIn(ExperimentalPagerApi::class)
+	@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
@@ -128,19 +131,39 @@ class BookmarksActivity : ComponentActivity() {
 													text = bookmarkUiState.title,
 													color = Color.Black,
 													fontWeight = FontWeight.Bold,
-													fontSize = 20.sp,
+													fontSize = 22.sp,
 													maxLines = 1,
 													overflow = TextOverflow.Ellipsis
 												)
+
 												Text(
-													modifier = modifier.padding(bottom = 16.dp),
+													modifier = modifier.padding(bottom = 6.dp),
 													text = bookmarkUiState.url,
 													color = Color.Gray,
-													fontSize = 14.sp,
+													fontSize = 12.sp,
 													maxLines = 1,
 													overflow = TextOverflow.Ellipsis
 												)
+
+												LazyRow(modifier = modifier.fillMaxWidth()) {
+													items(items = bookmarkUiState.tags) { tag ->
+														Box(
+															modifier = modifier
+																.padding(end = 8.dp)
+																.clip(RoundedCornerShape(16.dp))
+																.background(MaterialTheme.colors.secondary)
+														) {
+															Text(
+																modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+																text = tag,
+																fontSize = 12.sp
+															)
+														}
+													}
+												}
+
 												Text(
+													modifier = modifier.padding(top = 16.dp),
 													text = bookmarkUiState.description,
 													color = Color.Black,
 													fontSize = 14.sp,
