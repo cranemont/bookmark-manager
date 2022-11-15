@@ -32,14 +32,14 @@ object Mapper {
 	fun groupToGroupUiState(group: Group): GroupUiState {
 		return GroupUiState(
 			id = group.id,
-			name = group.name
+			name = group.name.uppercase()
 		)
 	}
 
-	fun groupUiStateToGroup(tagUiState: GroupUiState): Group {
+	fun groupUiStateToGroup(groupUiState: GroupUiState): Group {
 		return Group(
-			id = tagUiState.id,
-			name = tagUiState.name
+			id = groupUiState.id,
+			name = groupUiState.name.uppercase()
 		)
 	}
 }
