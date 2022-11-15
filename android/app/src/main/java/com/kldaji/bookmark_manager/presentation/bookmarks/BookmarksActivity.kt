@@ -5,18 +5,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,7 +27,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
-import com.kldaji.bookmark_manager.presentation.BookmarksViewModel
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class BookmarksActivity : ComponentActivity() {
 
-	@OptIn(ExperimentalPagerApi::class)
+	@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
@@ -46,8 +46,7 @@ class BookmarksActivity : ComponentActivity() {
 				val modifier = Modifier
 				val pagerState = rememberPagerState()
 				val coroutineScope = rememberCoroutineScope()
-				val bookmarks by bookmarksViewModel.bookmarks.observeAsState(mutableListOf())
-				val tags by bookmarksViewModel.tagsWithAll.observeAsState(mutableListOf())
+				val bookmarksUiState = bookmarksViewModel.bookmarksUiState
 
 				Scaffold(
 					topBar = {
@@ -89,7 +88,7 @@ class BookmarksActivity : ComponentActivity() {
 							backgroundColor = Color.White,
 							edgePadding = 0.dp
 						) {
-							tags.forEachIndexed { index, tagUiState ->
+							bookmarksUiState.groupUiStates.forEachIndexed { index, tagUiState ->
 								Tab(
 									text = { Text(text = tagUiState.name) },
 									selected = pagerState.currentPage == index,
@@ -104,7 +103,7 @@ class BookmarksActivity : ComponentActivity() {
 
 						HorizontalPager(
 							modifier = modifier.fillMaxSize(),
-							count = tags.size,
+							count = bookmarksUiState.filteredBookmarkUiStates.size,
 							state = pagerState
 						) { pageIndex ->
 
@@ -112,47 +111,66 @@ class BookmarksActivity : ComponentActivity() {
 								modifier = modifier.fillMaxSize(),
 								contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
 							) {
-								items(
-									items = bookmarks[pageIndex],
-									key = { bookmarkUiState ->
-										bookmarkUiState.id
-									}
-								) { bookmarkUiState ->
+								if (bookmarksUiState.isEmpty(bookmarksUiState.filteredBookmarkUiStates[pageIndex])) {
+									bookmarksViewModel.removeGroup(bookmarksUiState.groupUiStates[pageIndex])
+								} else {
+									items(items = bookmarksUiState.filteredBookmarkUiStates[pageIndex]) { bookmarkUiState ->
 
-									Card(
-										modifier = modifier
-											.fillMaxWidth()
-											.padding(vertical = 8.dp),
-										shape = RoundedCornerShape(size = 18.dp),
-										backgroundColor = Color.LightGray
-									) {
-										Column(
+										Card(
 											modifier = modifier
-												.padding(vertical = 16.dp, horizontal = 20.dp)
+												.fillMaxWidth()
+												.padding(vertical = 8.dp),
+											shape = RoundedCornerShape(size = 18.dp),
+											backgroundColor = Color.LightGray
 										) {
-											Text(
-												text = bookmarkUiState.title,
-												color = Color.Black,
-												fontWeight = FontWeight.Bold,
-												fontSize = 20.sp,
-												maxLines = 1,
-												overflow = TextOverflow.Ellipsis
-											)
-											Text(
-												modifier = modifier.padding(bottom = 16.dp),
-												text = bookmarkUiState.url,
-												color = Color.Gray,
-												fontSize = 14.sp,
-												maxLines = 1,
-												overflow = TextOverflow.Ellipsis
-											)
-											Text(
-												text = bookmarkUiState.description,
-												color = Color.Black,
-												fontSize = 14.sp,
-												maxLines = 3,
-												overflow = TextOverflow.Ellipsis
-											)
+											Column(
+												modifier = modifier
+													.padding(vertical = 16.dp, horizontal = 20.dp)
+											) {
+												Text(
+													text = bookmarkUiState.title,
+													color = Color.Black,
+													fontWeight = FontWeight.Bold,
+													fontSize = 22.sp,
+													maxLines = 1,
+													overflow = TextOverflow.Ellipsis
+												)
+
+												Text(
+													modifier = modifier.padding(bottom = 6.dp),
+													text = bookmarkUiState.url,
+													color = Color.Gray,
+													fontSize = 12.sp,
+													maxLines = 1,
+													overflow = TextOverflow.Ellipsis
+												)
+
+												LazyRow(modifier = modifier.fillMaxWidth()) {
+													items(items = bookmarkUiState.tags) { tag ->
+														Box(
+															modifier = modifier
+																.padding(end = 8.dp)
+																.clip(RoundedCornerShape(16.dp))
+																.background(MaterialTheme.colors.secondary)
+														) {
+															Text(
+																modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+																text = tag,
+																fontSize = 12.sp
+															)
+														}
+													}
+												}
+
+												Text(
+													modifier = modifier.padding(top = 16.dp),
+													text = bookmarkUiState.description,
+													color = Color.Black,
+													fontSize = 14.sp,
+													maxLines = 3,
+													overflow = TextOverflow.Ellipsis
+												)
+											}
 										}
 									}
 								}

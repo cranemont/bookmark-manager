@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class Bookmark(
 	@PrimaryKey(autoGenerate = true) val id: Long,
+	@ColumnInfo val group: String,
 	@ColumnInfo val tags: List<String>,
 	@ColumnInfo val title: String,
 	@ColumnInfo val url: String,

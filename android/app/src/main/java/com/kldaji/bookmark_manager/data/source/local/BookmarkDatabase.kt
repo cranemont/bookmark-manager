@@ -6,9 +6,9 @@ import androidx.room.TypeConverters
 import com.kldaji.bookmark_manager.data.entity.Bookmark
 import com.kldaji.bookmark_manager.util.StringListTypeConverter
 
-@Database(entities = [Bookmark::class, Tag::class], version = 1)
+@Database(entities = [Bookmark::class, Group::class], version = 1)
 @TypeConverters(value = [StringListTypeConverter::class])
 abstract class BookmarkDatabase : RoomDatabase() {
 	abstract fun bookmarkDao(): BookmarkDao
-	abstract fun tagDao(): TagDao
+	abstract fun groupDao(): GroupDao
 }

@@ -1,15 +1,16 @@
 package com.kldaji.bookmark_manager.data
 
-import com.kldaji.bookmark_manager.data.source.local.Tag
+import com.kldaji.bookmark_manager.data.source.local.Group
 import com.kldaji.bookmark_manager.data.entity.Bookmark
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
-import com.kldaji.bookmark_manager.presentation.bookmarks.TagUiState
+import com.kldaji.bookmark_manager.presentation.bookmarks.GroupUiState
 
 object Mapper {
 
 	fun bookmarkToBookmarkUiState(bookmark: Bookmark): BookmarkUiState {
 		return BookmarkUiState(
 			id = bookmark.id,
+			group = bookmark.group,
 			tags = bookmark.tags,
 			title = bookmark.title,
 			url = bookmark.url,
@@ -20,6 +21,7 @@ object Mapper {
 	fun bookmarkUiStateToBookmark(bookmarkUiState: BookmarkUiState): Bookmark {
 		return Bookmark(
 			id = bookmarkUiState.id,
+			group = bookmarkUiState.group,
 			tags = bookmarkUiState.tags,
 			title = bookmarkUiState.title,
 			url = bookmarkUiState.url,
@@ -27,17 +29,17 @@ object Mapper {
 		)
 	}
 
-	fun tagToTagUiState(tag: Tag): TagUiState {
-		return TagUiState(
-			id = tag.id,
-			name = tag.name
+	fun groupToGroupUiState(group: Group): GroupUiState {
+		return GroupUiState(
+			id = group.id,
+			name = group.name.uppercase()
 		)
 	}
 
-	fun tagUiStateToTag(tagUiState: TagUiState): Tag {
-		return Tag(
-			id = tagUiState.id,
-			name = tagUiState.name
+	fun groupUiStateToGroup(groupUiState: GroupUiState): Group {
+		return Group(
+			id = groupUiState.id,
+			name = groupUiState.name.uppercase()
 		)
 	}
 }
