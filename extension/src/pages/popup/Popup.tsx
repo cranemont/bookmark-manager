@@ -1,4 +1,6 @@
 import styled from "@emotion/styled";
+import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
 const PopupContainer = styled.div`
@@ -8,6 +10,14 @@ const PopupContainer = styled.div`
   font-family: Pretendard, serif;
 `;
 
+const RowContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+`;
+
 const Title = styled.h1`
   font-size: 20px;
   font-weight: bold;
@@ -15,12 +25,8 @@ const Title = styled.h1`
   margin: 0;
 `;
 
-const RowContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
+const TitleContainer = styled(RowContainer)`
+  margin-top: 0;
 `;
 
 const TagContainer = styled(RowContainer)`
@@ -69,7 +75,7 @@ const Tag = styled.div`
 const TextArea = styled.textarea`
   box-sizing: border-box;
   width: 100%;
-  min-height: 100px;
+  height: 140px;
   resize: none;
   border-radius: 8px;
   font-size: 16px;
@@ -86,6 +92,13 @@ const Button = styled.button`
   background-color: #242830;
   color: #ffffff;
   font-weight: bold;
+  cursor: pointer;
+`;
+
+const IconBtn = styled(FontAwesomeIcon)`
+  height: 16px;
+  color: #242830;
+  cursor: pointer;
 `;
 
 const Popup = () => {
@@ -113,16 +126,21 @@ const Popup = () => {
 
   return (
     <PopupContainer>
-      <Title>Add Bookmark</Title>
+      <TitleContainer>
+        <Title>Add Bookmark</Title>
+        <IconBtn icon={faTableColumns} onClick={() => send("panel")} />
+      </TitleContainer>
+
       <RowContainer>
         <Label>Name</Label>
         <Input onChange={(e) => setName(e.target.value)} value={name} />
       </RowContainer>
+
       <RowContainer>
         <Label>Group</Label>
         <Select>
           <option value={0} key={0} disabled selected>
-            선택
+            Select
           </option>
           {groups.map(({ id, name }) => (
             <option value={id} key={id}>
@@ -131,6 +149,7 @@ const Popup = () => {
           ))}
         </Select>
       </RowContainer>
+
       <RowContainer>
         <Label>Tags</Label>
         <Input
@@ -146,14 +165,16 @@ const Popup = () => {
           </Tag>
         ))}
       </TagContainer>
+
       <RowContainer>
         <Label>Summary</Label>
       </RowContainer>
       <RowContainer>
         <TextArea></TextArea>
       </RowContainer>
+
       <RowContainer>
-        <Button onClick={() => send("panel")}>Add</Button>
+        <Button onClick={() => send("add")}>Add</Button>
       </RowContainer>
     </PopupContainer>
   );
