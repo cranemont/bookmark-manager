@@ -15,21 +15,21 @@ model User {
   username String     @unique
   password String
   Bookmark Bookmark[]
-  tags     Json
+  tags     Tag[]
   groups   Group[]
 }
 
 model Bookmark {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  user       User       @relation(fields: [userId], references: [id])
-  userId     String     @db.ObjectId
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  user       User        @relation(fields: [userId], references: [id])
+  userId     String      @db.ObjectId
   url        String
   title      String
   summary    String?
-  tags       Json
+  tags       Tag[]
   group      Group
-  updated    UpdateFrom
-  creatdedAt DateTime   @default(now())
+  updated    UpdatedFrom
+  creatdedAt DateTime    @default(now())
 }
 
 type Group {
@@ -37,14 +37,17 @@ type Group {
   from Source
 }
 
+type Tag {
+  name String
+}
+
 enum Source {
   Web
   Mobile
 }
 
-enum UpdateFrom {
+enum UpdatedFrom {
   None
   Web
   Mobile
-  Both
 }
