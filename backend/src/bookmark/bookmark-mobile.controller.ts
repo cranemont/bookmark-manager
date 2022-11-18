@@ -11,13 +11,18 @@ import { BookmarkService } from './bookmark.service'
 export class BookmarkMobileController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
+  // TODO: Validator 적용
   @Get()
   async getBookmarksByTag(
     @Query('tag') tag: string,
     @Body('bookmarkIds') bookmarkIds: Array<string>,
   ) {
     try {
-      return this.bookmarkService.getMobileBookmarksByTag(tag, bookmarkIds)
+      return this.bookmarkService.getUpdatedBookmarksByTag(
+        tag,
+        bookmarkIds,
+        'Web',
+      )
     } catch (error) {
       throw new InternalServerErrorException()
     }

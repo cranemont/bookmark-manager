@@ -5,8 +5,7 @@ import { BookmarkMobileController } from './bookmark-mobile.controller'
 import { BookmarkService } from './bookmark.service'
 
 @Module({
-  imports: [PrismaService],
   controllers: [BookmarkWebController, BookmarkMobileController],
-  providers: [BookmarkService],
+  providers: [BookmarkService, PrismaService],
 })
 export class BookmarkModule {}
