@@ -7,6 +7,7 @@ import { OneAIModule } from './oneai/oneai.module'
 import { PrismaService } from './prisma/prisma.service'
 import { BookmarkModule } from './bookmark/bookmark.module'
 import { UserModule } from './user/user.module'
+import { GroupModule } from './group/group.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { UserModule } from './user/user.module'
     ConfigModule.forRoot({ isGlobal: true }),
     BookmarkModule,
     UserModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
