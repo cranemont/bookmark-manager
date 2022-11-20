@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsUrl } from 'class-validator'
 
-export class CreateBookmarkDto {
+export class UpdateBookmarkDto {
   @IsUrl()
   @IsNotEmpty()
   url: string

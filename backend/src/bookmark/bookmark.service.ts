@@ -1,95 +1,124 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common'
-import { Prisma, Source, UpdatedFrom } from '@prisma/client'
-import { GroupRepository } from 'src/group/group.repository'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { UserRepository } from 'src/user/user.repository'
 import { BookmarkRepository } from './bookmark.repository'
 import { CreateBookmarkDto } from './dto/create-bookmark.dto'
+import { UpdateBookmarkDto } from './dto/update-bookmark.dto'
+import { userId } from 'src/common/constants'
 
 @Injectable()
 export class BookmarkService {
   constructor(
     private readonly bookmarkRepository: BookmarkRepository,
     private readonly userRepository: UserRepository,
-    private readonly groupRepository: GroupRepository,
   ) {}
 
   filterId = (arr: Array<{ id: string }>) => arr.map((data) => data.id)
 
-  async getUpdatedBookmarksByTag(
-    tag: string,
-    bookmarkIds: Array<string>,
-    updatedFrom: UpdatedFrom,
-  ) {
-    const updatedBookmarks = await this.bookmarkRepository.getUpdatedBookmarks(
-      tag,
-      updatedFrom,
-    )
-    const updatedBookmarkIds = this.filterId(updatedBookmarks)
-    const addedBookmarks = await this.bookmarkRepository.getAddedBookmarks(
-      bookmarkIds,
-      updatedBookmarkIds,
-    )
-
-    await this.bookmarkRepository.updateBookmarkState(updatedBookmarkIds)
-
-    const allBookmarkIds = await this.bookmarkRepository.getBookmarkIdsByTag(
-      tag,
-    )
-    const deletedIds = bookmarkIds.filter((id) => !allBookmarkIds.includes(id))
-
-    // TODO: responseDTO로 deletedIds 붙이기
-    return updatedBookmarks.concat(addedBookmarks)
+  async getBookmarkById(id: string) {
+    const bookmark = await this.bookmarkRepository.getBookmarkById(id, userId)
+    if (!bookmark) {
+      throw new NotFoundException('Bookmark does not exist')
+    }
+    return bookmark
   }
 
-  async createBookmark(createBookmarkDto: CreateBookmarkDto, source: Source) {
-    const { url, title, summary, tags, group } = createBookmarkDto
-    const username = 'root'
+  async getBookmarksByTag(tag: string) {
+    return await this.bookmarkRepository.getBookmarksByTag(tag, userId)
+  }
 
-    // group 존재하는지 체크, 없으면에러
-    if (!(await this.groupRepository.isGroupExist(username, group))) {
-      throw new UnprocessableEntityException('Group does not exist')
-    }
-
-    const userTags = await this.userRepository.getTags(username)
-    // TODO: Refactor, Transaction
-    const userTagNames = userTags.map((tag) => tag.name)
-    const newTags = []
-    const existingTags = []
-    tags.forEach((tag) =>
-      userTagNames.includes(tag) ? existingTags.push(tag) : newTags.push(tag),
+  async getTags() {
+    const bookmarks = await this.bookmarkRepository.getTags(userId)
+    return Array.from(
+      new Set(
+        bookmarks.reduce((tags, bookmark) => {
+          return tags.concat(bookmark.tags.map((tag) => tag.name))
+        }, []),
+      ),
     )
-    // TODO: User의 Tag 업데이트(있는건 ref + 1, 없는건 새로추가)
-    await this.userRepository.createTags(username, newTags)
-    await this.userRepository.incrementTagRef(username, existingTags)
+  }
 
+  async getBookmarksByGroup(group: string) {
+    return await this.bookmarkRepository.getBookmarksByGroup(group, userId)
+  }
+
+  async createBookmark(createBookmarkDto: CreateBookmarkDto) {
+    const { url, title, summary, tags, group } = createBookmarkDto
     const tagObjects = tags.map((tag) => {
-      return { name: tag, refCount: 1 }
+      return { name: tag }
     })
+
     const bookmark = await this.bookmarkRepository.create({
       data: {
-        user: { connect: { username: username } },
+        user: { connect: { id: userId } },
         url: url,
         title: title,
         summary: summary,
-        updated: source,
         tags: tagObjects,
         group: {
-          connect: {
-            username_name: {
-              username: username,
+          connectOrCreate: {
+            where: {
+              name_userId: {
+                userId: userId,
+                name: group,
+              },
+            },
+            create: {
+              userId: userId,
               name: group,
             },
           },
         },
       },
     })
-
-    //TODO: Responsedto 정리
-    bookmark.tags = bookmark.tags.map((tag) => tag.name) as any
     return bookmark
+  }
+
+  async updateBookmark(id: string, updateBookmarkDto: UpdateBookmarkDto) {
+    const { url, title, summary, tags, group } = updateBookmarkDto
+
+    if (!(await this.bookmarkRepository.isExist(id))) {
+      throw new NotFoundException('Bookmark does not exist')
+    }
+
+    const tagObjects = tags.map((tag) => {
+      return { name: tag }
+    })
+
+    return await this.bookmarkRepository.update({
+      where: {
+        id_userId: {
+          id: id,
+          userId: userId,
+        },
+      },
+      data: {
+        user: { connect: { id: userId } },
+        url: url,
+        title: title,
+        summary: summary,
+        tags: tagObjects,
+        group: {
+          connectOrCreate: {
+            where: {
+              name_userId: {
+                userId: userId,
+                name: group,
+              },
+            },
+            create: {
+              userId: userId,
+              name: group,
+            },
+          },
+        },
+      },
+    })
+  }
+
+  async deleteBookmark(id: string) {
+    if (!(await this.bookmarkRepository.isExist(id))) {
+      throw new NotFoundException('Bookmark does not exist')
+    }
+    return await this.bookmarkRepository.delete(id, userId)
   }
 }
