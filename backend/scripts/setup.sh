@@ -7,13 +7,13 @@ cd $BASEDIR
 # https://www.oneai.com/ 에서 발급받은 API KEY를 입력하세요
 API_KEY="YOUR_API_KEY_HERE"
 
-DB_HOST=app-dev-db
-DB_PORT=27017
+DB_USER=""
+DB_PASSWD=""
 
 npm i -g @nestjs/cli
 yarn install
 yarn prisma generate
 
 rm -f .env
-echo "DATABASE_URL=\"mongodb://mongo:1234@$DB_HOST:$DB_PORT/cabstone\"" > .env
+echo "DATABASE_URL=\"mongodb+srv://$DB_USER:$DB_PASSWD@2022-cabstone.sqajriy.mongodb.net/2022-cabstone?retryWrites=true&w=majority\"" > .env
 echo "ONE_AI_API_KEY=\"$API_KEY\"" >> .env

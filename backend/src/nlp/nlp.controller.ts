@@ -19,7 +19,7 @@ export class NlpController {
       return await this.nplService.summarizeUrl(url)
     } catch (err) {
       Logger.error(err)
-      return new InternalServerErrorException()
+      throw new InternalServerErrorException()
     }
   }
 }

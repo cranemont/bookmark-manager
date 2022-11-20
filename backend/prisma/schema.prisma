@@ -15,7 +15,7 @@ model User {
   username String     @unique
   password String
   Bookmark Bookmark[]
-  tags     Tag[]
+  groups   Group[]
 }
 
 model Bookmark {
@@ -26,8 +26,21 @@ model Bookmark {
   title      String
   summary    String?
   tags       Tag[]
+  group      Group    @relation(fields: [groupId], references: [id])
+  groupId    String   @db.ObjectId
   creatdedAt DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  @@unique([id, userId])
+}
+
+model Group {
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  name     String     @default("Uncategorized")
+  User     User       @relation(fields: [userId], references: [id])
+  userId   String     @db.ObjectId
+  Bookmark Bookmark[]
+
+  @@unique([name, userId])
 }
 
 type Tag {
