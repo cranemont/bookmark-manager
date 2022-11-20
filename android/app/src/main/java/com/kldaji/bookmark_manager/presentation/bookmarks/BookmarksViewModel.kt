@@ -42,4 +42,8 @@ class BookmarksViewModel @Inject constructor(
 			groupRepository.delete(groupUiState)
 		}
 	}
+
+	fun setSelectedGroup(name: String) {
+		bookmarksUiState = bookmarksUiState.copy(selectedGroup = name)
+	}
 }
