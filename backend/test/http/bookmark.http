@@ -1,0 +1,42 @@
+POST http://localhost:3000/bookmark HTTP/1.1
+content-type: application/json
+
+{
+    "url": "https://google.com",
+    "title": "Google",
+    "summary": "",
+    "tags": ["search"],
+    "group": "search engine"
+}
+
+###
+PUT http://localhost:3000/bookmark/637a8dd44045dd16ab608675 HTTP/1.1
+content-type: application/json
+
+{
+    "url": "https://naver.com",
+    "title": "Naver",
+    "summary": "updated",
+    "tags": ["search"],
+    "group": "search engine"
+}
+
+###
+DELETE http://localhost:3000/bookmark/637a8dd44045dd16ab608675 HTTP/1.1
+
+###
+// getBookmarkById(id: string)
+GET http://localhost:3000/bookmark/637a8dd44045dd16ab608675 HTTP/1.1
+
+###
+// getBookmarksByTag(tag: string)
+GET http://localhost:3000/bookmark/tag?name=search HTTP/1.1
+
+###
+// getTags()
+GET http://localhost:3000/bookmark/tags HTTP/1.1
+
+
+###
+// getBookmarksByGroup(group: string)
+GET http://localhost:3000/bookmark/group?name=search engine HTTP/1.1
