@@ -27,18 +27,26 @@ model Bookmark {
   title      String
   summary    String?
   tags       Tag[]
-  group      Group
+  group      Group       @relation(fields: [groupId], references: [id])
+  groupId    String      @db.ObjectId
   updated    UpdatedFrom
   creatdedAt DateTime    @default(now())
 }
 
-type Group {
-  name String
-  from Source
+model Group {
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  name     String     @default("Uncategorized")
+  from     Source
+  User     User       @relation(fields: [username], references: [username])
+  username String     @unique
+  Bookmark Bookmark[]
+
+  @@unique([username, name])
 }
 
 type Tag {
-  name String
+  name     String
+  refCount Int    @default(1)
 }
 
 enum Source {
