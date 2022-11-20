@@ -6,9 +6,7 @@ data class BookmarksUiState(
 	val selectedGroup: String = groupUiStates.firstOrNull()?.name ?: "",
 ) {
 
-	val filteredBookmarkUiStates: List<List<BookmarkUiState>> = groupUiStates.map { groupUiState ->
-		bookmarkUiStates.filter { bookmarkUiState -> bookmarkUiState.group == groupUiState.name }
+	val groupedBookmarkUiStates: List<BookmarkUiState> = bookmarkUiStates.filter { bookmarkUiState ->
+		selectedGroup == bookmarkUiState.group
 	}
-
-	fun isEmpty(filteredBookmarkUiState: List<BookmarkUiState>) = filteredBookmarkUiState.isEmpty()
 }

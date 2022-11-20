@@ -33,17 +33,14 @@ class BookmarksViewModel @Inject constructor(
 				.getAll()
 				.collect { newGroups ->
 					bookmarksUiState = bookmarksUiState.copy(groupUiStates = newGroups)
+					setSelectedGroup(newGroups.firstOrNull()?.name)
 				}
 		}
 	}
 
-	fun removeGroup(groupUiState: GroupUiState) {
-		viewModelScope.launch {
-			groupRepository.delete(groupUiState)
+	fun setSelectedGroup(name: String?) {
+		name?.let {
+			bookmarksUiState = bookmarksUiState.copy(selectedGroup = it)
 		}
-	}
-
-	fun setSelectedGroup(name: String) {
-		bookmarksUiState = bookmarksUiState.copy(selectedGroup = name)
 	}
 }
