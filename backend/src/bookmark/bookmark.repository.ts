@@ -1,8 +1,19 @@
-import { UpdatedFrom } from '@prisma/client'
+import { Injectable } from '@nestjs/common'
+import { Prisma, UpdatedFrom } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 
+@Injectable()
 export class BookmarkRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getBookmarkIdsByTag(tag: string) {
+    return (
+      await this.prisma.bookmark.findMany({
+        where: { tags: { some: { name: tag } } },
+        select: { id: true },
+      })
+    ).map((val) => val.id)
+  }
 
   async getUpdatedBookmarks(tag: string, from: UpdatedFrom) {
     return await this.prisma.bookmark.findMany({
@@ -34,5 +45,9 @@ export class BookmarkRepository {
         updated: 'None',
       },
     })
+  }
+
+  async create(data: Prisma.BookmarkCreateArgs) {
+    return await this.prisma.bookmark.create(data)
   }
 }
