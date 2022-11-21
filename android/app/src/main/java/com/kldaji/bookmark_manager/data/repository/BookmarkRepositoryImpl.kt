@@ -1,8 +1,10 @@
 package com.kldaji.bookmark_manager.data.repository
 
 import com.kldaji.bookmark_manager.data.Mapper
-import com.kldaji.bookmark_manager.data.entity.BookmarkBody
+import com.kldaji.bookmark_manager.data.entity.BookmarkNlp
 import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
+import com.kldaji.bookmark_manager.data.entity.NewBookmark
+import com.kldaji.bookmark_manager.data.entity.Url
 import com.kldaji.bookmark_manager.data.source.local.BookmarkLocalDataSource
 import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSource
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
@@ -37,7 +39,11 @@ class BookmarkRepositoryImpl @Inject constructor(
 		bookmarkLocalDataSource.delete(Mapper.bookmarkUiStateToBookmark(bookmarkUiState))
 	}
 
-	override suspend fun getBookmarkResponse(bookmarkBody: BookmarkBody): Flow<Result<BookmarkResponse>> = flow {
-		emit(bookmarkRemoteDataSource.getBookmarkResponse(bookmarkBody))
+	override suspend fun getBookmarkNlpResult(url: Url): Result<BookmarkNlp> {
+		return bookmarkRemoteDataSource.getBookmarkNlpResult(url)
+	}
+
+	override suspend fun addBookmark(newBookmark: NewBookmark): Result<BookmarkResponse> {
+		return bookmarkRemoteDataSource.addBookmark(newBookmark)
 	}
 }

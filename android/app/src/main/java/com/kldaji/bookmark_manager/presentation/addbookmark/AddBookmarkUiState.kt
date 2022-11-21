@@ -1,17 +1,16 @@
 package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
+import com.kldaji.bookmark_manager.data.entity.BookmarkNlp
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
 import com.kldaji.bookmark_manager.presentation.bookmarks.GroupUiState
 
 data class AddBookmarkUiState(
-	val bookmarkUiState: BookmarkUiState? = null,
 	val tags: List<String> = emptyList(),
 	val groupUiStates: List<GroupUiState> = emptyList(),
 	val selectedGroup: String = "",
 	val isShowAddGroupDialog: Boolean = false,
-	val bookmarkResponse: BookmarkResponse? = null,
+	val bookmarkNlp: BookmarkNlp? = null,
 	val isShowProgressBar: Boolean = false,
 	val isShowGroups: Boolean = false,
 	val title: TextFieldValue = TextFieldValue(""),
@@ -22,15 +21,4 @@ data class AddBookmarkUiState(
 	val isDuplicatedTag: Boolean = false,
 	val isDuplicatedGroup: Boolean = false,
 	val isNetworkError: Boolean = false
-) {
-
-	fun createNewBookmarkUiState(): BookmarkUiState {
-		return BookmarkUiState(
-			group = selectedGroup,
-			tags = tags,
-			title = title.text,
-			url = url.text,
-			description = description.text
-		)
-	}
-}
+)
