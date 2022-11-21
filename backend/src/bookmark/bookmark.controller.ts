@@ -19,8 +19,8 @@ export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
   // TODO: Validator 적용
-  @Get('bookmarks')
-  async getBookmarksByTag(@Query('tag') tag: string) {
+  @Get('bookmarks/tag')
+  async getBookmarksByTag(@Query('name') tag: string) {
     try {
       return this.bookmarkService.getBookmarksByTag(tag)
     } catch (error) {
@@ -46,8 +46,8 @@ export class BookmarkController {
     }
   }
 
-  @Get('bookmarks')
-  async getBookmarksByGroup(@Query('group') group: string) {
+  @Get('bookmarks/group')
+  async getBookmarksByGroup(@Query('name') group: string) {
     try {
       return this.bookmarkService.getBookmarksByGroup(group)
     } catch (error) {
