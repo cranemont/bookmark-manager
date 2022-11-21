@@ -3,11 +3,10 @@ package com.kldaji.bookmark_manager.presentation.bookmarks
 data class BookmarksUiState(
 	val bookmarkUiStates: List<BookmarkUiState> = emptyList(),
 	val groupUiStates: List<GroupUiState> = emptyList(),
+	val selectedGroup: String = groupUiStates.firstOrNull()?.name ?: "",
 ) {
 
-	val filteredBookmarkUiStates: List<List<BookmarkUiState>> = groupUiStates.map { groupUiState ->
-		bookmarkUiStates.filter { bookmarkUiState -> bookmarkUiState.group == groupUiState.name }
+	val groupedBookmarkUiStates: List<BookmarkUiState> = bookmarkUiStates.filter { bookmarkUiState ->
+		selectedGroup == bookmarkUiState.group
 	}
-
-	fun isEmpty(filteredBookmarkUiState: List<BookmarkUiState>) = filteredBookmarkUiState.isEmpty()
 }
