@@ -1,5 +1,6 @@
 package com.kldaji.bookmark_manager.presentation.bookmarks
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kldaji.bookmark_manager.data.repository.BookmarkRepository
 import com.kldaji.bookmark_manager.data.repository.GroupRepository
+import com.kldaji.bookmark_manager.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,25 +24,32 @@ class BookmarksViewModel @Inject constructor(
 
 	init {
 		viewModelScope.launch {
-			bookmarkRepository
-				.getAll()
-				.collect { newBookmarks ->
-					bookmarksUiState = bookmarksUiState.copy(bookmarkUiStates = newBookmarks)
+			when (val result = groupRepository.getGroups()) {
+				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
+				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+				is Result.Success -> {
+					val groups = result.data
+					bookmarksUiState = bookmarksUiState.copy(groups = result.data)
+					setSelectedGroup(groups.firstOrNull())
 				}
-		}
-		viewModelScope.launch {
-			groupRepository
-				.getAll()
-				.collect { newGroups ->
-					bookmarksUiState = bookmarksUiState.copy(groupUiStates = newGroups)
-					setSelectedGroup(newGroups.firstOrNull()?.name)
-				}
+			}
 		}
 	}
 
 	fun setSelectedGroup(name: String?) {
 		name?.let {
 			bookmarksUiState = bookmarksUiState.copy(selectedGroup = it)
+
+			viewModelScope.launch {
+				when (val result = bookmarkRepository.getBookmarksByGroup(it)) {
+					is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
+					is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+					is Result.Success -> {
+						val bookmarkResponses = result.data
+						bookmarksUiState = bookmarksUiState.copy(bookmarkResponses = bookmarkResponses)
+					}
+				}
+			}
 		}
 	}
 }

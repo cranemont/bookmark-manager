@@ -1,12 +1,7 @@
 package com.kldaji.bookmark_manager.di
 
-import com.kldaji.bookmark_manager.data.source.local.BookmarkLocalDataSource
-import com.kldaji.bookmark_manager.data.source.local.BookmarkLocalDataSourceImpl
-import com.kldaji.bookmark_manager.data.source.local.GroupLocalDataSource
-import com.kldaji.bookmark_manager.data.source.local.GroupLocalDataSourceImpl
-import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSource
-import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSourceImpl
-import com.kldaji.bookmark_manager.data.source.remote.BookmarkApi
+import com.kldaji.bookmark_manager.data.source.local.*
+import com.kldaji.bookmark_manager.data.source.remote.*
 import com.squareup.moshi.Moshi
 import dagger.Binds
 import dagger.Module
@@ -34,6 +29,10 @@ abstract class DataSourceModule {
 	@Singleton
 	@Binds
 	abstract fun bindsBookmarkRemoteDataSource(bookmarkRemoteDataSourceImpl: BookmarkRemoteDataSourceImpl): BookmarkRemoteDataSource
+
+	@Singleton
+	@Binds
+	abstract fun bindsGroupRemoteDataSource(groupRemoteDataSourceImpl: GroupRemoteDataSourceImpl): GroupRemoteDataSource
 }
 
 @Module
@@ -53,12 +52,23 @@ object ApiModule {
 
 	@Singleton
 	@Provides
-	fun provideServiceApi(client: OkHttpClient, moshi: Moshi): BookmarkApi {
+	fun provideBookmarkApi(client: OkHttpClient, moshi: Moshi): BookmarkApi {
 		return Retrofit.Builder()
 			.baseUrl(BASE_URL)
 			.addConverterFactory(MoshiConverterFactory.create(moshi))
 			.client(client)
 			.build()
 			.create(BookmarkApi::class.java)
+	}
+
+	@Singleton
+	@Provides
+	fun provideGroupApi(client: OkHttpClient, moshi: Moshi): GroupApi {
+		return Retrofit.Builder()
+			.baseUrl(BASE_URL)
+			.addConverterFactory(MoshiConverterFactory.create(moshi))
+			.client(client)
+			.build()
+			.create(GroupApi::class.java)
 	}
 }
