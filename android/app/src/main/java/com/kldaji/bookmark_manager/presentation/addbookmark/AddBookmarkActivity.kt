@@ -65,9 +65,10 @@ class AddBookmarkActivity : ComponentActivity() {
 
 				LaunchedEffect(key1 = addBookmarkUiState.bookmarkResponse) {
 					addBookmarkUiState.bookmarkResponse?.let {
+						addBookmarkViewModel.setUrl(TextFieldValue(it.url))
 						addBookmarkViewModel.setTitle(TextFieldValue(it.title))
 						addBookmarkViewModel.setDescription(TextFieldValue(it.summary))
-						addBookmarkViewModel.addTags(it.topics)
+						addBookmarkViewModel.addTags(it.tags)
 					}
 				}
 
