@@ -1,5 +1,6 @@
 package com.kldaji.bookmark_manager.util
 
+import android.util.Log
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -7,7 +8,7 @@ import retrofit2.HttpException
 import java.io.IOException
 
 data class ErrorResponse(
-	val status: Int,
+	val statusCode: Int,
 	val message: String
 )
 
@@ -25,7 +26,10 @@ suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend ()
 			when (throwable) {
 				is IOException -> Result.NetworkError
 				is HttpException -> Result.GenericError(parseErrorBody(throwable))
-				else -> Result.GenericError(null)
+				else -> {
+					Log.d("AddBookmarkActivity", throwable.message.toString())
+					Result.GenericError(null)
+				}
 			}
 		}
 	}

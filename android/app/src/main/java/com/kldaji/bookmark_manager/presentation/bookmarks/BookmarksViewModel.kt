@@ -29,7 +29,8 @@ class BookmarksViewModel @Inject constructor(
 				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
 				is Result.Success -> {
 					val groups = result.data
-					bookmarksUiState = bookmarksUiState.copy(groups = result.data)
+					Log.d("AddBookmarkActivity", groups.toString())
+					bookmarksUiState = bookmarksUiState.copy(groups = groups)
 					setSelectedGroup(groups.firstOrNull())
 				}
 			}
