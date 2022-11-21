@@ -1,12 +1,9 @@
 package com.kldaji.bookmark_manager.presentation.bookmarks
 
-data class BookmarksUiState(
-	val bookmarkUiStates: List<BookmarkUiState> = emptyList(),
-	val groupUiStates: List<GroupUiState> = emptyList(),
-	val selectedGroup: String = groupUiStates.firstOrNull()?.name ?: "",
-) {
+import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 
-	val groupedBookmarkUiStates: List<BookmarkUiState> = bookmarkUiStates.filter { bookmarkUiState ->
-		selectedGroup == bookmarkUiState.group
-	}
-}
+data class BookmarksUiState(
+	val bookmarkResponses: List<BookmarkResponse> = emptyList(),
+	val groups: List<String> = emptyList(),
+	val selectedGroup: String = groups.firstOrNull() ?: "",
+)

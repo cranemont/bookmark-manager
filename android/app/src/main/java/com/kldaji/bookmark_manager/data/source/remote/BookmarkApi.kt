@@ -1,12 +1,31 @@
 package com.kldaji.bookmark_manager.data.source.remote
 
-import com.kldaji.bookmark_manager.data.entity.BookmarkBody
+import com.kldaji.bookmark_manager.data.entity.BookmarkNlp
 import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
-import retrofit2.http.Body
-import retrofit2.http.POST
+import com.kldaji.bookmark_manager.data.entity.NewBookmark
+import com.kldaji.bookmark_manager.data.entity.Url
+import retrofit2.http.*
 
 interface BookmarkApi {
 
 	@POST("/nlp/summarize/")
-	suspend fun getBookmarkResponse(@Body body: BookmarkBody): BookmarkResponse
+	suspend fun getBookmarkNlpResult(@Body url: Url): BookmarkNlp
+
+	@POST("/bookmark/")
+	suspend fun addBookmark(@Body newBookmark: NewBookmark): BookmarkResponse
+
+	@PUT("/bookmark/{id}/")
+	suspend fun updateBookmark(@Path("id") id: String, @Body newBookmark: NewBookmark): BookmarkResponse
+
+//	@DELETE("/bookmark/{id}/")
+//	suspend fun deleteBookmark(@Path("id") id: String)
+
+	@GET("/bookmark/{id}/")
+	suspend fun getBookmarkById(@Path("id") id: String): BookmarkResponse
+
+	@GET("/bookmarks?tag={name}/")
+	suspend fun getBookmarksByTag(@Query("name") tag: String): List<BookmarkResponse>
+
+	@GET("/bookmarks?group={name}/")
+	suspend fun getBookmarksByGroup(@Query("name") group: String): List<BookmarkResponse>
 }

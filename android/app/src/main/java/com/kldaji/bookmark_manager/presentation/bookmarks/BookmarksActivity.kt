@@ -117,6 +117,7 @@ class BookmarksActivity : ComponentActivity() {
 						) {
 							item {
 								Text(
+									modifier = modifier.padding(bottom = 16.dp),
 									text = "Group",
 									color = Color.White,
 									fontSize = 18.sp,
@@ -124,17 +125,17 @@ class BookmarksActivity : ComponentActivity() {
 								)
 							}
 
-							items(items = bookmarksViewModel.bookmarksUiState.groupUiStates) { groupUiState: GroupUiState ->
+							items(items = bookmarksViewModel.bookmarksUiState.groups) { group: String ->
 								Row(
 									modifier = modifier
 										.fillMaxWidth()
 										.clickable {
-											bookmarksViewModel.setSelectedGroup(groupUiState.name)
+											bookmarksViewModel.setSelectedGroup(group)
 											coroutineScope.launch {
 												scaffoldState.drawerState.close()
 											}
 										}
-										.padding(vertical = 24.dp),
+										.padding(vertical = 12.dp),
 									verticalAlignment = Alignment.CenterVertically
 								) {
 									Icon(
@@ -144,7 +145,7 @@ class BookmarksActivity : ComponentActivity() {
 									)
 									Text(
 										modifier = modifier.padding(start = 12.dp),
-										text = groupUiState.name,
+										text = group,
 										color = Color.White,
 										fontSize = 16.sp
 									)
@@ -163,7 +164,7 @@ class BookmarksActivity : ComponentActivity() {
 							.fillMaxSize(),
 						contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
 					) {
-						items(items = bookmarksUiState.groupedBookmarkUiStates) { bookmarkUiState ->
+						items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
 
 							Card(
 								modifier = modifier
@@ -178,7 +179,7 @@ class BookmarksActivity : ComponentActivity() {
 										.padding(vertical = 16.dp, horizontal = 20.dp)
 								) {
 									Text(
-										text = bookmarkUiState.title,
+										text = bookmarkResponse.title,
 										color = Color.Black,
 										fontWeight = FontWeight.Bold,
 										fontSize = 28.sp,
@@ -187,7 +188,7 @@ class BookmarksActivity : ComponentActivity() {
 									)
 
 									Text(
-										text = bookmarkUiState.url,
+										text = bookmarkResponse.url,
 										color = url_text_color,
 										fontSize = 14.sp,
 										maxLines = 1,
@@ -199,7 +200,7 @@ class BookmarksActivity : ComponentActivity() {
 											.fillMaxWidth()
 											.padding(vertical = 16.dp)
 									) {
-										items(items = bookmarkUiState.tags) { tag ->
+										items(items = bookmarkResponse.tags) { tag ->
 											Box(
 												modifier = modifier
 													.padding(end = 8.dp)
@@ -208,7 +209,7 @@ class BookmarksActivity : ComponentActivity() {
 											) {
 												Text(
 													modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-													text = tag,
+													text = tag.name,
 													fontSize = 12.sp
 												)
 											}
@@ -216,7 +217,7 @@ class BookmarksActivity : ComponentActivity() {
 									}
 
 									Text(
-										text = bookmarkUiState.description,
+										text = bookmarkResponse.summary,
 										color = Color.Black,
 										fontSize = 18.sp,
 										maxLines = 3,

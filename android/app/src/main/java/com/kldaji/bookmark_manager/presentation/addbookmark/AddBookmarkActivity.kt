@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.kldaji.bookmark_manager.data.entity.Url
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 import com.kldaji.bookmark_manager.presentation.theme.background
@@ -47,7 +48,7 @@ class AddBookmarkActivity : ComponentActivity() {
 		val addBookmarkViewModel: AddBookmarkViewModel by viewModels()
 
 		intent.getStringExtra(Intent.EXTRA_TEXT)?.let { url ->
-			addBookmarkViewModel.setBookmarkResponse(url)
+			addBookmarkViewModel.setBookmarkResponse(Url(url))
 		}
 
 		callback = object : OnBackPressedCallback(true) {
@@ -63,11 +64,12 @@ class AddBookmarkActivity : ComponentActivity() {
 				val addBookmarkUiState = addBookmarkViewModel.addBookmarkUiState
 				val scaffoldState = rememberScaffoldState()
 
-				LaunchedEffect(key1 = addBookmarkUiState.bookmarkResponse) {
-					addBookmarkUiState.bookmarkResponse?.let {
+				LaunchedEffect(key1 = addBookmarkUiState.bookmarkNlp) {
+					addBookmarkUiState.bookmarkNlp?.let {
+						addBookmarkViewModel.setUrl(TextFieldValue(it.url))
 						addBookmarkViewModel.setTitle(TextFieldValue(it.title))
 						addBookmarkViewModel.setDescription(TextFieldValue(it.summary))
-						addBookmarkViewModel.addTags(it.topics)
+						addBookmarkViewModel.addTags(it.tags)
 					}
 				}
 
