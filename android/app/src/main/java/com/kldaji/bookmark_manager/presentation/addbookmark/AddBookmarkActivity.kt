@@ -2,24 +2,22 @@ package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -27,13 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
+import com.kldaji.bookmark_manager.presentation.theme.background
+import com.kldaji.bookmark_manager.presentation.theme.tag_background
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -64,8 +63,6 @@ class AddBookmarkActivity : ComponentActivity() {
 				val addBookmarkUiState = addBookmarkViewModel.addBookmarkUiState
 				val scaffoldState = rememberScaffoldState()
 
-				Log.d("AddBookmarkActivity", addBookmarkUiState.newTag.text)
-
 				LaunchedEffect(key1 = addBookmarkUiState.bookmarkResponse) {
 					addBookmarkUiState.bookmarkResponse?.let {
 						addBookmarkViewModel.setTitle(TextFieldValue(it.title))
@@ -92,7 +89,7 @@ class AddBookmarkActivity : ComponentActivity() {
 					topBar = {
 						TopAppBar(
 							title = { Text(text = "Add Bookmark") },
-							backgroundColor = Color.White,
+							backgroundColor = background,
 							navigationIcon = {
 								IconButton(onClick = { startBookmarkActivity() }) {
 									Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "북마크 리스트 화면으로 이동")
@@ -100,23 +97,9 @@ class AddBookmarkActivity : ComponentActivity() {
 							}
 						)
 					},
-					scaffoldState = scaffoldState
+					scaffoldState = scaffoldState,
+					backgroundColor = background
 				) { paddingValues ->
-
-					if (addBookmarkUiState.isShowAddTagDialog) {
-						AddDialog(
-							modifier = modifier,
-							onDismissRequest = { addBookmarkViewModel.hideAddTagDialog() },
-							textFieldValue = addBookmarkUiState.newTag,
-							textFieldValueOnChange = { addBookmarkViewModel.setNewTag(it) },
-							label = "TAG",
-							onCancel = { addBookmarkViewModel.hideAddTagDialog() },
-							onConfirm = {
-								addBookmarkViewModel.hideAddTagDialog()
-								addBookmarkViewModel.addTag(addBookmarkUiState.newTag.text)
-							}
-						)
-					}
 
 					if (addBookmarkUiState.isShowAddGroupDialog) {
 						AddDialog(
@@ -152,81 +135,47 @@ class AddBookmarkActivity : ComponentActivity() {
 						modifier = modifier
 							.fillMaxSize()
 							.padding(paddingValues)
-							.padding(horizontal = 16.dp, vertical = 16.dp),
+							.padding(horizontal = 28.dp, vertical = 16.dp),
 						verticalArrangement = Arrangement.SpaceBetween,
 						horizontalAlignment = Alignment.CenterHorizontally
 					) {
 						Column {
-							Row(
-								modifier = modifier.padding(start = 6.dp, bottom = 6.dp),
-								verticalAlignment = Alignment.CenterVertically
-							) {
-								Text(
-									text = "TAGS",
-									fontSize = 16.sp,
-									color = Color.Black
-								)
-								Row(
-									modifier = modifier
-										.padding(start = 16.dp)
-										.clickable { addBookmarkViewModel.showAddTagDialog() },
-									verticalAlignment = Alignment.CenterVertically
-								) {
-									Text(
-										text = "ADD TAG",
-										color = Color.Blue,
-										fontSize = 12.sp,
-										fontWeight = FontWeight.Bold
-									)
-								}
-							}
-
-							LazyRow(
+							OutlinedTextField(
 								modifier = modifier
 									.fillMaxWidth()
-									.border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(4.dp)),
-							) {
-								if (addBookmarkUiState.tags.isEmpty()) {
-									item {
-										Column(
-											modifier = modifier
-												.padding(8.dp),
-											verticalArrangement = Arrangement.Center
-										) {
-											Text(
-												modifier = modifier.padding(8.dp),
-												text = "please add tags",
-												color = Color.LightGray
-											)
-										}
-									}
-								} else {
-									items(items = addBookmarkUiState.tags) { tag ->
-										Chip(
-											modifier = modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
-											onClick = { addBookmarkViewModel.removeTag(tag) },
-											leadingIcon = {
-												Icon(
-													Icons.Default.Check,
-													contentDescription = "태그 선택"
-												)
-											},
-											colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.secondary)
-										) {
+									.padding(bottom = 12.dp),
+								value = addBookmarkUiState.url,
+								onValueChange = { addBookmarkViewModel.setUrl(it) },
+								label = { Text(text = "URL") },
+								maxLines = 1,
+								singleLine = true,
+								colors = TextFieldDefaults.textFieldColors(
+									backgroundColor = Color.White,
+									focusedIndicatorColor = Color.Black,
+									focusedLabelColor = Color.Black
+								)
+							)
 
-											Text(
-												modifier = modifier.padding(end = 4.dp),
-												text = tag
-											)
-										}
-									}
-								}
-							}
+							OutlinedTextField(
+								modifier = modifier
+									.fillMaxWidth()
+									.padding(bottom = 12.dp),
+								value = addBookmarkUiState.title,
+								onValueChange = { addBookmarkViewModel.setTitle(it) },
+								label = { Text(text = "TITLE") },
+								maxLines = 1,
+								singleLine = true,
+								colors = TextFieldDefaults.textFieldColors(
+									backgroundColor = Color.White,
+									focusedIndicatorColor = Color.Black,
+									focusedLabelColor = Color.Black
+								)
+							)
 
 							ExposedDropdownMenuBox(
 								modifier = modifier
 									.fillMaxWidth()
-									.padding(top = 24.dp),
+									.padding(bottom = 12.dp),
 								expanded = addBookmarkUiState.isShowGroups,
 								onExpandedChange = {
 									if (it) addBookmarkViewModel.showGroups()
@@ -240,7 +189,11 @@ class AddBookmarkActivity : ComponentActivity() {
 									value = addBookmarkUiState.selectedGroup,
 									onValueChange = {},
 									trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = addBookmarkUiState.isShowGroups) },
-									colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+									colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
+										backgroundColor = Color.White,
+										focusedLabelColor = Color.Black,
+										focusedBorderColor = Color.Black
+									)
 								)
 
 								ExposedDropdownMenu(
@@ -272,24 +225,44 @@ class AddBookmarkActivity : ComponentActivity() {
 							OutlinedTextField(
 								modifier = modifier
 									.fillMaxWidth()
-									.padding(top = 16.dp, bottom = 8.dp),
-								value = addBookmarkUiState.url,
-								onValueChange = { addBookmarkViewModel.setUrl(it) },
-								label = { Text(text = "URL") },
+									.padding(bottom = 12.dp),
+								value = addBookmarkUiState.newTag,
+								onValueChange = { addBookmarkViewModel.setNewTag(it) },
+								label = { Text(text = "TAG") },
 								maxLines = 1,
-								singleLine = true
+								singleLine = true,
+								colors = TextFieldDefaults.textFieldColors(
+									backgroundColor = Color.White,
+									focusedIndicatorColor = Color.Black,
+									focusedLabelColor = Color.Black
+								),
+								keyboardActions = KeyboardActions(onDone = {
+									addBookmarkViewModel.addTag(addBookmarkUiState.newTag)
+									addBookmarkViewModel.setNewTag("")
+								})
 							)
 
-							OutlinedTextField(
+							LazyRow(
 								modifier = modifier
 									.fillMaxWidth()
-									.padding(vertical = 8.dp),
-								value = addBookmarkUiState.title,
-								onValueChange = { addBookmarkViewModel.setTitle(it) },
-								label = { Text(text = "TITLE") },
-								maxLines = 1,
-								singleLine = true
-							)
+									.padding(start = 6.dp, bottom = 12.dp)
+							) {
+								items(items = addBookmarkUiState.tags) { tag ->
+									Box(
+										modifier = modifier
+											.padding(end = 8.dp)
+											.clip(RoundedCornerShape(8.dp))
+											.background(tag_background)
+											.clickable { addBookmarkViewModel.removeTag(tag) }
+									) {
+										Text(
+											modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+											text = tag,
+											fontSize = 14.sp
+										)
+									}
+								}
+							}
 
 							OutlinedTextField(
 								modifier = modifier
@@ -299,6 +272,11 @@ class AddBookmarkActivity : ComponentActivity() {
 								value = addBookmarkUiState.description,
 								onValueChange = { addBookmarkViewModel.setDescription(it) },
 								label = { Text(text = "DESCRIPTION") },
+								colors = TextFieldDefaults.textFieldColors(
+									backgroundColor = Color.White,
+									focusedIndicatorColor = Color.Black,
+									focusedLabelColor = Color.Black
+								)
 							)
 						}
 
@@ -310,12 +288,13 @@ class AddBookmarkActivity : ComponentActivity() {
 								addBookmarkViewModel.addBookmarkUiState()
 								startBookmarkActivity()
 							},
-							colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
+							colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
 							enabled = true
 						) {
 							Text(
 								text = "DONE",
-								fontSize = 16.sp
+								fontSize = 16.sp,
+								color = Color.White
 							)
 						}
 					}

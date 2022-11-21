@@ -45,6 +45,8 @@ class AddBookmarkViewModel @Inject constructor(
 	}
 
 	fun addTag(tag: String) {
+		if (tag.isEmpty()) return
+
 		val list = addBookmarkUiState.tags.toMutableList()
 
 		if (list.contains(tag)) {
@@ -142,21 +144,8 @@ class AddBookmarkViewModel @Inject constructor(
 		addBookmarkUiState = addBookmarkUiState.copy(description = textFieldValue)
 	}
 
-	fun showAddTagDialog() {
-		addBookmarkUiState = addBookmarkUiState.copy(isShowAddTagDialog = true)
-	}
-
-	fun hideAddTagDialog() {
-		addBookmarkUiState = addBookmarkUiState.copy(
-			isShowAddTagDialog = false,
-			newTag = TextFieldValue("")
-		)
-	}
-
-	fun setNewTag(textFieldValue: TextFieldValue) {
-		if (addBookmarkUiState.isShowAddTagDialog) {
-			addBookmarkUiState = addBookmarkUiState.copy(newTag = textFieldValue)
-		}
+	fun setNewTag(tag: String) {
+		addBookmarkUiState = addBookmarkUiState.copy(newTag = tag)
 	}
 
 	fun setNewGroup(textFieldValue: TextFieldValue) {

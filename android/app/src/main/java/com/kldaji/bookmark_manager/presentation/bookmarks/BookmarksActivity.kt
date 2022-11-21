@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
-import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
+import com.kldaji.bookmark_manager.presentation.theme.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -58,8 +58,8 @@ class BookmarksActivity : ComponentActivity() {
 									)
 								}
 							},
-							backgroundColor = Color.White,
-							elevation = 0.dp,
+							backgroundColor = background,
+							elevation = 1.dp,
 							navigationIcon = {
 								IconButton(onClick = {
 									coroutineScope.launch {
@@ -72,13 +72,17 @@ class BookmarksActivity : ComponentActivity() {
 						)
 					},
 					floatingActionButton = {
-						FloatingActionButton(onClick = {
-							val intent = Intent(this, AddBookmarkActivity::class.java)
-							startActivity(intent)
-						}) {
+						FloatingActionButton(
+							onClick = {
+								val intent = Intent(this, AddBookmarkActivity::class.java)
+								startActivity(intent)
+							},
+							backgroundColor = Color.Black
+						) {
 							Icon(
 								imageVector = Icons.Default.Add,
-								contentDescription = "북마크 추가 화면으로 이동"
+								contentDescription = "북마크 추가 화면으로 이동",
+								tint = Color.White
 							)
 						}
 					},
@@ -86,7 +90,7 @@ class BookmarksActivity : ComponentActivity() {
 						Row(
 							modifier = modifier
 								.fillMaxWidth()
-								.background(Color.Black)
+								.background(drawer_header_background)
 								.padding(vertical = 24.dp),
 							horizontalArrangement = Arrangement.Center,
 							verticalAlignment = Alignment.CenterVertically
@@ -148,8 +152,9 @@ class BookmarksActivity : ComponentActivity() {
 							}
 						}
 					},
-					drawerBackgroundColor = Color.DarkGray,
-					scaffoldState = scaffoldState
+					drawerBackgroundColor = drawer_body_background,
+					scaffoldState = scaffoldState,
+					backgroundColor = background
 				) { paddingValues ->
 
 					LazyColumn(
@@ -164,8 +169,9 @@ class BookmarksActivity : ComponentActivity() {
 								modifier = modifier
 									.fillMaxWidth()
 									.padding(vertical = 8.dp),
-								shape = RoundedCornerShape(size = 18.dp),
-								backgroundColor = Color.LightGray
+								shape = RoundedCornerShape(size = 6.dp),
+								backgroundColor = Color.White,
+								elevation = 2.dp
 							) {
 								Column(
 									modifier = modifier
@@ -175,27 +181,30 @@ class BookmarksActivity : ComponentActivity() {
 										text = bookmarkUiState.title,
 										color = Color.Black,
 										fontWeight = FontWeight.Bold,
-										fontSize = 22.sp,
+										fontSize = 28.sp,
 										maxLines = 1,
 										overflow = TextOverflow.Ellipsis
 									)
 
 									Text(
-										modifier = modifier.padding(bottom = 6.dp),
 										text = bookmarkUiState.url,
-										color = Color.Gray,
-										fontSize = 12.sp,
+										color = url_text_color,
+										fontSize = 14.sp,
 										maxLines = 1,
 										overflow = TextOverflow.Ellipsis
 									)
 
-									LazyRow(modifier = modifier.fillMaxWidth()) {
+									LazyRow(
+										modifier = modifier
+											.fillMaxWidth()
+											.padding(vertical = 16.dp)
+									) {
 										items(items = bookmarkUiState.tags) { tag ->
 											Box(
 												modifier = modifier
 													.padding(end = 8.dp)
-													.clip(RoundedCornerShape(16.dp))
-													.background(MaterialTheme.colors.secondary)
+													.clip(RoundedCornerShape(8.dp))
+													.background(tag_background)
 											) {
 												Text(
 													modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -207,10 +216,9 @@ class BookmarksActivity : ComponentActivity() {
 									}
 
 									Text(
-										modifier = modifier.padding(top = 16.dp),
 										text = bookmarkUiState.description,
 										color = Color.Black,
-										fontSize = 14.sp,
+										fontSize = 18.sp,
 										maxLines = 3,
 										overflow = TextOverflow.Ellipsis
 									)
