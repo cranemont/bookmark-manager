@@ -14,13 +14,13 @@ import { BookmarkService } from './bookmark.service'
 import { CreateBookmarkDto } from './dto/create-bookmark.dto'
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto'
 
-@Controller('bookmark')
+@Controller()
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
   // TODO: Validator 적용
-  @Get('tag')
-  async getBookmarksByTag(@Query('name') tag: string) {
+  @Get('bookmarks')
+  async getBookmarksByTag(@Query('tag') tag: string) {
     try {
       return this.bookmarkService.getBookmarksByTag(tag)
     } catch (error) {
@@ -33,7 +33,7 @@ export class BookmarkController {
     }
   }
 
-  @Get('tags')
+  @Get('bookmark/tags')
   async getTags() {
     try {
       return this.bookmarkService.getTags()
@@ -46,8 +46,8 @@ export class BookmarkController {
     }
   }
 
-  @Get('group')
-  async getBookmarksByGroup(@Query('name') group: string) {
+  @Get('bookmarks')
+  async getBookmarksByGroup(@Query('group') group: string) {
     try {
       return this.bookmarkService.getBookmarksByGroup(group)
     } catch (error) {
@@ -60,7 +60,7 @@ export class BookmarkController {
     }
   }
 
-  @Get(':id')
+  @Get('bookmark/:id')
   async getBookmarkById(@Param('id') id: string) {
     try {
       return this.bookmarkService.getBookmarkById(id)
@@ -74,7 +74,7 @@ export class BookmarkController {
     }
   }
 
-  @Post()
+  @Post('bookmark')
   async createBookmark(@Body() createBookmarkDto: CreateBookmarkDto) {
     try {
       return this.bookmarkService.createBookmark(createBookmarkDto)
@@ -87,7 +87,7 @@ export class BookmarkController {
     }
   }
 
-  @Put(':id')
+  @Put('bookmark/:id')
   async updateBookmark(
     @Param('id') id: string,
     @Body() updateBookmarkDto: UpdateBookmarkDto,
@@ -103,7 +103,7 @@ export class BookmarkController {
     }
   }
 
-  @Delete(':id')
+  @Delete('bookmark/:id')
   async deleteBookmark(@Param('id') id: string) {
     try {
       return this.bookmarkService.deleteBookmark(id)
