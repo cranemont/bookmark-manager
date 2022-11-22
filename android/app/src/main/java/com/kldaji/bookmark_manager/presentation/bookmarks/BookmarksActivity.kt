@@ -2,6 +2,7 @@ package com.kldaji.bookmark_manager.presentation.bookmarks
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -32,10 +33,10 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class BookmarksActivity : ComponentActivity() {
 
+	private val bookmarksViewModel: BookmarksViewModel by viewModels()
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-
-		val bookmarksViewModel: BookmarksViewModel by viewModels()
 
 		setContent {
 			BookmarkmanagerTheme {
@@ -73,10 +74,7 @@ class BookmarksActivity : ComponentActivity() {
 					},
 					floatingActionButton = {
 						FloatingActionButton(
-							onClick = {
-								val intent = Intent(this, AddBookmarkActivity::class.java)
-								startActivity(intent)
-							},
+							onClick = { startActivity() },
 							backgroundColor = Color.Black
 						) {
 							Icon(
@@ -192,10 +190,16 @@ class BookmarksActivity : ComponentActivity() {
 											expanded = menuExpanded,
 											onDismissRequest = { menuExpanded = false }
 										) {
-											DropdownMenuItem(onClick = { /*TODO*/ }) {
+											DropdownMenuItem(onClick = {
+												startActivityEdit(bookmarkResponse.id)
+												menuExpanded = false
+											}) {
 												Text(text = "EDIT")
 											}
-											DropdownMenuItem(onClick = { /*TODO*/ }) {
+											DropdownMenuItem(onClick = {
+												// TODO: 삭제
+												menuExpanded = false
+											}) {
 												Text(text = "DELETE")
 											}
 										}
@@ -262,5 +266,24 @@ class BookmarksActivity : ComponentActivity() {
 				}
 			}
 		}
+	}
+
+	override fun onStart() {
+		super.onStart()
+
+		Log.d("AddBookmarkActivity", "onStart()")
+		bookmarksViewModel.getNewBookmarkResponses()
+	}
+
+	private fun startActivity() {
+		val intent = Intent(this, AddBookmarkActivity::class.java)
+		startActivity(intent)
+	}
+
+	private fun startActivityEdit(id: String) {
+		val intent = Intent(this, AddBookmarkActivity::class.java).apply {
+			putExtra("BookmarkId", id)
+		}
+		startActivity(intent)
 	}
 }

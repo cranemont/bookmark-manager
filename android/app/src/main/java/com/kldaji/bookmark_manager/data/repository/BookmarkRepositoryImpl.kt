@@ -54,4 +54,8 @@ class BookmarkRepositoryImpl @Inject constructor(
 	override suspend fun getBookmarksByGroup(name: String): Result<List<BookmarkResponse>> {
 		return bookmarkRemoteDataSource.getBookmarksByGroup(name)
 	}
+
+	override suspend fun updateBookmark(id: String, newBookmark: NewBookmark): Result<BookmarkResponse> {
+		return bookmarkRemoteDataSource.updateBookmark(id, newBookmark)
+	}
 }

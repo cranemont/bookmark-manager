@@ -36,23 +36,69 @@ class AddBookmarkViewModel @Inject constructor(
 		}
 	}
 
-	fun addBookmarkUiState() {
-		viewModelScope.launch {
-			addBookmarkUiState.let {
-				val newBookmark = NewBookmark().copy(
-					url = it.url.text,
-					title = it.title.text,
-					summary = it.description.text,
-					tags = it.tags,
-					group = it.selectedGroup
-				)
+	fun setBookmarkId(id: String) {
+		addBookmarkUiState = addBookmarkUiState.copy(bookmarkId = id)
+	}
 
-				when (val result = bookmarkRepository.addBookmark(newBookmark)) {
-					is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
-					is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
-					is Result.Success -> Log.d("AddBookmarkActivity", result.data.toString())
+	fun getBookmarkById(id: String) {
+		viewModelScope.launch {
+			when (val result = bookmarkRepository.getBookmarkById(id)) {
+				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
+				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+				is Result.Success -> {
+					val bookmarkResponse = result.data
+
+					addBookmarkUiState = addBookmarkUiState.copy(
+						url = TextFieldValue(bookmarkResponse.url),
+						title = TextFieldValue(bookmarkResponse.title),
+						description = TextFieldValue(bookmarkResponse.summary),
+						tags = bookmarkResponse.tags.map { it.name },
+						selectedGroup = bookmarkResponse.group.name
+					)
 				}
-//				bookmarkRepository.insert(it)
+			}
+		}
+	}
+
+	fun addBookmark() {
+		viewModelScope.launch {
+			val newBookmark = NewBookmark().copy(
+				url = addBookmarkUiState.url.text,
+				title = addBookmarkUiState.title.text,
+				summary = addBookmarkUiState.description.text,
+				tags = addBookmarkUiState.tags,
+				group = addBookmarkUiState.selectedGroup
+			)
+
+			when (val result = bookmarkRepository.addBookmark(newBookmark)) {
+				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
+				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+				is Result.Success -> {
+					Log.d("AddBookmarkActivity", result.data.toString())
+					addBookmarkUiState = addBookmarkUiState.copy(navigateToMain = Unit)
+				}
+			}
+		}
+	}
+
+	fun updateBookmark() {
+		viewModelScope.launch {
+			val newBookmark = NewBookmark().copy(
+				url = addBookmarkUiState.url.text,
+				title = addBookmarkUiState.title.text,
+				summary = addBookmarkUiState.description.text,
+				tags = addBookmarkUiState.tags,
+				group = addBookmarkUiState.selectedGroup
+			)
+
+			Log.d("AddBookmarkActivity", newBookmark.toString())
+			when (val result = bookmarkRepository.updateBookmark(addBookmarkUiState.bookmarkId, newBookmark)) {
+				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
+				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+				is Result.Success -> {
+					Log.d("AddBookmarkActivity", result.data.toString())
+					addBookmarkUiState = addBookmarkUiState.copy(navigateToMain = Unit)
+				}
 			}
 		}
 	}

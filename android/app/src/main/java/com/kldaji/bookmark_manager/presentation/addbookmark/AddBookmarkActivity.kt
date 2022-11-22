@@ -51,6 +51,10 @@ class AddBookmarkActivity : ComponentActivity() {
 			addBookmarkViewModel.setBookmarkResponse(Url(url))
 		}
 
+		intent.getStringExtra("BookmarkId")?.let { id ->
+			addBookmarkViewModel.setBookmarkId(id)
+		}
+
 		callback = object : OnBackPressedCallback(true) {
 			override fun handleOnBackPressed() {
 				startBookmarkActivity()
@@ -63,6 +67,16 @@ class AddBookmarkActivity : ComponentActivity() {
 				val modifier = Modifier
 				val addBookmarkUiState = addBookmarkViewModel.addBookmarkUiState
 				val scaffoldState = rememberScaffoldState()
+
+				LaunchedEffect(key1 = addBookmarkUiState.bookmarkId) {
+					if (addBookmarkUiState.bookmarkId.isNotEmpty()) {
+						addBookmarkViewModel.getBookmarkById(addBookmarkUiState.bookmarkId)
+					}
+				}
+
+				LaunchedEffect(key1 = addBookmarkUiState.navigateToMain) {
+					addBookmarkUiState.navigateToMain?.let { startBookmarkActivity() }
+				}
 
 				LaunchedEffect(key1 = addBookmarkUiState.bookmarkNlp) {
 					addBookmarkUiState.bookmarkNlp?.let {
@@ -90,7 +104,7 @@ class AddBookmarkActivity : ComponentActivity() {
 				Scaffold(
 					topBar = {
 						TopAppBar(
-							title = { Text(text = "Add Bookmark") },
+							title = { Text(text = addBookmarkUiState.topAppBarTitle) },
 							backgroundColor = background,
 							navigationIcon = {
 								IconButton(onClick = { startBookmarkActivity() }) {
@@ -287,8 +301,11 @@ class AddBookmarkActivity : ComponentActivity() {
 								.width(250.dp)
 								.padding(horizontal = 24.dp),
 							onClick = {
-								addBookmarkViewModel.addBookmarkUiState()
-								startBookmarkActivity()
+								if (addBookmarkUiState.isEdit) {
+									addBookmarkViewModel.updateBookmark()
+								} else {
+									addBookmarkViewModel.addBookmark()
+								}
 							},
 							colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black),
 							enabled = true
