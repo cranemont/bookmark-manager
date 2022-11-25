@@ -1,106 +1,118 @@
-import styled from "@emotion/styled";
+import {
+  Box,
+  Button,
+  ChakraProvider,
+  Flex,
+  Heading,
+  IconButton,
+  Input,
+  Select,
+  Tag,
+  TagCloseButton,
+  TagLabel,
+  Textarea,
+} from "@chakra-ui/react";
 import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const PopupContainer = styled.div`
-  width: 320px;
-  padding: 20px;
-  background-color: #f3f3f3;
-  font-family: Pretendard, serif;
-`;
+// const PopupContainer = styled.div`
+//   width: 320px;
+//   padding: 20px;
+//   background-color: #f3f3f3;
+// `;
 
-const RowContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
-`;
+// const RowContainer = styled.div`
+//   display: flex;
+//   flex-direction: row;
+//   align-items: center;
+//   justify-content: space-between;
+//   margin-top: 16px;
+// `;
 
-const Title = styled.h1`
-  font-size: 20px;
-  font-weight: bold;
-  color: #000000;
-  margin: 0;
-`;
+// const Title = styled.h1`
+//   font-size: 20px;
+//   font-weight: bold;
+//   color: #000000;
+//   margin: 0;
+// `;
 
-const TitleContainer = styled(RowContainer)`
-  margin-top: 0;
-`;
+// const TitleContainer = styled(RowContainer)`
+//   margin-top: 0;
+// `;
 
-const TagContainer = styled(RowContainer)`
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: flex-start;
-`;
+// const TagContainer = styled(RowContainer)`
+//   flex-wrap: wrap;
+//   gap: 4px;
+//   justify-content: flex-start;
+// `;
 
-const Label = styled.h2`
-  font-size: 16px;
-  font-weight: bold;
-  color: #3c3c3c;
-  margin: 0;
-`;
+// const Label = styled.h2`
+//   font-size: 16px;
+//   font-weight: bold;
+//   color: #3c3c3c;
+//   margin: 0;
+// `;
 
-const Input = styled.input`
-  box-sizing: border-box;
-  width: 250px;
-  border-radius: 8px;
-  border: thin solid #eeeeee;
-  font-size: 16px;
-  padding: 8px;
-  background-color: #ffffff;
-`;
+// const Input = styled.input`
+//   box-sizing: border-box;
+//   width: 250px;
+//   border-radius: 8px;
+//   border: thin solid #eeeeee;
+//   font-size: 16px;
+//   padding: 8px;
+//   background-color: #ffffff;
+// `;
 
-const Select = styled.select`
-  box-sizing: border-box;
-  width: 250px;
-  border-radius: 8px;
-  border: thin solid #eeeeee;
-  font-size: 16px;
-  padding: 8px;
-  background-color: #ffffff;
-`;
+// const Select = styled.select`
+//   box-sizing: border-box;
+//   width: 250px;
+//   border-radius: 8px;
+//   border: thin solid #eeeeee;
+//   font-size: 16px;
+//   padding: 8px;
+//   background-color: #ffffff;
+// `;
 
-const Tag = styled.div`
-  box-sizing: border-box;
-  width: fit-content;
-  border-radius: 8px;
-  font-size: 12px;
-  padding: 8px;
-  background-color: #d4d4d4;
-  cursor: pointer;
-`;
+// const Tag = styled.div`
+//   box-sizing: border-box;
+//   width: fit-content;
+//   border-radius: 8px;
+//   font-size: 12px;
+//   padding: 8px;
+//   background-color: #d4d4d4;
+//   cursor: pointer;
+// `;
 
-const TextArea = styled.textarea`
-  box-sizing: border-box;
-  width: 100%;
-  height: 140px;
-  resize: none;
-  border-radius: 8px;
-  font-size: 16px;
-  padding: 8px;
-  border: thin solid #eeeeee;
-`;
+// const TextArea = styled.textarea`
+//   box-sizing: border-box;
+//   width: 100%;
+//   height: 140px;
+//   resize: none;
+//   border-radius: 8px;
+//   font-size: 16px;
+//   padding: 8px;
+//   border: thin solid #eeeeee;
+// `;
 
-const Button = styled.button`
-  width: 100%;
-  border-radius: 8px;
-  border: thin solid #eeeeee;
-  font-size: 16px;
-  padding: 12px;
-  background-color: #242830;
-  color: #ffffff;
-  font-weight: bold;
-  cursor: pointer;
-`;
+// const Button = styled.button`
+//   width: 100%;
+//   border-radius: 8px;
+//   border: thin solid #eeeeee;
+//   font-size: 16px;
+//   padding: 12px;
+//   background-color: #242830;
+//   color: #ffffff;
+//   font-weight: bold;
+//   cursor: pointer;
+// `;
 
-const IconBtn = styled(FontAwesomeIcon)`
-  height: 16px;
-  color: #242830;
-  cursor: pointer;
-`;
+// const IconBtn = styled(FontAwesomeIcon)`
+//   height: 16px;
+//   color: #242830;
+//   cursor: pointer;
+// `;
 
 const Popup = () => {
   const [url, setUrl] = useState("");
@@ -141,8 +153,8 @@ const Popup = () => {
       }
     );
     console.log(data);
-    setTags(data.topics);
-    setSummary(data.summary);
+    data.tags && setTags(data.tags);
+    data.summary && setSummary(data.summary);
   };
 
   const send = (type: "add" | "panel") => {
@@ -158,8 +170,8 @@ const Popup = () => {
     }
   };
 
-  const onTagClick = (e) => {
-    setTags(tags.filter((value) => value != e.target.textContent));
+  const removeTag = (tagValue: string) => {
+    setTags(tags.filter((value) => value != tagValue));
   };
 
   useEffect(() => {
@@ -167,63 +179,97 @@ const Popup = () => {
   }, []);
 
   return (
-    <PopupContainer>
-      <TitleContainer>
-        <Title>Add Bookmark</Title>
-        <IconBtn icon={faTableColumns} onClick={() => send("panel")} />
-      </TitleContainer>
+    <ChakraProvider>
+      <Box width={96} padding={5}>
+        <Flex alignItems="center" justifyContent="space-between">
+          <Heading as="h1" size="md">
+            Add Bookmark
+          </Heading>
+          <IconButton
+            aria-label="Panel Link"
+            icon={<FontAwesomeIcon icon={faTableColumns} />}
+            variant="ghost"
+            onClick={() => send("panel")}
+          />
+        </Flex>
 
-      <RowContainer>
-        <Label>Url</Label>
-        <Input onChange={(e) => setUrl(e.target.value)} value={url} />
-      </RowContainer>
+        <Flex marginY={4} alignItems="center" justifyContent="space-between">
+          <Heading as="h2" size="sm">
+            Url
+          </Heading>
+          <Input
+            maxWidth={64}
+            placeholder="Url"
+            onChange={(e) => setUrl(e.target.value)}
+            value={url}
+          />
+        </Flex>
 
-      <RowContainer>
-        <Label>Name</Label>
-        <Input onChange={(e) => setName(e.target.value)} value={name} />
-      </RowContainer>
+        <Flex marginY={4} alignItems="center" justifyContent="space-between">
+          <Heading as="h2" size="sm">
+            Name
+          </Heading>
+          <Input
+            maxWidth={64}
+            placeholder="Name"
+            onChange={(e) => setName(e.target.value)}
+            value={name}
+          />
+        </Flex>
 
-      <RowContainer>
-        <Label>Group</Label>
-        <Select>
-          <option value={0} key={0} disabled selected>
-            Select
-          </option>
-          {groups.map(({ id, name }) => (
-            <option value={id} key={id}>
-              {name}
-            </option>
+        <Flex marginY={4} alignItems="center" justifyContent="space-between">
+          <Heading as="h2" size="sm">
+            Group
+          </Heading>
+          <Select maxWidth={64} placeholder="Select">
+            {groups.map(({ id, name }) => (
+              <option value={id} key={id}>
+                {name}
+              </option>
+            ))}
+          </Select>
+        </Flex>
+
+        <Flex marginY={4} alignItems="center" justifyContent="space-between">
+          <Heading as="h2" size="sm">
+            Tags
+          </Heading>
+          <Input
+            maxWidth={64}
+            placeholder="Tags"
+            onKeyDown={onTagInputEnter}
+            onChange={(e) => setTagName(e.target.value)}
+            value={tagName}
+          />
+        </Flex>
+        <Flex marginY={4} alignItems="center" flexWrap="wrap" gap={1}>
+          {tags.map((value, index) => (
+            <Tag key={index}>
+              <TagLabel>{value}</TagLabel>
+              <TagCloseButton onClick={() => removeTag(value)} />
+            </Tag>
           ))}
-        </Select>
-      </RowContainer>
+        </Flex>
 
-      <RowContainer>
-        <Label>Tags</Label>
-        <Input
-          onKeyDown={onTagInputEnter}
-          onChange={(e) => setTagName(e.target.value)}
-          value={tagName}
-        />
-      </RowContainer>
-      <TagContainer>
-        {tags.map((value, index) => (
-          <Tag key={index} onClick={onTagClick}>
-            {value}
-          </Tag>
-        ))}
-      </TagContainer>
+        <Flex marginY={4} flexDirection="column" justifyContent="space-between">
+          <Heading as="h2" size="sm">
+            Summary
+          </Heading>
+          <Textarea
+            marginTop={4}
+            height="140px"
+            value={summary}
+            resize="none"
+          ></Textarea>
+        </Flex>
 
-      <RowContainer>
-        <Label>Summary</Label>
-      </RowContainer>
-      <RowContainer>
-        <TextArea value={summary}></TextArea>
-      </RowContainer>
-
-      <RowContainer>
-        <Button onClick={() => send("add")}>Add</Button>
-      </RowContainer>
-    </PopupContainer>
+        <Flex marginTop={4} alignItems="center" justifyContent="space-between">
+          <Button width="full" onClick={() => send("add")}>
+            Add
+          </Button>
+        </Flex>
+      </Box>
+    </ChakraProvider>
   );
 };
 
