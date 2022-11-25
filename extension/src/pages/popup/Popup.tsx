@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
 import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const PopupContainer = styled.div`
   width: 320px;
@@ -102,10 +103,47 @@ const IconBtn = styled(FontAwesomeIcon)`
 `;
 
 const Popup = () => {
+  const [url, setUrl] = useState("");
   const [name, setName] = useState("");
+  const [summary, setSummary] = useState("");
   const [tagName, setTagName] = useState("");
   const groups = [{ id: 1, name: "그룹1" }]; // TODO: state화 하고 API 연결
   const [tags, setTags] = useState([]);
+
+  const getTestData = async () => {
+    await ((timeToDelay) =>
+      new Promise((resolve) => setTimeout(resolve, timeToDelay)))(1000);
+    return {
+      topics: ["one", "two", "three"],
+      summary: "summary",
+    };
+  };
+
+  const init = async () => {
+    // get current page info and update state
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
+    });
+    setUrl(tab.url);
+    setName(tab.title);
+
+    // request nlp api and update state
+    const { data } = await axios.post(
+      "http://43.201.119.242/nlp/summarize",
+      {
+        url: tab.url,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(data);
+    setTags(data.topics);
+    setSummary(data.summary);
+  };
 
   const send = (type: "add" | "panel") => {
     chrome.runtime.sendMessage({ type });
@@ -124,12 +162,21 @@ const Popup = () => {
     setTags(tags.filter((value) => value != e.target.textContent));
   };
 
+  useEffect(() => {
+    init();
+  }, []);
+
   return (
     <PopupContainer>
       <TitleContainer>
         <Title>Add Bookmark</Title>
         <IconBtn icon={faTableColumns} onClick={() => send("panel")} />
       </TitleContainer>
+
+      <RowContainer>
+        <Label>Url</Label>
+        <Input onChange={(e) => setUrl(e.target.value)} value={url} />
+      </RowContainer>
 
       <RowContainer>
         <Label>Name</Label>
@@ -170,7 +217,7 @@ const Popup = () => {
         <Label>Summary</Label>
       </RowContainer>
       <RowContainer>
-        <TextArea></TextArea>
+        <TextArea value={summary}></TextArea>
       </RowContainer>
 
       <RowContainer>

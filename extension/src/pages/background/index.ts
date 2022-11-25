@@ -10,14 +10,16 @@ chrome.runtime.onMessage.addListener(async function (
   sendResponse
 ) {
   switch (request.type) {
-    case "panel":
+    case "panel": {
       await chrome.tabs.create({
         active: true,
         url: `chrome-extension://${chrome.runtime.id}/src/pages/panel/index.html`,
       });
       break;
-    case "add":
+    }
+    case "add": {
       sendResponse({ message: "bookmark added!" });
       break;
+    }
   }
 });
