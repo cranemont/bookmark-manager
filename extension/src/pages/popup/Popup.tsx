@@ -132,15 +132,6 @@ const Popup = () => {
   const [tags, setTags] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const getTestData = async () => {
-    await ((timeToDelay) =>
-      new Promise((resolve) => setTimeout(resolve, timeToDelay)))(1000);
-    return {
-      topics: ["one", "two", "three"],
-      summary: "summary",
-    };
-  };
-
   const init = async () => {
     // open loading modal
     onOpen();
@@ -154,7 +145,7 @@ const Popup = () => {
     setName(tab.title);
 
     // request APIs
-    const [summaryRes, groupsRes] = await Promise.all([
+    const [summaryRes, groupsRes] = await Promise.allSettled([
       axios.post(
         "http://43.201.119.242/nlp/summarize",
         {
@@ -174,9 +165,14 @@ const Popup = () => {
     ]);
 
     // update UI
-    summaryRes.data.tags && setTags(summaryRes.data.tags);
-    summaryRes.data.summary && setSummary(summaryRes.data.summary);
-    groupsRes.data && setGroups(groupsRes.data);
+    if (summaryRes.status == "fulfilled") {
+      summaryRes.value.data.tags && setTags(summaryRes.value.data.tags);
+      summaryRes.value.data.summary &&
+        setSummary(summaryRes.value.data.summary);
+    }
+    if (groupsRes.status == "fulfilled") {
+      groupsRes.value.data && setGroups(groupsRes.value.data);
+    }
 
     // close loading modal
     onClose();
