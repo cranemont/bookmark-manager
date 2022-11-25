@@ -6,11 +6,20 @@ import {
   Heading,
   IconButton,
   Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
+  Spinner,
   Tag,
   TagCloseButton,
   TagLabel,
   Textarea,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -119,8 +128,9 @@ const Popup = () => {
   const [name, setName] = useState("");
   const [summary, setSummary] = useState("");
   const [tagName, setTagName] = useState("");
-  const groups = [{ id: 1, name: "그룹1" }]; // TODO: state화 하고 API 연결
+  const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const getTestData = async () => {
     await ((timeToDelay) =>
@@ -132,6 +142,9 @@ const Popup = () => {
   };
 
   const init = async () => {
+    // open loading modal
+    onOpen();
+
     // get current page info and update state
     const [tab] = await chrome.tabs.query({
       active: true,
@@ -140,21 +153,33 @@ const Popup = () => {
     setUrl(tab.url);
     setName(tab.title);
 
-    // request nlp api and update state
-    const { data } = await axios.post(
-      "http://43.201.119.242/nlp/summarize",
-      {
-        url: tab.url,
-      },
-      {
+    // request APIs
+    const [summaryRes, groupsRes] = await Promise.all([
+      axios.post(
+        "http://43.201.119.242/nlp/summarize",
+        {
+          url: tab.url,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ),
+      axios.get("http://43.201.119.242/groups", {
         headers: {
           "Content-Type": "application/json",
         },
-      }
-    );
-    console.log(data);
-    data.tags && setTags(data.tags);
-    data.summary && setSummary(data.summary);
+      }),
+    ]);
+
+    // update UI
+    summaryRes.data.tags && setTags(summaryRes.data.tags);
+    summaryRes.data.summary && setSummary(summaryRes.data.summary);
+    groupsRes.data && setGroups(groupsRes.data);
+
+    // close loading modal
+    onClose();
   };
 
   const send = (type: "add" | "panel") => {
@@ -180,7 +205,19 @@ const Popup = () => {
 
   return (
     <ChakraProvider>
-      <Box width={96} padding={5}>
+      <Modal
+        closeOnOverlayClick={false}
+        isOpen={isOpen}
+        onClose={onClose}
+        size="xs"
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent width="fit-content" padding={4}>
+          <Spinner size="xl" />
+        </ModalContent>
+      </Modal>
+      <Box width={96} padding={4} boxSizing="border-box">
         <Flex alignItems="center" justifyContent="space-between">
           <Heading as="h1" size="md">
             Add Bookmark
@@ -222,9 +259,9 @@ const Popup = () => {
             Group
           </Heading>
           <Select maxWidth={64} placeholder="Select">
-            {groups.map(({ id, name }) => (
-              <option value={id} key={id}>
-                {name}
+            {groups.map((value, index) => (
+              <option value={value} key={index}>
+                {value}
               </option>
             ))}
           </Select>
@@ -257,7 +294,7 @@ const Popup = () => {
           </Heading>
           <Textarea
             marginTop={4}
-            height="140px"
+            height={28}
             value={summary}
             resize="none"
           ></Textarea>
