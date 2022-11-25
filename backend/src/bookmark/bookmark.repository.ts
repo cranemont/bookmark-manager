@@ -43,9 +43,9 @@ export class BookmarkRepository {
     })
   }
 
-  async getBookmarksByTag(tag: string, userId: string) {
+  async getBookmarksByTags(tag: Array<string>, userId: string) {
     return await this.prisma.bookmark.findMany({
-      where: { user: { id: userId }, tags: { some: { name: tag } } },
+      where: { user: { id: userId }, tags: { some: { name: { in: tag } } } },
       select: bookmarkReseponseFields,
     })
   }

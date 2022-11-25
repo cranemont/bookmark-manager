@@ -22,8 +22,8 @@ export class BookmarkService {
     return bookmark
   }
 
-  async getBookmarksByTag(tag: string) {
-    return await this.bookmarkRepository.getBookmarksByTag(tag, userId)
+  async getBookmarksByTags(tags: Array<string>) {
+    return await this.bookmarkRepository.getBookmarksByTags(tags, userId)
   }
 
   async getTags() {

@@ -6,6 +6,7 @@ import {
   HttpException,
   InternalServerErrorException,
   Param,
+  ParseArrayPipe,
   Post,
   Put,
   Query,
@@ -20,9 +21,12 @@ export class BookmarkController {
 
   // TODO: Validator 적용
   @Get('bookmarks/tag')
-  async getBookmarksByTag(@Query('name') tag: string) {
+  async getBookmarksByTag(
+    @Query('names', new ParseArrayPipe({ items: String, separator: ',' }))
+    tags: Array<string>,
+  ) {
     try {
-      return this.bookmarkService.getBookmarksByTag(tag)
+      return this.bookmarkService.getBookmarksByTags(tags)
     } catch (error) {
       // TODO: interceptor로 분리
       if (error instanceof HttpException) {
