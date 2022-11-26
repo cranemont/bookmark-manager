@@ -173,21 +173,27 @@ const Popup = () => {
       ]);
 
       // update UI
-      if (summaryRes.status == "fulfilled") {
-        summaryRes.value.data.tags && setTags(summaryRes.value.data.tags);
-        summaryRes.value.data.summary &&
-          setInputValue((prev) => ({
-            ...prev,
-            summary: summaryRes.value.data.summary,
-          }));
-      }
-      if (groupsRes.status == "fulfilled") {
-        groupsRes.value.data && setGroups(groupsRes.value.data);
-      }
+      if (groupsRes.status == "rejected") {
+        setModalProps({
+          isLoading: false,
+          message: "Server Error.",
+        });
+      } else {
+        if (summaryRes.status == "fulfilled") {
+          summaryRes.value.data.tags && setTags(summaryRes.value.data.tags);
+          summaryRes.value.data.summary &&
+            setInputValue((prev) => ({
+              ...prev,
+              summary: summaryRes.value.data.summary,
+            }));
+        }
 
-      // close loading modal
-      setModalProps((prev) => ({ ...prev, isLoading: false }));
-      onClose();
+        groupsRes.value.data && setGroups(groupsRes.value.data);
+
+        // close loading modal
+        setModalProps((prev) => ({ ...prev, isLoading: false }));
+        onClose();
+      }
     } else {
       setModalProps({
         isLoading: false,
