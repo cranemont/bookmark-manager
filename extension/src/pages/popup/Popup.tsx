@@ -23,6 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PopupModal } from "@src/components/popup/PopupModal";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -124,16 +125,23 @@ import { useEffect, useState } from "react";
 // `;
 
 const Popup = () => {
-  const [url, setUrl] = useState("");
-  const [name, setName] = useState("");
-  const [summary, setSummary] = useState("");
-  const [tagName, setTagName] = useState("");
   const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
+  const [inputValue, setInputValue] = useState({
+    url: "",
+    name: "",
+    summary: "",
+    tag: "",
+  });
+  const [modalProps, setModalProps] = useState({
+    isLoading: true,
+    message: "",
+  });
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const init = async () => {
     // open loading modal
+    setModalProps((prev) => ({ ...prev, isLoading: true }));
     onOpen();
 
     // get current page info and update state
@@ -141,41 +149,51 @@ const Popup = () => {
       active: true,
       lastFocusedWindow: true,
     });
-    setUrl(tab.url);
-    setName(tab.title);
+    setInputValue((prev) => ({ ...prev, url: tab.url, name: tab.title }));
 
     // request APIs
-    const [summaryRes, groupsRes] = await Promise.allSettled([
-      axios.post(
-        "http://43.201.119.242/nlp/summarize",
-        {
-          url: tab.url,
-        },
-        {
+    if (tab.url.startsWith("http://") || tab.url.startsWith("https://")) {
+      const [summaryRes, groupsRes] = await Promise.allSettled([
+        axios.post(
+          "http://43.201.119.242/nlp/summarize",
+          {
+            url: tab.url,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        ),
+        axios.get("http://43.201.119.242/groups", {
           headers: {
             "Content-Type": "application/json",
           },
-        }
-      ),
-      axios.get("http://43.201.119.242/groups", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-    ]);
+        }),
+      ]);
 
-    // update UI
-    if (summaryRes.status == "fulfilled") {
-      summaryRes.value.data.tags && setTags(summaryRes.value.data.tags);
-      summaryRes.value.data.summary &&
-        setSummary(summaryRes.value.data.summary);
-    }
-    if (groupsRes.status == "fulfilled") {
-      groupsRes.value.data && setGroups(groupsRes.value.data);
-    }
+      // update UI
+      if (summaryRes.status == "fulfilled") {
+        summaryRes.value.data.tags && setTags(summaryRes.value.data.tags);
+        summaryRes.value.data.summary &&
+          setInputValue((prev) => ({
+            ...prev,
+            summary: summaryRes.value.data.summary,
+          }));
+      }
+      if (groupsRes.status == "fulfilled") {
+        groupsRes.value.data && setGroups(groupsRes.value.data);
+      }
 
-    // close loading modal
-    onClose();
+      // close loading modal
+      setModalProps((prev) => ({ ...prev, isLoading: false }));
+      onClose();
+    } else {
+      setModalProps({
+        isLoading: false,
+        message: "This Website is not supported.",
+      });
+    }
   };
 
   const send = (type: "add" | "panel") => {
@@ -184,10 +202,10 @@ const Popup = () => {
 
   const onTagInputEnter = (e) => {
     if (e.key === "Enter") {
-      if (!tags.includes(tagName)) {
-        setTags([...tags, tagName]);
+      if (!tags.includes(inputValue.tag)) {
+        setTags([...tags, inputValue.tag]);
       }
-      setTagName("");
+      setInputValue((prev) => ({ ...prev, tag: "" }));
     }
   };
 
@@ -201,19 +219,13 @@ const Popup = () => {
 
   return (
     <ChakraProvider>
-      <Modal
-        closeOnOverlayClick={false}
-        isOpen={isOpen}
-        onClose={onClose}
-        size="xs"
-        isCentered
-      >
-        <ModalOverlay />
-        <ModalContent width="fit-content" padding={4}>
-          <Spinner size="xl" />
-        </ModalContent>
-      </Modal>
       <Box width={96} padding={4} boxSizing="border-box">
+        <PopupModal
+          isOpen={isOpen}
+          onClose={onClose}
+          isLoading={modalProps.isLoading}
+          message={modalProps.message}
+        />
         <Flex alignItems="center" justifyContent="space-between">
           <Heading as="h1" size="md">
             Add Bookmark
@@ -233,8 +245,10 @@ const Popup = () => {
           <Input
             maxWidth={64}
             placeholder="Url"
-            onChange={(e) => setUrl(e.target.value)}
-            value={url}
+            onChange={(e) =>
+              setInputValue((prev) => ({ ...prev, url: e.target.value }))
+            }
+            value={inputValue.url}
           />
         </Flex>
 
@@ -245,8 +259,10 @@ const Popup = () => {
           <Input
             maxWidth={64}
             placeholder="Name"
-            onChange={(e) => setName(e.target.value)}
-            value={name}
+            onChange={(e) =>
+              setInputValue((prev) => ({ ...prev, name: e.target.value }))
+            }
+            value={inputValue.name}
           />
         </Flex>
 
@@ -271,8 +287,10 @@ const Popup = () => {
             maxWidth={64}
             placeholder="Tags"
             onKeyDown={onTagInputEnter}
-            onChange={(e) => setTagName(e.target.value)}
-            value={tagName}
+            onChange={(e) =>
+              setInputValue((prev) => ({ ...prev, tag: e.target.value }))
+            }
+            value={inputValue.tag}
           />
         </Flex>
         <Flex marginY={4} alignItems="center" flexWrap="wrap" gap={1}>
@@ -291,9 +309,11 @@ const Popup = () => {
           <Textarea
             marginTop={4}
             height={28}
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
             resize="none"
+            onChange={(e) =>
+              setInputValue((prev) => ({ ...prev, summary: e.target.value }))
+            }
+            value={inputValue.summary}
           />
         </Flex>
 
