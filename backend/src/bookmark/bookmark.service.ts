@@ -4,13 +4,21 @@ import { CreateBookmarkDto } from './dto/create-bookmark.dto'
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto'
 import { userId } from 'src/common/constants'
 import { TransformPlainToInstance } from 'class-transformer'
-import { BookmarkResponseDto } from './dto/bookmark.response.dto'
+import {
+  BookmarkRawResponseDto,
+  BookmarkResponseDto,
+} from './dto/bookmark.response.dto'
 
 @Injectable()
 export class BookmarkService {
   constructor(private readonly bookmarkRepository: BookmarkRepository) {}
 
   filterId = (arr: Array<{ id: string }>) => arr.map((data) => data.id)
+
+  @TransformPlainToInstance(BookmarkRawResponseDto)
+  async fullTextSearch(query: string) {
+    return this.bookmarkRepository.fullTextSearch(query)
+  }
 
   @TransformPlainToInstance(BookmarkResponseDto)
   async getBookmarkById(id: string) {
