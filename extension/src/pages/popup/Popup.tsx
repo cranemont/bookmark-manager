@@ -212,7 +212,7 @@ const Popup = () => {
 
   const send = async (type: "add" | "panel", data?) => {
     // check if group is selected
-    if (!inputValue.group) {
+    if (type == "add" && !inputValue.group) {
       toast({
         title: "Please select a group",
         status: "error",
