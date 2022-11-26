@@ -10,7 +10,7 @@ content-type: application/json
 }
 
 ###
-PUT http://localhost:3000/bookmark/637a8dd44045dd16ab608675 HTTP/1.1
+PUT http://localhost:3000/bookmark/6381c7729c536d5e22f96745 HTTP/1.1
 content-type: application/json
 
 {
@@ -22,15 +22,15 @@ content-type: application/json
 }
 
 ###
-DELETE http://localhost:3000/bookmark/637a8dd44045dd16ab608675 HTTP/1.1
+DELETE http://localhost:3000/bookmark/6380ea3458bc53ecb8767934 HTTP/1.1
 
 ###
 // getBookmarkById(id: string)
-GET http://localhost:3000/bookmark/637a8dd44045dd16ab608675 HTTP/1.1
+GET http://localhost:3000/bookmark/6381c7729c536d5e22f96745 HTTP/1.1
 
 ###
 // getBookmarksByTag(tag: string)
-GET http://localhost:3000/bookmark/tag?name=search HTTP/1.1
+GET http://localhost:3000/bookmarks/tag?names=search HTTP/1.1
 
 ###
 // getTags()
@@ -39,4 +39,4 @@ GET http://localhost:3000/bookmark/tags HTTP/1.1
 
 ###
 // getBookmarksByGroup(group: string)
-GET http://localhost:3000/bookmark/group?name=search engine HTTP/1.1
+GET http://localhost:3000/bookmarks/group?name=search engine HTTP/1.1
