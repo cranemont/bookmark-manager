@@ -20,12 +20,13 @@ import {
   TagLabel,
   Textarea,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PopupModal } from "@src/components/popup/PopupModal";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // const PopupContainer = styled.div`
 //   width: 320px;
@@ -129,8 +130,9 @@ const Popup = () => {
   const [tags, setTags] = useState([]);
   const [inputValue, setInputValue] = useState({
     url: "",
-    name: "",
+    title: "",
     summary: "",
+    group: "",
     tag: "",
   });
   const [modalProps, setModalProps] = useState({
@@ -138,6 +140,12 @@ const Popup = () => {
     message: "",
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast({
+    position: "top",
+    duration: 3000,
+    isClosable: true,
+  });
+  const groupSelect = useRef(null);
 
   const init = async () => {
     // open loading modal
@@ -149,7 +157,7 @@ const Popup = () => {
       active: true,
       lastFocusedWindow: true,
     });
-    setInputValue((prev) => ({ ...prev, url: tab.url, name: tab.title }));
+    setInputValue((prev) => ({ ...prev, url: tab.url, title: tab.title }));
 
     // request APIs
     if (tab.url.startsWith("http://") || tab.url.startsWith("https://")) {
@@ -202,8 +210,35 @@ const Popup = () => {
     }
   };
 
-  const send = (type: "add" | "panel") => {
-    chrome.runtime.sendMessage({ type });
+  const send = async (type: "add" | "panel", data?) => {
+    // check if group is selected
+    if (!inputValue.group) {
+      toast({
+        title: "Please select a group",
+        status: "error",
+      });
+      groupSelect.current.focus();
+      return;
+    }
+
+    // open loading modal
+    setModalProps((prev) => ({ ...prev, isLoading: true }));
+    onOpen();
+
+    const { status, message } = await chrome.runtime.sendMessage({
+      type,
+      data,
+    });
+
+    // close loading modal
+    onClose();
+
+    if (message) {
+      toast({
+        title: message,
+        status: status,
+      });
+    }
   };
 
   const onTagInputEnter = (e) => {
@@ -260,15 +295,15 @@ const Popup = () => {
 
         <Flex marginY={4} alignItems="center" justifyContent="space-between">
           <Heading as="h2" size="sm">
-            Name
+            Title
           </Heading>
           <Input
             maxWidth={64}
-            placeholder="Name"
+            placeholder="title"
             onChange={(e) =>
-              setInputValue((prev) => ({ ...prev, name: e.target.value }))
+              setInputValue((prev) => ({ ...prev, title: e.target.value }))
             }
-            value={inputValue.name}
+            value={inputValue.title}
           />
         </Flex>
 
@@ -276,7 +311,15 @@ const Popup = () => {
           <Heading as="h2" size="sm">
             Group
           </Heading>
-          <Select maxWidth={64} placeholder="Select">
+          <Select
+            maxWidth={64}
+            placeholder="Select"
+            value={inputValue.group}
+            onChange={(e) =>
+              setInputValue((prev) => ({ ...prev, group: e.target.value }))
+            }
+            ref={groupSelect}
+          >
             {groups.map((value, index) => (
               <option value={value} key={index}>
                 {value}
@@ -324,7 +367,18 @@ const Popup = () => {
         </Flex>
 
         <Flex marginTop={4} alignItems="center" justifyContent="space-between">
-          <Button width="full" onClick={() => send("add")}>
+          <Button
+            width="full"
+            onClick={() =>
+              send("add", {
+                url: inputValue.url,
+                title: inputValue.title,
+                summary: inputValue.summary,
+                tags: tags,
+                group: inputValue.group,
+              })
+            }
+          >
             Add
           </Button>
         </Flex>
