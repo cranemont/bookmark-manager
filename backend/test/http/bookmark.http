@@ -40,3 +40,7 @@ GET http://localhost:3000/bookmark/tags HTTP/1.1
 ###
 // getBookmarksByGroup(group: string)
 GET http://localhost:3000/bookmarks/group?name=search engine HTTP/1.1
+
+###
+// fullTextSearch
+GET http://localhost:3000/bookmarks/search?query=stackoverflow.com HTTP/1.1

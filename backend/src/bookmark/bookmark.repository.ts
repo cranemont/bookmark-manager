@@ -15,6 +15,44 @@ export class BookmarkRepository {
     })
   }
 
+  async fullTextSearch(query: string) {
+    return await this.prisma.bookmark.aggregateRaw({
+      pipeline: [
+        {
+          $search: {
+            index: 'bookmark-search',
+            text: {
+              query: query,
+              path: {
+                wildcard: '*',
+              },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'Group',
+            localField: 'groupId',
+            foreignField: '_id',
+            as: 'group',
+          },
+        },
+        {
+          $project: {
+            id: {
+              $toString: '$_id',
+            },
+            url: 1,
+            title: 1,
+            summary: 1,
+            tags: 1,
+            'group.name': 1,
+          },
+        },
+      ],
+    })
+  }
+
   async getBookmarkById(id: string, userId: string) {
     return await this.prisma.bookmark.findUnique({
       where: {

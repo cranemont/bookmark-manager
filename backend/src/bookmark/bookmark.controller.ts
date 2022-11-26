@@ -19,6 +19,19 @@ import { UpdateBookmarkDto } from './dto/update-bookmark.dto'
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
+  @Get('bookmarks/search')
+  async fullTextSearch(@Query('query') query: string) {
+    try {
+      return this.bookmarkService.fullTextSearch(query)
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error
+      } else {
+        throw new InternalServerErrorException()
+      }
+    }
+  }
+
   // TODO: Validator 적용
   @Get('bookmarks/tag')
   async getBookmarksByTag(
