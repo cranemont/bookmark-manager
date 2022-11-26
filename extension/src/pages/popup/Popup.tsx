@@ -292,8 +292,9 @@ const Popup = () => {
             marginTop={4}
             height={28}
             value={summary}
+            onChange={(e) => setSummary(e.target.value)}
             resize="none"
-          ></Textarea>
+          />
         </Flex>
 
         <Flex marginTop={4} alignItems="center" justifyContent="space-between">
