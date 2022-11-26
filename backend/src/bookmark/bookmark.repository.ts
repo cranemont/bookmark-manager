@@ -1,23 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
-
-const bookmarkReseponseFields = {
-  id: true,
-  url: true,
-  title: true,
-  summary: true,
-  tags: {
-    select: {
-      name: true,
-    },
-  },
-  group: {
-    select: {
-      name: true,
-    },
-  },
-}
+import { bookmarkReseponseFields } from './dto/bookmark.response.dto'
 
 @Injectable()
 export class BookmarkRepository {

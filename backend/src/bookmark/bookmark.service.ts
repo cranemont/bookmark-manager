@@ -1,19 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { UserRepository } from 'src/user/user.repository'
 import { BookmarkRepository } from './bookmark.repository'
 import { CreateBookmarkDto } from './dto/create-bookmark.dto'
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto'
 import { userId } from 'src/common/constants'
+import { TransformPlainToInstance } from 'class-transformer'
+import { BookmarkResponseDto } from './dto/bookmark.response.dto'
 
 @Injectable()
 export class BookmarkService {
-  constructor(
-    private readonly bookmarkRepository: BookmarkRepository,
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly bookmarkRepository: BookmarkRepository) {}
 
   filterId = (arr: Array<{ id: string }>) => arr.map((data) => data.id)
 
+  @TransformPlainToInstance(BookmarkResponseDto)
   async getBookmarkById(id: string) {
     const bookmark = await this.bookmarkRepository.getBookmarkById(id, userId)
     if (!bookmark) {
@@ -22,6 +21,7 @@ export class BookmarkService {
     return bookmark
   }
 
+  @TransformPlainToInstance(BookmarkResponseDto)
   async getBookmarksByTags(tags: Array<string>) {
     return await this.bookmarkRepository.getBookmarksByTags(tags, userId)
   }
@@ -37,10 +37,12 @@ export class BookmarkService {
     )
   }
 
+  @TransformPlainToInstance(BookmarkResponseDto)
   async getBookmarksByGroup(group: string) {
     return await this.bookmarkRepository.getBookmarksByGroup(group, userId)
   }
 
+  @TransformPlainToInstance(BookmarkResponseDto)
   async createBookmark(createBookmarkDto: CreateBookmarkDto) {
     const { url, title, summary, tags, group } = createBookmarkDto
     const tagObjects = tags.map((tag) => {
@@ -73,6 +75,7 @@ export class BookmarkService {
     return bookmark
   }
 
+  @TransformPlainToInstance(BookmarkResponseDto)
   async updateBookmark(id: string, updateBookmarkDto: UpdateBookmarkDto) {
     const { url, title, summary, tags, group } = updateBookmarkDto
 
