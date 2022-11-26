@@ -19,16 +19,16 @@ model User {
 }
 
 model Bookmark {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String   @db.ObjectId
-  url        String
-  title      String
-  summary    String?
-  tags       Tag[]
-  group      Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  groupId    String   @db.ObjectId
-  creatdedAt DateTime @default(now())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.ObjectId
+  url       String
+  title     String
+  summary   String?
+  tags      Tag[]
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String   @db.ObjectId
+  createdAt DateTime @default(now())
 
   @@unique([id, userId])
 }
