@@ -15,107 +15,11 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaIcon } from "@src/components/common/FaIcon";
+import theme from "@src/components/common/GlobalTheme";
 import { PopupModal } from "@src/components/popup/PopupModal";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-
-// const PopupContainer = styled.div`
-//   width: 320px;
-//   padding: 20px;
-//   background-color: #f3f3f3;
-// `;
-
-// const RowContainer = styled.div`
-//   display: flex;
-//   flex-direction: row;
-//   align-items: center;
-//   justify-content: space-between;
-//   margin-top: 16px;
-// `;
-
-// const Title = styled.h1`
-//   font-size: 20px;
-//   font-weight: bold;
-//   color: #000000;
-//   margin: 0;
-// `;
-
-// const TitleContainer = styled(RowContainer)`
-//   margin-top: 0;
-// `;
-
-// const TagContainer = styled(RowContainer)`
-//   flex-wrap: wrap;
-//   gap: 4px;
-//   justify-content: flex-start;
-// `;
-
-// const Label = styled.h2`
-//   font-size: 16px;
-//   font-weight: bold;
-//   color: #3c3c3c;
-//   margin: 0;
-// `;
-
-// const Input = styled.input`
-//   box-sizing: border-box;
-//   width: 250px;
-//   border-radius: 8px;
-//   border: thin solid #eeeeee;
-//   font-size: 16px;
-//   padding: 8px;
-//   background-color: #ffffff;
-// `;
-
-// const Select = styled.select`
-//   box-sizing: border-box;
-//   width: 250px;
-//   border-radius: 8px;
-//   border: thin solid #eeeeee;
-//   font-size: 16px;
-//   padding: 8px;
-//   background-color: #ffffff;
-// `;
-
-// const Tag = styled.div`
-//   box-sizing: border-box;
-//   width: fit-content;
-//   border-radius: 8px;
-//   font-size: 12px;
-//   padding: 8px;
-//   background-color: #d4d4d4;
-//   cursor: pointer;
-// `;
-
-// const TextArea = styled.textarea`
-//   box-sizing: border-box;
-//   width: 100%;
-//   height: 140px;
-//   resize: none;
-//   border-radius: 8px;
-//   font-size: 16px;
-//   padding: 8px;
-//   border: thin solid #eeeeee;
-// `;
-
-// const Button = styled.button`
-//   width: 100%;
-//   border-radius: 8px;
-//   border: thin solid #eeeeee;
-//   font-size: 16px;
-//   padding: 12px;
-//   background-color: #242830;
-//   color: #ffffff;
-//   font-weight: bold;
-//   cursor: pointer;
-// `;
-
-// const IconBtn = styled(FontAwesomeIcon)`
-//   height: 16px;
-//   color: #242830;
-//   cursor: pointer;
-// `;
 
 const Popup = () => {
   const [groups, setGroups] = useState([]);
@@ -131,6 +35,7 @@ const Popup = () => {
     isLoading: true,
     message: "",
   });
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast({
     position: "top",
@@ -251,7 +156,7 @@ const Popup = () => {
   }, []);
 
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <Box width={96} padding={4} boxSizing="border-box">
         <PopupModal
           isOpen={isOpen}
@@ -265,7 +170,7 @@ const Popup = () => {
           </Heading>
           <IconButton
             aria-label="Panel Link"
-            icon={<FontAwesomeIcon icon={faTableColumns} />}
+            icon={<FaIcon icon={faTableColumns} />}
             variant="ghost"
             onClick={() => send("panel")}
           />
@@ -370,6 +275,7 @@ const Popup = () => {
                 group: inputValue.group,
               })
             }
+            colorScheme="gray"
           >
             Add
           </Button>
