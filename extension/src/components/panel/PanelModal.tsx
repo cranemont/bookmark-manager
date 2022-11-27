@@ -8,11 +8,14 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  ModalProps,
 } from "@chakra-ui/react";
 
-export const PanelModal = ({ isOpen, onClose, ...props }) => {
+type Props = Omit<ModalProps, "children">;
+
+export const PanelModal = ({ isOpen, onClose, ...props }: Props) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} {...props}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Search for bookmarks</ModalHeader>
@@ -20,7 +23,6 @@ export const PanelModal = ({ isOpen, onClose, ...props }) => {
         <ModalBody pb={6}>
           <Input placeholder="Input keyword here." />
         </ModalBody>
-
         <ModalFooter>
           <Button colorScheme="blue" mr={3}>
             Search

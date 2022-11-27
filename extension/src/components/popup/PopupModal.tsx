@@ -2,9 +2,15 @@ import {
   Modal,
   ModalContent,
   ModalOverlay,
+  ModalProps,
   Spinner,
   Text,
 } from "@chakra-ui/react";
+
+interface Props extends Omit<ModalProps, "children"> {
+  isLoading: boolean;
+  message: string;
+}
 
 export const PopupModal = ({
   isOpen,
@@ -12,7 +18,7 @@ export const PopupModal = ({
   isLoading,
   message,
   ...props
-}) => {
+}: Props) => {
   return (
     <Modal
       closeOnOverlayClick={false}
@@ -20,6 +26,7 @@ export const PopupModal = ({
       onClose={onClose}
       size="xs"
       isCentered
+      {...props}
     >
       <ModalOverlay />
       <ModalContent width="fit-content" padding={4}>
