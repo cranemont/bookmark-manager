@@ -23,9 +23,9 @@ interface BookmarkApi {
 	@GET("/bookmark/{id}/")
 	suspend fun getBookmarkById(@Path("id") id: String): BookmarkResponse
 
-	@GET("/bookmarks?tag={name}/")
+	@GET("/bookmarks")
 	suspend fun getBookmarksByTag(@Query("name") tag: String): List<BookmarkResponse>
 
-	@GET("/bookmarks?group={name}/")
-	suspend fun getBookmarksByGroup(@Query("name") group: String): List<BookmarkResponse>
+	@GET("/bookmarks/group")
+	suspend fun getBookmarksByGroup(@Query("name") name: String): List<BookmarkResponse>
 }

@@ -29,7 +29,8 @@ class BookmarksViewModel @Inject constructor(
 				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
 				is Result.Success -> {
 					val groups = result.data
-					bookmarksUiState = bookmarksUiState.copy(groups = result.data)
+
+					bookmarksUiState = bookmarksUiState.copy(groups = groups)
 					setSelectedGroup(groups.firstOrNull())
 				}
 			}
@@ -48,6 +49,20 @@ class BookmarksViewModel @Inject constructor(
 						val bookmarkResponses = result.data
 						bookmarksUiState = bookmarksUiState.copy(bookmarkResponses = bookmarkResponses)
 					}
+				}
+			}
+		}
+	}
+
+	fun getNewBookmarkResponses() {
+		viewModelScope.launch {
+			when (val result = bookmarkRepository.getBookmarksByGroup(bookmarksUiState.selectedGroup)) {
+				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
+				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+				is Result.Success -> {
+					val bookmarkResponses = result.data
+					Log.d("AddBookmarkActivity", bookmarkResponses.toString())
+					bookmarksUiState = bookmarksUiState.copy(bookmarkResponses = bookmarkResponses)
 				}
 			}
 		}

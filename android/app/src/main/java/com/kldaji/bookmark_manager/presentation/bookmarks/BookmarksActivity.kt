@@ -2,6 +2,7 @@ package com.kldaji.bookmark_manager.presentation.bookmarks
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -15,7 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,10 +33,10 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class BookmarksActivity : ComponentActivity() {
 
+	private val bookmarksViewModel: BookmarksViewModel by viewModels()
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-
-		val bookmarksViewModel: BookmarksViewModel by viewModels()
 
 		setContent {
 			BookmarkmanagerTheme {
@@ -73,10 +74,7 @@ class BookmarksActivity : ComponentActivity() {
 					},
 					floatingActionButton = {
 						FloatingActionButton(
-							onClick = {
-								val intent = Intent(this, AddBookmarkActivity::class.java)
-								startActivity(intent)
-							},
+							onClick = { startActivity() },
 							backgroundColor = Color.Black
 						) {
 							Icon(
@@ -166,6 +164,8 @@ class BookmarksActivity : ComponentActivity() {
 					) {
 						items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
 
+							var menuExpanded by remember { mutableStateOf(false) }
+
 							Card(
 								modifier = modifier
 									.fillMaxWidth()
@@ -174,61 +174,116 @@ class BookmarksActivity : ComponentActivity() {
 								backgroundColor = Color.White,
 								elevation = 2.dp
 							) {
-								Column(
-									modifier = modifier
-										.padding(vertical = 16.dp, horizontal = 20.dp)
-								) {
-									Text(
-										text = bookmarkResponse.title,
-										color = Color.Black,
-										fontWeight = FontWeight.Bold,
-										fontSize = 28.sp,
-										maxLines = 1,
-										overflow = TextOverflow.Ellipsis
-									)
+								Box(modifier = modifier.fillMaxWidth()) {
+									Box(modifier = modifier.align(Alignment.TopEnd)) {
+										IconButton(
+											modifier = modifier.align(Alignment.TopEnd),
+											onClick = { menuExpanded = true }
+										) {
+											Icon(imageVector = Icons.Default.MoreVert, contentDescription = "더보기")
+										}
 
-									Text(
-										text = bookmarkResponse.url,
-										color = url_text_color,
-										fontSize = 14.sp,
-										maxLines = 1,
-										overflow = TextOverflow.Ellipsis
-									)
-
-									LazyRow(
-										modifier = modifier
-											.fillMaxWidth()
-											.padding(vertical = 16.dp)
-									) {
-										items(items = bookmarkResponse.tags) { tag ->
-											Box(
-												modifier = modifier
-													.padding(end = 8.dp)
-													.clip(RoundedCornerShape(8.dp))
-													.background(tag_background)
-											) {
-												Text(
-													modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-													text = tag.name,
-													fontSize = 12.sp
-												)
+										DropdownMenu(
+											modifier = modifier
+												.wrapContentSize()
+												.align(Alignment.TopEnd),
+											expanded = menuExpanded,
+											onDismissRequest = { menuExpanded = false }
+										) {
+											DropdownMenuItem(onClick = {
+												startActivityEdit(bookmarkResponse.id)
+												menuExpanded = false
+											}) {
+												Text(text = "EDIT")
+											}
+											DropdownMenuItem(onClick = {
+												// TODO: 삭제
+												menuExpanded = false
+											}) {
+												Text(text = "DELETE")
 											}
 										}
 									}
 
-									Text(
-										text = bookmarkResponse.summary,
-										color = Color.Black,
-										fontSize = 18.sp,
-										maxLines = 3,
-										overflow = TextOverflow.Ellipsis
-									)
+									Column(
+										modifier = modifier
+											.fillMaxWidth()
+											.padding(vertical = 16.dp, horizontal = 20.dp)
+									) {
+
+										Text(
+											modifier = modifier.padding(top = 24.dp),
+											text = bookmarkResponse.title,
+											color = Color.Black,
+											fontWeight = FontWeight.Bold,
+											fontSize = 24.sp,
+											maxLines = 1,
+											overflow = TextOverflow.Ellipsis
+										)
+
+										Text(
+											text = bookmarkResponse.url,
+											color = url_text_color,
+											fontSize = 12.sp,
+											maxLines = 1,
+											overflow = TextOverflow.Ellipsis
+										)
+
+										LazyRow(
+											modifier = modifier
+												.fillMaxWidth()
+												.padding(vertical = 16.dp)
+										) {
+											items(items = bookmarkResponse.tags) { tag ->
+												Box(
+													modifier = modifier
+														.padding(end = 8.dp)
+														.clip(RoundedCornerShape(8.dp))
+														.background(tag_background)
+												) {
+													Text(
+														modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+														text = tag.name,
+														fontSize = 11.sp
+													)
+												}
+											}
+										}
+
+										Text(
+											text = bookmarkResponse.summary,
+											color = Color.Black,
+											fontSize = 16.sp,
+											maxLines = 3,
+											overflow = TextOverflow.Ellipsis
+										)
+									}
 								}
+
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	override fun onStart() {
+		super.onStart()
+
+		Log.d("AddBookmarkActivity", "onStart()")
+		bookmarksViewModel.getNewBookmarkResponses()
+	}
+
+	private fun startActivity() {
+		val intent = Intent(this, AddBookmarkActivity::class.java)
+		startActivity(intent)
+	}
+
+	private fun startActivityEdit(id: String) {
+		val intent = Intent(this, AddBookmarkActivity::class.java).apply {
+			putExtra("BookmarkId", id)
+		}
+		startActivity(intent)
 	}
 }

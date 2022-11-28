@@ -15,6 +15,12 @@ interface BookmarkRepository {
 	suspend fun delete(bookmarkUiState: BookmarkUiState)
 
 	suspend fun getBookmarkNlpResult(url: Url): Result<BookmarkNlp>
+
 	suspend fun addBookmark(newBookmark: NewBookmark): Result<BookmarkResponse>
+
+	suspend fun getBookmarkById(id: String): Result<BookmarkResponse>
+
 	suspend fun getBookmarksByGroup(name: String): Result<List<BookmarkResponse>>
+
+	suspend fun updateBookmark(id: String, newBookmark: NewBookmark): Result<BookmarkResponse>
 }

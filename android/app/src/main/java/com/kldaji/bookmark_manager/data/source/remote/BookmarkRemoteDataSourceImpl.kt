@@ -24,9 +24,21 @@ class BookmarkRemoteDataSourceImpl @Inject constructor(
 		}
 	}
 
+	override suspend fun getBookmarkById(id: String): Result<BookmarkResponse> {
+		return safeApiCall(ioDispatcher) {
+			bookmarkApi.getBookmarkById(id)
+		}
+	}
+
 	override suspend fun getBookmarksByGroup(name: String): Result<List<BookmarkResponse>> {
 		return safeApiCall(ioDispatcher) {
 			bookmarkApi.getBookmarksByGroup(name)
+		}
+	}
+
+	override suspend fun updateBookmark(id: String, newBookmark: NewBookmark): Result<BookmarkResponse> {
+		return safeApiCall(ioDispatcher) {
+			bookmarkApi.updateBookmark(id, newBookmark)
 		}
 	}
 }

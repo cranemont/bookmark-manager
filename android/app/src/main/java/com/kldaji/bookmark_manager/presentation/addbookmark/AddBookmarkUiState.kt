@@ -20,5 +20,12 @@ data class AddBookmarkUiState(
 	val newGroup: TextFieldValue = TextFieldValue(""),
 	val isDuplicatedTag: Boolean = false,
 	val isDuplicatedGroup: Boolean = false,
-	val isNetworkError: Boolean = false
-)
+	val isNetworkError: Boolean = false,
+	val bookmarkId: String = "",
+	val navigateToMain: Unit? = null
+) {
+
+	val isEdit: Boolean = bookmarkId.isNotEmpty()
+
+	val topAppBarTitle: String = if (isEdit) "Edit Bookmark" else "Add Bookmark"
+}
