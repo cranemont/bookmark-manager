@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -169,118 +170,143 @@ class BookmarksActivity : ComponentActivity() {
 					) {
 						items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
 
-							Column(
-								modifier = modifier
-									.fillMaxWidth()
-									.padding(vertical = 8.dp)
-									.shadow(elevation = 8.dp, shape = RoundedCornerShape(12.dp))
-									.clip(RoundedCornerShape(12.dp))
-									.background(color = Color.White)
-									.animateContentSize(),
-							) {
+							Column(modifier = modifier.fillMaxWidth()) {
+								Column(
+									modifier = modifier
+										.fillMaxWidth()
+										.padding(vertical = 8.dp)
+										.shadow(elevation = 8.dp, shape = RoundedCornerShape(12.dp))
+										.clip(RoundedCornerShape(12.dp))
+										.background(color = Color.White)
+										.animateContentSize(),
+								) {
 
-								if (bookmarksUiState.selectedBookmarkId != bookmarkResponse.id) {
-									Row(
-										modifier = modifier
-											.fillMaxWidth()
-											.clickable {
-												bookmarksViewModel.setSelectedBookmarkId(bookmarkResponse.id)
-											},
-										horizontalArrangement = Arrangement.SpaceBetween,
-										verticalAlignment = Alignment.CenterVertically
-									) {
-										Text(
+									if (bookmarksUiState.selectedBookmarkId != bookmarkResponse.id) {
+										Row(
 											modifier = modifier
-												.padding(start = 12.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
-												.weight(0.9f),
-											text = bookmarkResponse.title,
-											color = Color.Black,
-											fontWeight = FontWeight.Bold,
-											fontSize = 16.sp,
-										)
-
-										Icon(
-											modifier = modifier
-												.padding(end = 4.dp)
-												.weight(0.1f),
-											imageVector = Icons.Default.ExpandMore,
-											contentDescription = ""
-										)
-									}
-								} else {
-									Row(
-										modifier = modifier
-											.fillMaxWidth()
-											.clickable {
-												bookmarksViewModel.setSelectedBookmarkId("")
-											}
-											.drawBehind {
-												val strokeWidth = (borderSize * density).toPx()
-												val y = size.height - strokeWidth / 2
-
-												drawLine(
-													color = url_text_color,
-													Offset(0f, y),
-													Offset(size.width, y),
-													strokeWidth = strokeWidth
-												)
-											},
-										horizontalArrangement = Arrangement.SpaceBetween,
-										verticalAlignment = Alignment.CenterVertically
-									) {
-										Text(
-											modifier = modifier
-												.padding(start = 12.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
-												.weight(0.9f),
-											text = bookmarkResponse.title,
-											color = Color.Black,
-											fontWeight = FontWeight.Bold,
-											fontSize = 16.sp,
-										)
-
-										Icon(
-											modifier = modifier
-												.padding(end = 4.dp)
-												.weight(0.1f),
-											imageVector = Icons.Default.ExpandLess,
-											contentDescription = ""
-										)
-									}
-
-									Text(
-										modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
-										text = bookmarkResponse.url,
-										color = url_text_color,
-										fontSize = 12.sp,
-									)
-
-									LazyRow(
-										modifier = modifier
-											.fillMaxWidth()
-											.padding(horizontal = 12.dp),
-									) {
-										items(items = bookmarkResponse.tags) { tag ->
-											Box(
+												.fillMaxWidth()
+												.clickable {
+													bookmarksViewModel.setSelectedBookmarkId(bookmarkResponse.id)
+												},
+											horizontalArrangement = Arrangement.SpaceBetween,
+											verticalAlignment = Alignment.CenterVertically
+										) {
+											Text(
 												modifier = modifier
-													.padding(end = 8.dp)
-													.clip(RoundedCornerShape(8.dp))
-													.background(tag_background)
-											) {
-												Text(
-													modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-													text = tag,
-													fontSize = 11.sp
-												)
+													.padding(start = 12.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
+													.weight(0.9f),
+												text = bookmarkResponse.title,
+												color = Color.Black,
+												fontWeight = FontWeight.Bold,
+												fontSize = 16.sp,
+											)
+
+											Icon(
+												modifier = modifier
+													.padding(end = 4.dp)
+													.weight(0.1f),
+												imageVector = Icons.Default.ExpandMore,
+												contentDescription = ""
+											)
+										}
+									} else {
+										Row(
+											modifier = modifier
+												.fillMaxWidth()
+												.clickable {
+													bookmarksViewModel.setSelectedBookmarkId("")
+												}
+												.drawBehind {
+													val strokeWidth = (borderSize * density).toPx()
+													val y = size.height - strokeWidth / 2
+
+													drawLine(
+														color = url_text_color,
+														Offset(0f, y),
+														Offset(size.width, y),
+														strokeWidth = strokeWidth
+													)
+												},
+											horizontalArrangement = Arrangement.SpaceBetween,
+											verticalAlignment = Alignment.CenterVertically
+										) {
+											Text(
+												modifier = modifier
+													.padding(start = 12.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
+													.weight(0.9f),
+												text = bookmarkResponse.title,
+												color = Color.Black,
+												fontWeight = FontWeight.Bold,
+												fontSize = 16.sp,
+											)
+
+											Icon(
+												modifier = modifier
+													.padding(end = 4.dp)
+													.weight(0.1f),
+												imageVector = Icons.Default.ExpandLess,
+												contentDescription = ""
+											)
+										}
+
+										Text(
+											modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
+											text = bookmarkResponse.url,
+											color = url_text_color,
+											fontSize = 12.sp,
+										)
+
+										LazyRow(
+											modifier = modifier
+												.fillMaxWidth()
+												.padding(horizontal = 12.dp),
+										) {
+											items(items = bookmarkResponse.tags) { tag ->
+												Box(
+													modifier = modifier
+														.padding(end = 8.dp)
+														.clip(RoundedCornerShape(8.dp))
+														.background(tag_background)
+												) {
+													Text(
+														modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+														text = tag,
+														fontSize = 11.sp
+													)
+												}
 											}
 										}
-									}
 
-									Text(
-										modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
-										text = bookmarkResponse.summary,
-										color = Color.Black,
-										fontSize = 16.sp,
-									)
+										Text(
+											modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
+											text = bookmarkResponse.summary,
+											color = Color.Black,
+											fontSize = 16.sp,
+										)
+									}
+								}
+
+								if (bookmarksUiState.selectedBookmarkId == bookmarkResponse.id) {
+									Row(
+										modifier = modifier.fillMaxWidth(),
+										horizontalArrangement = Arrangement.SpaceEvenly,
+										verticalAlignment = Alignment.CenterVertically
+									) {
+										IconButton(
+											modifier = modifier.clip(CircleShape),
+											onClick = {
+												startActivityEdit(bookmarkResponse.id)
+											}
+										) {
+											Icon(imageVector = Icons.Default.Edit, contentDescription = "")
+										}
+										IconButton(
+											modifier = modifier.clip(CircleShape),
+											onClick = { /*TODO*/ }
+										) {
+											Icon(imageVector = Icons.Default.Delete, contentDescription = "")
+										}
+									}
 								}
 							}
 						}
