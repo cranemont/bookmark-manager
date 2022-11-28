@@ -71,4 +71,8 @@ class BookmarksViewModel @Inject constructor(
 	fun setSelectedBookmarkId(id: String) {
 		bookmarksUiState = bookmarksUiState.copy(selectedBookmarkId = id)
 	}
+
+	fun setQuery(query: String) {
+		bookmarksUiState = bookmarksUiState.copy(query = query)
+	}
 }
