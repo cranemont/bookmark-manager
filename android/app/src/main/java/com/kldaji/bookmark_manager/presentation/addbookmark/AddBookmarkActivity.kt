@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -130,21 +131,6 @@ class AddBookmarkActivity : ComponentActivity() {
 								addBookmarkViewModel.addGroup(addBookmarkUiState.newGroup.text)
 							}
 						)
-					}
-
-					if (addBookmarkUiState.isShowProgressBar) {
-						Box(modifier = Modifier
-							.fillMaxSize()
-							.clickable(
-								indication = null, // disable ripple effect
-								interactionSource = remember { MutableInteractionSource() },
-								onClick = { }
-							)
-							.background(color = Color.Black.copy(alpha = 0.3f)),
-							contentAlignment = Alignment.Center
-						) {
-							CircularProgressIndicator()
-						}
 					}
 
 					Column(
@@ -316,6 +302,17 @@ class AddBookmarkActivity : ComponentActivity() {
 								color = Color.White
 							)
 						}
+					}
+				}
+
+				if (addBookmarkUiState.isShowProgressBar) {
+					Box(modifier = Modifier
+						.fillMaxSize()
+						.background(Color.Black.copy(alpha = 0.3f))
+						.pointerInput(Unit) {},
+						contentAlignment = Alignment.Center
+					) {
+						CircularProgressIndicator()
 					}
 				}
 			}
