@@ -1,6 +1,5 @@
 package com.kldaji.bookmark_manager.data.source.remote
 
-import com.kldaji.bookmark_manager.data.entity.Group
 import com.kldaji.bookmark_manager.data.entity.GroupResponse
 import com.kldaji.bookmark_manager.di.IoDispatcher
 import com.kldaji.bookmark_manager.util.Result
@@ -19,7 +18,7 @@ class GroupRemoteDataSourceImpl @Inject constructor(
 		}
 	}
 
-	override suspend fun addGroup(group: Group): Result<GroupResponse> {
+	override suspend fun addGroup(group: String): Result<GroupResponse> {
 		return safeApiCall(ioDispatcher) {
 			groupApi.addGroup(group)
 		}

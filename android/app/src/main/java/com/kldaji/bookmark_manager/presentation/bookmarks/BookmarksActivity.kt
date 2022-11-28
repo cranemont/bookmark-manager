@@ -243,7 +243,7 @@ class BookmarksActivity : ComponentActivity() {
 												) {
 													Text(
 														modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-														text = tag.name,
+														text = tag,
 														fontSize = 11.sp
 													)
 												}
