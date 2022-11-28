@@ -8,6 +8,7 @@ import { PrismaService } from './prisma/prisma.service'
 import { BookmarkModule } from './bookmark/bookmark.module'
 import { UserModule } from './user/user.module'
 import { GroupModule } from './group/group.module'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { GroupModule } from './group/group.module'
     BookmarkModule,
     UserModule,
     GroupModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
