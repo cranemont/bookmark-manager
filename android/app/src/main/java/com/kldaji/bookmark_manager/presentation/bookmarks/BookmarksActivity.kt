@@ -54,7 +54,6 @@ class BookmarksActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-
 		setContent {
 			BookmarkmanagerTheme {
 				val modifier = Modifier

@@ -23,4 +23,6 @@ interface BookmarkRepository {
 	suspend fun getBookmarksByGroup(name: String): Result<List<BookmarkResponse>>
 
 	suspend fun updateBookmark(id: String, newBookmark: NewBookmark): Result<BookmarkResponse>
+
+	suspend fun queryBookmarks(query: String): Result<List<BookmarkResponse>>
 }
