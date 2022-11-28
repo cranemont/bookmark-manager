@@ -6,4 +6,5 @@ data class BookmarksUiState(
 	val bookmarkResponses: List<BookmarkResponse> = emptyList(),
 	val groups: List<String> = emptyList(),
 	val selectedGroup: String = groups.firstOrNull() ?: "",
+	val selectedBookmarkId: String = ""
 )

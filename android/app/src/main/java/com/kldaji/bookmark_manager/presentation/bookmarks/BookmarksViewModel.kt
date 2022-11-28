@@ -67,4 +67,8 @@ class BookmarksViewModel @Inject constructor(
 			}
 		}
 	}
+
+	fun setSelectedBookmarkId(id: String) {
+		bookmarksUiState = bookmarksUiState.copy(selectedBookmarkId = id)
+	}
 }

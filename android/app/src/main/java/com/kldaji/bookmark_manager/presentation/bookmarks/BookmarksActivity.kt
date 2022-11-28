@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,13 +17,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
@@ -37,6 +40,8 @@ class BookmarksActivity : ComponentActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+
+		val borderSize = (0.5).dp
 
 		setContent {
 			BookmarkmanagerTheme {
@@ -164,102 +169,119 @@ class BookmarksActivity : ComponentActivity() {
 					) {
 						items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
 
-							var menuExpanded by remember { mutableStateOf(false) }
-
-							Card(
+							Column(
 								modifier = modifier
 									.fillMaxWidth()
-									.padding(vertical = 8.dp),
-								shape = RoundedCornerShape(size = 6.dp),
-								backgroundColor = Color.White,
-								elevation = 2.dp
+									.padding(vertical = 8.dp)
+									.shadow(elevation = 8.dp, shape = RoundedCornerShape(12.dp))
+									.clip(RoundedCornerShape(12.dp))
+									.background(color = Color.White)
+									.animateContentSize(),
 							) {
-								Box(modifier = modifier.fillMaxWidth()) {
-									Box(modifier = modifier.align(Alignment.TopEnd)) {
-										IconButton(
-											modifier = modifier.align(Alignment.TopEnd),
-											onClick = { menuExpanded = true }
-										) {
-											Icon(imageVector = Icons.Default.MoreVert, contentDescription = "더보기")
-										}
 
-										DropdownMenu(
-											modifier = modifier
-												.wrapContentSize()
-												.align(Alignment.TopEnd),
-											expanded = menuExpanded,
-											onDismissRequest = { menuExpanded = false }
-										) {
-											DropdownMenuItem(onClick = {
-												startActivityEdit(bookmarkResponse.id)
-												menuExpanded = false
-											}) {
-												Text(text = "EDIT")
-											}
-											DropdownMenuItem(onClick = {
-												// TODO: 삭제
-												menuExpanded = false
-											}) {
-												Text(text = "DELETE")
-											}
-										}
-									}
-
-									Column(
+								if (bookmarksUiState.selectedBookmarkId != bookmarkResponse.id) {
+									Row(
 										modifier = modifier
 											.fillMaxWidth()
-											.padding(vertical = 16.dp, horizontal = 20.dp)
+											.clickable {
+												bookmarksViewModel.setSelectedBookmarkId(bookmarkResponse.id)
+											},
+										horizontalArrangement = Arrangement.SpaceBetween,
+										verticalAlignment = Alignment.CenterVertically
 									) {
-
 										Text(
-											modifier = modifier.padding(top = 24.dp),
+											modifier = modifier
+												.padding(start = 12.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
+												.weight(0.9f),
 											text = bookmarkResponse.title,
 											color = Color.Black,
 											fontWeight = FontWeight.Bold,
-											fontSize = 24.sp,
-											maxLines = 1,
-											overflow = TextOverflow.Ellipsis
-										)
-
-										Text(
-											text = bookmarkResponse.url,
-											color = url_text_color,
-											fontSize = 12.sp,
-											maxLines = 1,
-											overflow = TextOverflow.Ellipsis
-										)
-
-										LazyRow(
-											modifier = modifier
-												.fillMaxWidth()
-												.padding(vertical = 16.dp)
-										) {
-											items(items = bookmarkResponse.tags) { tag ->
-												Box(
-													modifier = modifier
-														.padding(end = 8.dp)
-														.clip(RoundedCornerShape(8.dp))
-														.background(tag_background)
-												) {
-													Text(
-														modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-														text = tag,
-														fontSize = 11.sp
-													)
-												}
-											}
-										}
-
-										Text(
-											text = bookmarkResponse.summary,
-											color = Color.Black,
 											fontSize = 16.sp,
-											maxLines = 3,
-											overflow = TextOverflow.Ellipsis
+										)
+
+										Icon(
+											modifier = modifier
+												.padding(end = 4.dp)
+												.weight(0.1f),
+											imageVector = Icons.Default.ExpandMore,
+											contentDescription = ""
 										)
 									}
-								}
+								} else {
+									Row(
+										modifier = modifier
+											.fillMaxWidth()
+											.clickable {
+												bookmarksViewModel.setSelectedBookmarkId("")
+											}
+											.drawBehind {
+												val strokeWidth = (borderSize * density).toPx()
+												val y = size.height - strokeWidth / 2
 
+												drawLine(
+													color = url_text_color,
+													Offset(0f, y),
+													Offset(size.width, y),
+													strokeWidth = strokeWidth
+												)
+											},
+										horizontalArrangement = Arrangement.SpaceBetween,
+										verticalAlignment = Alignment.CenterVertically
+									) {
+										Text(
+											modifier = modifier
+												.padding(start = 12.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
+												.weight(0.9f),
+											text = bookmarkResponse.title,
+											color = Color.Black,
+											fontWeight = FontWeight.Bold,
+											fontSize = 16.sp,
+										)
+
+										Icon(
+											modifier = modifier
+												.padding(end = 4.dp)
+												.weight(0.1f),
+											imageVector = Icons.Default.ExpandLess,
+											contentDescription = ""
+										)
+									}
+
+									Text(
+										modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
+										text = bookmarkResponse.url,
+										color = url_text_color,
+										fontSize = 12.sp,
+									)
+
+									LazyRow(
+										modifier = modifier
+											.fillMaxWidth()
+											.padding(horizontal = 12.dp),
+									) {
+										items(items = bookmarkResponse.tags) { tag ->
+											Box(
+												modifier = modifier
+													.padding(end = 8.dp)
+													.clip(RoundedCornerShape(8.dp))
+													.background(tag_background)
+											) {
+												Text(
+													modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+													text = tag,
+													fontSize = 11.sp
+												)
+											}
+										}
+									}
+
+									Text(
+										modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
+										text = bookmarkResponse.summary,
+										color = Color.Black,
+										fontSize = 16.sp,
+									)
+								}
 							}
 						}
 					}
