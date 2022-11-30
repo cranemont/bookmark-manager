@@ -26,7 +26,6 @@ export class AuthController {
     try {
       return await this.authService.registerUser(registerUserDto)
     } catch (error) {
-      console.log(error)
       if (error instanceof HttpException) {
         throw error
       } else {
