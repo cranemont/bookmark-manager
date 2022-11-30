@@ -5,11 +5,19 @@ import { UserRepository } from './user.repository'
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async getUser(username: string) {
-    const user = await this.userRepository.getUser(username)
-    if (!user) {
-      throw new NotFoundException('user does not exist')
-    }
-    return user
+  async getCredentialByUsername(username: string) {
+    return await this.userRepository.getCredentialByUsername(username)
+  }
+
+  async getById(id: string) {
+    return await this.userRepository.getById(id)
+  }
+
+  async isUniqueUsername(username: string) {
+    return !(await this.userRepository.count(username))
+  }
+
+  async createUser(username: string, hashedPassword: string) {
+    return await this.userRepository.create(username, hashedPassword)
   }
 }
