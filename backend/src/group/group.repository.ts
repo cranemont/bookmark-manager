@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 
-const groupResponseFields = {}
-
 @Injectable()
 export class GroupRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -19,7 +17,7 @@ export class GroupRepository {
     })
   }
 
-  async getGroupByName(userId: string, groupName: string) {
+  async getGroupByName(groupName: string, userId: string) {
     return await this.prisma.group.findUnique({
       where: {
         name_userId: {
@@ -30,8 +28,8 @@ export class GroupRepository {
     })
   }
 
-  async isGroupExist(userName: string, groupName: string) {
-    const group = await this.getGroupByName(userName, groupName)
+  async isGroupExist(groupName: string, userId: string) {
+    const group = await this.getGroupByName(groupName, userId)
     return !!group
   }
 

@@ -15,7 +15,9 @@ export class BookmarkRepository {
     })
   }
 
-  async fullTextSearch(query: string) {
+  // prisma does not support ObjectId as input, use username with lookup instead of userId
+  // see https://github.com/prisma/prisma/issues/15013
+  async fullTextSearch(query: string, username: string) {
     return await this.prisma.bookmark.aggregateRaw({
       pipeline: [
         {
@@ -35,6 +37,19 @@ export class BookmarkRepository {
             localField: 'groupId',
             foreignField: '_id',
             as: 'group',
+          },
+        },
+        {
+          $lookup: {
+            from: 'User',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $match: {
+            'user.username': username,
           },
         },
         {
@@ -67,7 +82,7 @@ export class BookmarkRepository {
 
   async getBookmarksByTags(tag: Array<string>, userId: string) {
     return await this.prisma.bookmark.findMany({
-      where: { user: { id: userId }, tags: { some: { name: { in: tag } } } },
+      where: { userId: userId, tags: { some: { name: { in: tag } } } },
       select: bookmarkReseponseFields,
     })
   }
@@ -75,7 +90,7 @@ export class BookmarkRepository {
   async getBookmarksByGroup(group: string, userId: string) {
     return await this.prisma.bookmark.findMany({
       where: {
-        user: { id: userId },
+        userId: userId,
         group: { name: group },
       },
       select: bookmarkReseponseFields,

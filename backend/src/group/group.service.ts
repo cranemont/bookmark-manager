@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { userId } from 'src/common/constants'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { GroupRepository } from './group.repository'
 
@@ -7,7 +6,7 @@ import { GroupRepository } from './group.repository'
 export class GroupService {
   constructor(private readonly groupRespository: GroupRepository) {}
 
-  async getGroups() {
+  async getGroups(userId: string) {
     const groups = await this.groupRespository.getGroups(userId)
     return Array.from(
       new Set(
@@ -19,7 +18,7 @@ export class GroupService {
     )
   }
 
-  async createGroup(createGroupDto: CreateGroupDto) {
+  async createGroup(createGroupDto: CreateGroupDto, userId: string) {
     return await this.groupRespository.create({
       data: {
         userId: userId,

@@ -5,7 +5,7 @@ import {
   Logger,
   Post,
 } from '@nestjs/common'
-import { UrlValidationPipe } from 'src/pipes/url-validation.pipe'
+import { UrlValidationPipe } from 'src/common/pipes/url-validation.pipe'
 import { NlpService } from './nlp.service'
 
 @Controller('nlp')

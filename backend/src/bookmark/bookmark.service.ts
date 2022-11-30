@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { BookmarkRepository } from './bookmark.repository'
 import { CreateBookmarkDto } from './dto/create-bookmark.dto'
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto'
-import { userId } from 'src/common/constants'
 import { TransformPlainToInstance } from 'class-transformer'
 import {
   BookmarkRawResponseDto,
@@ -16,12 +15,12 @@ export class BookmarkService {
   filterId = (arr: Array<{ id: string }>) => arr.map((data) => data.id)
 
   @TransformPlainToInstance(BookmarkRawResponseDto)
-  async fullTextSearch(query: string) {
-    return this.bookmarkRepository.fullTextSearch(query)
+  async fullTextSearch(query: string, username: string) {
+    return this.bookmarkRepository.fullTextSearch(query, username)
   }
 
   @TransformPlainToInstance(BookmarkResponseDto)
-  async getBookmarkById(id: string) {
+  async getBookmarkById(id: string, userId: string) {
     const bookmark = await this.bookmarkRepository.getBookmarkById(id, userId)
     if (!bookmark) {
       throw new NotFoundException('Bookmark does not exist')
@@ -30,11 +29,11 @@ export class BookmarkService {
   }
 
   @TransformPlainToInstance(BookmarkResponseDto)
-  async getBookmarksByTags(tags: Array<string>) {
+  async getBookmarksByTags(tags: Array<string>, userId: string) {
     return await this.bookmarkRepository.getBookmarksByTags(tags, userId)
   }
 
-  async getTags() {
+  async getTags(userId: string) {
     const bookmarks = await this.bookmarkRepository.getTags(userId)
     return Array.from(
       new Set(
@@ -46,12 +45,12 @@ export class BookmarkService {
   }
 
   @TransformPlainToInstance(BookmarkResponseDto)
-  async getBookmarksByGroup(group: string) {
+  async getBookmarksByGroup(group: string, userId: string) {
     return await this.bookmarkRepository.getBookmarksByGroup(group, userId)
   }
 
   @TransformPlainToInstance(BookmarkResponseDto)
-  async createBookmark(createBookmarkDto: CreateBookmarkDto) {
+  async createBookmark(createBookmarkDto: CreateBookmarkDto, userId: string) {
     const { url, title, summary, tags, group } = createBookmarkDto
     const tagObjects = tags.map((tag) => {
       return { name: tag }
@@ -84,7 +83,11 @@ export class BookmarkService {
   }
 
   @TransformPlainToInstance(BookmarkResponseDto)
-  async updateBookmark(id: string, updateBookmarkDto: UpdateBookmarkDto) {
+  async updateBookmark(
+    id: string,
+    updateBookmarkDto: UpdateBookmarkDto,
+    userId: string,
+  ) {
     const { url, title, summary, tags, group } = updateBookmarkDto
 
     if (!(await this.bookmarkRepository.isExist(id))) {
@@ -126,7 +129,7 @@ export class BookmarkService {
     })
   }
 
-  async deleteBookmark(id: string) {
+  async deleteBookmark(id: string, userId: string) {
     if (!(await this.bookmarkRepository.isExist(id))) {
       throw new NotFoundException('Bookmark does not exist')
     }
