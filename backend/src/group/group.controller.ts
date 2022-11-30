@@ -5,18 +5,23 @@ import {
   HttpException,
   InternalServerErrorException,
   Post,
+  UseGuards,
 } from '@nestjs/common'
+import { AuthenticatedUser } from 'src/auth/authenticatedUser'
+import { SessionAuthGuard } from 'src/auth/guards/session.guard'
+import { User } from 'src/common/decorators/user.decorator'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { GroupService } from './group.service'
 
+@UseGuards(SessionAuthGuard)
 @Controller()
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
   @Get('groups')
-  async getGroups() {
+  async getGroups(@User() user: AuthenticatedUser) {
     try {
-      return this.groupService.getGroups()
+      return this.groupService.getGroups(user.id)
     } catch (error) {
       if (error instanceof HttpException) {
         throw error
@@ -27,9 +32,12 @@ export class GroupController {
   }
 
   @Post('group')
-  async createGroup(@Body() createGroupDto: CreateGroupDto) {
+  async createGroup(
+    @User() user: AuthenticatedUser,
+    @Body() createGroupDto: CreateGroupDto,
+  ) {
     try {
-      return this.groupService.createGroup(createGroupDto)
+      return this.groupService.createGroup(createGroupDto, user.id)
     } catch (error) {
       if (error instanceof HttpException) {
         throw error
