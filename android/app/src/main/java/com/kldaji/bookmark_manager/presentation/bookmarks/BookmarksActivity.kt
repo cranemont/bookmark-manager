@@ -106,8 +106,8 @@ class BookmarksActivity : ComponentActivity() {
 										},
 										colors = TextFieldDefaults.textFieldColors(
 											backgroundColor = Color.White,
-											focusedIndicatorColor = Color.Green,
-											unfocusedIndicatorColor = Color.Green
+											focusedIndicatorColor = drawer_header_background,
+											unfocusedIndicatorColor = drawer_body_background
 										),
 										shape = RoundedCornerShape(36.dp),
 										keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -123,7 +123,7 @@ class BookmarksActivity : ComponentActivity() {
 										modifier = modifier
 											.fillMaxSize()
 											.padding(it)
-											.padding(top = 8.dp),
+											.padding(vertical = 8.dp, horizontal = 16.dp),
 										horizontalAlignment = Alignment.CenterHorizontally
 									) {
 										Text(text = "NO RESULT")
@@ -133,6 +133,7 @@ class BookmarksActivity : ComponentActivity() {
 										modifier = modifier
 											.fillMaxSize()
 											.padding(it)
+											.padding(vertical = 8.dp, horizontal = 16.dp)
 									) {
 										items(items = bookmarksUiState.queriedBookmarks) { bookmarkResponse ->
 											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit)
