@@ -1,15 +1,14 @@
 package com.kldaji.bookmark_manager.data.repository
 
 import com.kldaji.bookmark_manager.data.Mapper
-import com.kldaji.bookmark_manager.data.entity.Group
 import com.kldaji.bookmark_manager.data.entity.GroupResponse
 import com.kldaji.bookmark_manager.data.source.local.GroupLocalDataSource
 import com.kldaji.bookmark_manager.data.source.remote.GroupRemoteDataSource
 import com.kldaji.bookmark_manager.presentation.bookmarks.GroupUiState
+import com.kldaji.bookmark_manager.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import com.kldaji.bookmark_manager.util.Result
 
 class GroupRepositoryImpl @Inject constructor(
 	private val groupLocalDataSource: GroupLocalDataSource,
@@ -36,7 +35,7 @@ class GroupRepositoryImpl @Inject constructor(
 		return groupRemoteDataSource.getGroups()
 	}
 
-	override suspend fun addGroup(group: Group): Result<GroupResponse> {
+	override suspend fun addGroup(group: String): Result<GroupResponse> {
 		return groupRemoteDataSource.addGroup(group)
 	}
 }

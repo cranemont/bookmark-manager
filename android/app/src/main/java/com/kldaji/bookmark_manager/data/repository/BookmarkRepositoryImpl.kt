@@ -58,4 +58,8 @@ class BookmarkRepositoryImpl @Inject constructor(
 	override suspend fun updateBookmark(id: String, newBookmark: NewBookmark): Result<BookmarkResponse> {
 		return bookmarkRemoteDataSource.updateBookmark(id, newBookmark)
 	}
+
+	override suspend fun queryBookmarks(query: String): Result<List<BookmarkResponse>> {
+		return bookmarkRemoteDataSource.queryBookmarks(query)
+	}
 }

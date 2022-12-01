@@ -5,10 +5,6 @@ data class BookmarkResponse(
 	val url: String = "",
 	val title: String = "",
 	val summary: String = "",
-	val tags: List<Tag> = emptyList(),
-	val group: Group = Group(name = "")
+	val tags: List<String> = emptyList(),
+	val group: String = ""
 )
-
-data class Tag(val name: String)
-
-data class Group(val name: String)

@@ -52,8 +52,8 @@ class AddBookmarkViewModel @Inject constructor(
 						url = TextFieldValue(bookmarkResponse.url),
 						title = TextFieldValue(bookmarkResponse.title),
 						description = TextFieldValue(bookmarkResponse.summary),
-						tags = bookmarkResponse.tags.map { it.name },
-						selectedGroup = bookmarkResponse.group.name
+						tags = bookmarkResponse.tags.map { it },
+						selectedGroup = bookmarkResponse.group
 					)
 				}
 			}
