@@ -1,9 +1,6 @@
 package com.kldaji.bookmark_manager.di
 
-import com.kldaji.bookmark_manager.data.repository.BookmarkRepository
-import com.kldaji.bookmark_manager.data.repository.BookmarkRepositoryImpl
-import com.kldaji.bookmark_manager.data.repository.GroupRepository
-import com.kldaji.bookmark_manager.data.repository.GroupRepositoryImpl
+import com.kldaji.bookmark_manager.data.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,4 +18,8 @@ abstract class RepositoryModule {
 	@Singleton
 	@Binds
 	abstract fun bindsGroupRepository(groupRepositoryImpl: GroupRepositoryImpl): GroupRepository
+
+	@Singleton
+	@Binds
+	abstract fun bindsLoginRepository(loginRepositoryImpl: LoginRepositoryImpl): LoginRepository
 }

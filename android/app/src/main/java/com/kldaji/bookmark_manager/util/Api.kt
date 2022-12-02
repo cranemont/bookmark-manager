@@ -8,8 +8,9 @@ import retrofit2.HttpException
 import java.io.IOException
 
 data class ErrorResponse(
-	val statusCode: Int,
-	val message: String
+	val statusCode: Int = 0,
+	val message: String = "",
+	val error: String = ""
 )
 
 sealed class Result<out T> {
@@ -21,7 +22,8 @@ sealed class Result<out T> {
 suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend () -> T): Result<T> {
 	return withContext(dispatcher) {
 		try {
-			Result.Success(apiCall.invoke())
+			val result = apiCall.invoke()
+			Result.Success(result)
 		} catch (throwable: Throwable) {
 			when (throwable) {
 				is IOException -> Result.NetworkError
