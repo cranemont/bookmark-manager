@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -367,7 +369,7 @@ fun BookmarkItem(
 				.shadow(elevation = 8.dp, shape = RoundedCornerShape(12.dp))
 				.clip(RoundedCornerShape(12.dp))
 				.background(color = Color.White)
-				.animateContentSize(),
+				.animateContentSize(spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
 		) {
 
 			if (bookmarksUiState.selectedBookmarkId != bookmarkResponse.id) {
