@@ -50,6 +50,11 @@ export class BookmarkService {
   }
 
   @TransformPlainToInstance(BookmarkResponseDto)
+  async getBookmarks(userId: string) {
+    return await this.bookmarkRepository.getBookmarks(userId)
+  }
+
+  @TransformPlainToInstance(BookmarkResponseDto)
   async createBookmark(createBookmarkDto: CreateBookmarkDto, userId: string) {
     const { url, title, summary, tags, group } = createBookmarkDto
     const tagObjects = tags.map((tag) => {

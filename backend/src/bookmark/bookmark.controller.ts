@@ -105,6 +105,19 @@ export class BookmarkController {
     }
   }
 
+  @Get('bookmarks')
+  async getAllBookmarks(@User() user: AuthenticatedUser) {
+    try {
+      return this.bookmarkService.getBookmarks(user.id)
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error
+      } else {
+        throw new InternalServerErrorException()
+      }
+    }
+  }
+
   @Post('bookmark')
   async createBookmark(
     @User() user: AuthenticatedUser,

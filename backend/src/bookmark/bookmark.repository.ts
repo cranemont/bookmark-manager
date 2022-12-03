@@ -104,6 +104,13 @@ export class BookmarkRepository {
     })
   }
 
+  async getBookmarks(userId: string) {
+    return await this.prisma.bookmark.findMany({
+      where: { userId: userId },
+      select: bookmarkReseponseFields,
+    })
+  }
+
   async create(data: Prisma.BookmarkCreateArgs) {
     return await this.prisma.bookmark.create({
       ...data,
