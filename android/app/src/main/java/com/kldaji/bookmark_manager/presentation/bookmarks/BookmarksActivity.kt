@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,10 +35,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kldaji.bookmark_manager.R
 import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
 import com.kldaji.bookmark_manager.presentation.theme.*
@@ -230,71 +233,89 @@ fun BottomSheetContent(
 			}
 		},
 		drawerContent = {
-			Row(
-				modifier = modifier
-					.fillMaxWidth()
-					.background(drawer_header_background)
-					.padding(vertical = 24.dp),
-				horizontalArrangement = Arrangement.Center,
-				verticalAlignment = Alignment.CenterVertically
+			Column(
+				modifier = modifier.fillMaxSize(),
+				verticalArrangement = Arrangement.SpaceBetween
 			) {
-				Icon(
-					imageVector = Icons.Default.MenuBook,
-					contentDescription = "북마크 이미지",
-					tint = Color.White
-				)
-
-				Text(
-					modifier = modifier.padding(start = 8.dp),
-					text = "Bookmark Manager",
-					fontWeight = FontWeight.Bold,
-					color = Color.White,
-					fontSize = 20.sp
-				)
-			}
-
-			LazyColumn(
-				modifier = modifier
-					.fillMaxSize()
-					.padding(24.dp)
-			) {
-				item {
-					Text(
-						modifier = modifier.padding(bottom = 16.dp),
-						text = "Group",
-						color = Color.White,
-						fontSize = 18.sp,
-						fontWeight = FontWeight.Bold
-					)
-				}
-
-				items(items = bookmarksViewModel.bookmarksUiState.groups) { group: String ->
+				Column(modifier = modifier.fillMaxWidth()) {
 					Row(
 						modifier = modifier
 							.fillMaxWidth()
-							.clickable {
-								bookmarksViewModel.setSelectedGroup(group)
-								coroutineScope.launch {
-									scaffoldState.drawerState.close()
-								}
-							}
-							.padding(vertical = 12.dp),
+							.background(drawer_header_background)
+							.padding(vertical = 24.dp),
+						horizontalArrangement = Arrangement.Center,
 						verticalAlignment = Alignment.CenterVertically
 					) {
-						Icon(
-							imageVector = Icons.Default.Bookmarks,
-							contentDescription = "북마크 이미지",
-							tint = Color.White
+						Image(
+							painterResource(R.drawable.bookmark),
+							"",
+							modifier = modifier.size(25.dp)
 						)
+
 						Text(
 							modifier = modifier.padding(start = 12.dp),
-							text = group,
+							text = "Bookmarks",
+							fontWeight = FontWeight.Bold,
 							color = Color.White,
-							fontSize = 16.sp
+							fontSize = 20.sp
 						)
 					}
+
+					LazyColumn(
+						modifier = modifier.padding(24.dp)
+					) {
+						item {
+							Text(
+								modifier = modifier.padding(bottom = 16.dp),
+								text = "Group",
+								color = Color.White,
+								fontSize = 18.sp,
+								fontWeight = FontWeight.Bold
+							)
+						}
+
+						items(items = bookmarksViewModel.bookmarksUiState.groups) { group: String ->
+							Row(
+								modifier = modifier
+									.fillMaxWidth()
+									.clickable {
+										bookmarksViewModel.setSelectedGroup(group)
+										coroutineScope.launch {
+											scaffoldState.drawerState.close()
+										}
+									}
+									.padding(vertical = 12.dp),
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								Icon(
+									imageVector = Icons.Default.Bookmarks,
+									contentDescription = "북마크 이미지",
+									tint = Color.White
+								)
+								Text(
+									modifier = modifier.padding(start = 12.dp),
+									text = group,
+									color = Color.White,
+									fontSize = 16.sp
+								)
+							}
+						}
+					}
+				}
+
+				Row(
+					modifier = modifier
+						.fillMaxWidth()
+						.padding(vertical = 16.dp, horizontal = 24.dp)
+						.clickable { },
+					verticalAlignment = Alignment.CenterVertically,
+				) {
+					Icon(modifier = modifier.padding(end = 16.dp), imageVector = Icons.Default.Logout, contentDescription = "", tint = Color.White)
+
+					Text(text = "LOGOUT", color = Color.White)
 				}
 			}
+
 		},
 		drawerBackgroundColor = drawer_body_background,
 		scaffoldState = scaffoldState,
