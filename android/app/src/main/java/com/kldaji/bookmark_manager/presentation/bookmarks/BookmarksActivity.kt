@@ -2,7 +2,6 @@ package com.kldaji.bookmark_manager.presentation.bookmarks
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -23,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -66,8 +66,24 @@ class BookmarksActivity : ComponentActivity() {
 					initialValue = ModalBottomSheetValue.Hidden,
 					skipHalfExpanded = true
 				)
+				val bookmarksState = rememberScaffoldState()
+				val searchState = rememberScaffoldState()
 				val focusManager = LocalFocusManager.current
 				val focusRequester: FocusRequester = remember { FocusRequester() }
+
+				LaunchedEffect(key1 = bookmarksUiState.bookmarksUserMessage) {
+					bookmarksUiState.bookmarksUserMessage?.let {
+						bookmarksState.snackbarHostState.showSnackbar(it)
+						bookmarksViewModel.hideUserMessage()
+					}
+				}
+
+				LaunchedEffect(key1 = bookmarksUiState.searchUserMessage) {
+					bookmarksUiState.searchUserMessage?.let {
+						searchState.snackbarHostState.showSnackbar(it)
+						bookmarksViewModel.hideUserMessage()
+					}
+				}
 
 				ModalBottomSheetLayout(
 					sheetContentColor = background,
@@ -78,6 +94,7 @@ class BookmarksActivity : ComponentActivity() {
 							modifier = modifier
 								.fillMaxWidth()
 								.fillMaxHeight(0.95f),
+							scaffoldState = searchState,
 							topBar = {
 								Surface(
 									modifier = modifier.fillMaxWidth(),
@@ -147,11 +164,11 @@ class BookmarksActivity : ComponentActivity() {
 						)
 					}
 				) {
-					BottomSheetContent(modifier, bookmarksUiState, coroutineScope, ::startActivity, ::startActivityEdit, bookmarksViewModel) {
+					BottomSheetContent(modifier, bookmarksUiState, coroutineScope, ::startActivity, ::startActivityEdit, bookmarksViewModel, clickSearchButton = {
 						coroutineScope.launch {
 							sheetState.show()
 						}
-					}
+					}, state = bookmarksState)
 				}
 			}
 		}
@@ -160,7 +177,6 @@ class BookmarksActivity : ComponentActivity() {
 	override fun onStart() {
 		super.onStart()
 
-		Log.d("AddBookmarkActivity", "onStart()")
 		bookmarksViewModel.getNewBookmarkResponses()
 	}
 
@@ -186,11 +202,12 @@ fun BottomSheetContent(
 	clickFloatingButton: () -> Unit,
 	clickEditButton: (id: String) -> Unit,
 	bookmarksViewModel: BookmarksViewModel,
-	clickSearchButton: () -> Unit
+	clickSearchButton: () -> Unit,
+	state: ScaffoldState
 ) {
-	val scaffoldState = rememberScaffoldState()
 
 	Scaffold(
+		scaffoldState = state,
 		topBar = {
 			TopAppBar(
 				title = {
@@ -212,7 +229,7 @@ fun BottomSheetContent(
 				navigationIcon = {
 					IconButton(onClick = {
 						coroutineScope.launch {
-							scaffoldState.drawerState.open()
+							state.drawerState.open()
 						}
 					}) {
 						Icon(imageVector = Icons.Default.Menu, contentDescription = "드로우어")
@@ -281,7 +298,7 @@ fun BottomSheetContent(
 									.clickable {
 										bookmarksViewModel.setSelectedGroup(group)
 										coroutineScope.launch {
-											scaffoldState.drawerState.close()
+											state.drawerState.close()
 										}
 									}
 									.padding(vertical = 12.dp),
@@ -318,7 +335,6 @@ fun BottomSheetContent(
 
 		},
 		drawerBackgroundColor = drawer_body_background,
-		scaffoldState = scaffoldState,
 		backgroundColor = background
 	) { paddingValues ->
 

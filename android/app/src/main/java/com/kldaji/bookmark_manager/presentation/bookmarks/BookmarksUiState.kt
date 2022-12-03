@@ -8,5 +8,7 @@ data class BookmarksUiState(
 	val selectedGroup: String = groups.firstOrNull() ?: "",
 	val selectedBookmarkId: String = "",
 	val query: String = "",
-	val queriedBookmarks: List<BookmarkResponse> = emptyList()
+	val queriedBookmarks: List<BookmarkResponse> = emptyList(),
+	val bookmarksUserMessage: String? = null,
+	val searchUserMessage: String? = null
 )
