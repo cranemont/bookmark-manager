@@ -18,4 +18,6 @@ interface BookmarkRemoteDataSource {
 	suspend fun queryBookmarks(query: String): Result<List<BookmarkResponse>>
 
 	suspend fun deleteBookmarks(id: String): Result<Unit>
+
+	suspend fun getAllBookmarks(): Result<List<BookmarkResponse>>
 }

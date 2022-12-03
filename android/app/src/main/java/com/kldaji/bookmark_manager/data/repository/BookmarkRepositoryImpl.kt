@@ -65,4 +65,8 @@ class BookmarkRepositoryImpl @Inject constructor(
 	override suspend fun deleteBookmark(id: String): Result<Unit> {
 		return bookmarkRemoteDataSource.deleteBookmarks(id)
 	}
+
+	override suspend fun getAllBookmarks(): Result<List<BookmarkResponse>> {
+		return bookmarkRemoteDataSource.getAllBookmarks()
+	}
 }

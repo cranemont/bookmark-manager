@@ -57,6 +57,20 @@ class BookmarksViewModel @Inject constructor(
 				}
 			}
 		}
+
+		viewModelScope.launch {
+			setShowLoading(Unit)
+
+			bookmarksUiState = when (val result = bookmarkRepository.getAllBookmarks()) {
+				is Result.NetworkError -> bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
+				is Result.GenericError -> bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
+				is Result.Success -> {
+					bookmarksUiState.copy(allBookmarks = result.data)
+				}
+			}
+
+			setShowLoading(null)
+		}
 	}
 
 	fun hideUserMessage() {

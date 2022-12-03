@@ -31,4 +31,7 @@ interface BookmarkApi {
 
 	@GET("/bookmarks/search")
 	suspend fun queryBookmarks(@Query("query") query: String): List<BookmarkResponse>
+
+	@GET("/bookmarks")
+	suspend fun getAllBookmarks(): List<BookmarkResponse>
 }

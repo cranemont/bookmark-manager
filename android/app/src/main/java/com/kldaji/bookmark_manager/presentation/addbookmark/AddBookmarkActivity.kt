@@ -222,7 +222,10 @@ class AddBookmarkActivity : ComponentActivity() {
 											Text(text = group)
 										}
 									}
-									DropdownMenuItem(onClick = { addBookmarkViewModel.showAddGroupDialog() }) {
+									DropdownMenuItem(onClick = {
+										addBookmarkViewModel.hideGroups()
+										addBookmarkViewModel.showAddGroupDialog()
+									}) {
 										Row {
 											Icon(imageVector = Icons.Default.AddCircle, contentDescription = "그룹 추가")
 											Text(

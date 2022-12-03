@@ -149,9 +149,18 @@ class BookmarksActivity : ComponentActivity() {
 								}
 							},
 							content = {
-								// TODO: query empty -> show all bookmarks
-
-								if (bookmarksUiState.queriedBookmarks?.isEmpty() == true) {
+								if (bookmarksUiState.queriedBookmarks == null) {
+									LazyColumn(
+										modifier = modifier
+											.fillMaxSize()
+											.padding(it)
+											.padding(vertical = 8.dp, horizontal = 16.dp)
+									) {
+										items(items = bookmarksUiState.allBookmarks) { bookmarkResponse ->
+											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
+										}
+									}
+								} else if (bookmarksUiState.queriedBookmarks.isEmpty()) {
 									Column(
 										modifier = modifier
 											.padding(it)
@@ -173,10 +182,8 @@ class BookmarksActivity : ComponentActivity() {
 											.padding(it)
 											.padding(vertical = 8.dp, horizontal = 16.dp)
 									) {
-										bookmarksUiState.queriedBookmarks?.let { queriedBookmarks ->
-											items(items = queriedBookmarks) { bookmarkResponse ->
-												BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
-											}
+										items(items = bookmarksUiState.queriedBookmarks) { bookmarkResponse ->
+											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
 										}
 									}
 								}

@@ -27,4 +27,6 @@ interface BookmarkRepository {
 	suspend fun queryBookmarks(query: String): Result<List<BookmarkResponse>>
 
 	suspend fun deleteBookmark(id: String): Result<Unit>
+
+	suspend fun getAllBookmarks(): Result<List<BookmarkResponse>>
 }
