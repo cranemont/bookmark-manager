@@ -10,4 +10,5 @@ data class LoginUiState(
 	val isPasswordVisible: Boolean = false,
 	val signInSuccess: Unit? = null,
 	val signUpSuccess: Unit? = null,
+	val showLoading: Unit? = null,
 )

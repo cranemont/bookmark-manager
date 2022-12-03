@@ -2,10 +2,12 @@ package com.kldaji.bookmark_manager.util
 
 import android.util.Log
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
+
 
 data class ErrorResponse(
 	val statusCode: Int = 0,
@@ -22,14 +24,16 @@ sealed class Result<out T> {
 suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend () -> T): Result<T> {
 	return withContext(dispatcher) {
 		try {
-			val result = apiCall.invoke()
-			Result.Success(result)
+			Result.Success(apiCall.invoke())
 		} catch (throwable: Throwable) {
 			when (throwable) {
 				is IOException -> Result.NetworkError
-				is HttpException -> Result.GenericError(parseErrorBody(throwable))
+				is HttpException -> {
+					Log.d("LoginViewModel", "HTTPEXCEPTION")
+					Result.GenericError(parseErrorBody(throwable))
+				}
 				else -> {
-					Log.d("AddBookmarkActivity", throwable.message.toString())
+					Log.d("LoginViewModel", "OTHERS")
 					Result.GenericError(null)
 				}
 			}
@@ -38,10 +42,12 @@ suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend ()
 }
 
 private fun parseErrorBody(throwable: HttpException): ErrorResponse? {
+	val errorBody = throwable.response()?.errorBody()?.string()
+
 	return try {
-		throwable.response()?.errorBody()?.source()?.let {
-			val moshiAdapter = Moshi.Builder().build().adapter(ErrorResponse::class.java)
-			moshiAdapter.fromJson(it)
+		errorBody?.let {
+			val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build().adapter(ErrorResponse::class.java)
+			moshi.fromJson(it)
 		}
 	} catch (exception: Exception) {
 		null

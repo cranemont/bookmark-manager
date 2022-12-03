@@ -1,6 +1,5 @@
 package com.kldaji.bookmark_manager.presentation.login
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -56,6 +55,10 @@ class LoginViewModel @Inject constructor(
 		loginUiState = loginUiState.copy(isPasswordVisible = isPasswordVisible)
 	}
 
+	private fun setShowLoading(showLoading: Unit?) {
+		loginUiState = loginUiState.copy(showLoading = showLoading)
+	}
+
 	fun signIn() {
 		if (loginUiState.loginId.isEmpty() || loginUiState.loginId.isBlank()) {
 			setSignInUserMessage("please enter id")
@@ -68,6 +71,8 @@ class LoginViewModel @Inject constructor(
 		}
 
 		viewModelScope.launch {
+			setShowLoading(Unit)
+
 			val result = loginRepository.signIn(
 				UserInfo(
 					username = loginUiState.loginId,
@@ -75,14 +80,19 @@ class LoginViewModel @Inject constructor(
 				)
 			)
 
-			Log.d("LoginViewModel", result.toString())
-			when (result) {
-				is Result.NetworkError -> {}
-				is Result.GenericError -> {}
+			loginUiState = when (result) {
+				is Result.NetworkError -> {
+					loginUiState.copy(signInUserMessage = "please check network connection")
+				}
+				is Result.GenericError -> {
+					loginUiState.copy(signInUserMessage = result.errorResponse?.message)
+				}
 				is Result.Success -> {
-					loginUiState = loginUiState.copy(signInSuccess = Unit)
+					loginUiState.copy(signInSuccess = Unit)
 				}
 			}
+
+			setShowLoading(null)
 		}
 	}
 
@@ -98,6 +108,8 @@ class LoginViewModel @Inject constructor(
 		}
 
 		viewModelScope.launch {
+			setShowLoading(Unit)
+
 			val result = loginRepository.signUp(
 				UserInfo(
 					username = loginUiState.newId,
@@ -105,13 +117,19 @@ class LoginViewModel @Inject constructor(
 				)
 			)
 
-			when (result) {
-				is Result.NetworkError -> {}
-				is Result.GenericError -> {}
+			loginUiState = when (result) {
+				is Result.NetworkError -> {
+					loginUiState.copy(signUpUserMessage = "please check network connection")
+				}
+				is Result.GenericError -> {
+					loginUiState.copy(signUpUserMessage = result.errorResponse?.message)
+				}
 				is Result.Success -> {
-					loginUiState = loginUiState.copy(signUpSuccess = Unit)
+					loginUiState.copy(signUpSuccess = Unit)
 				}
 			}
+
+			setShowLoading(null)
 		}
 	}
 }

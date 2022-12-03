@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,15 +15,17 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.compose.*
+import com.kldaji.bookmark_manager.R
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,9 +49,30 @@ class LoginActivity : ComponentActivity() {
 				val signInState = rememberScaffoldState()
 				val signUpState = rememberScaffoldState()
 
+				var isPlaying by remember { mutableStateOf(true) }
+				var speed by remember { mutableStateOf(1f) }
+				val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.login))
+				val compositionLoading by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+				val progress by animateLottieCompositionAsState(
+					composition,
+					iterations = LottieConstants.IterateForever,
+					isPlaying = isPlaying,
+					speed = speed,
+					restartOnPlay = false
+				)
+
 				LaunchedEffect(key1 = uiState.signInSuccess) {
 					uiState.signInSuccess?.let {
 						startActivity(Intent(this@LoginActivity, BookmarksActivity::class.java))
+						finish()
+					}
+				}
+
+				LaunchedEffect(key1 = uiState.signUpSuccess) {
+					uiState.signUpSuccess?.let {
+						coroutineScope.launch {
+							sheetState.hide()
+						}
 					}
 				}
 
@@ -72,7 +96,9 @@ class LoginActivity : ComponentActivity() {
 					sheetContent = {
 						Scaffold(
 							scaffoldState = signUpState,
-							modifier = modifier.fillMaxSize()
+							modifier = modifier
+								.fillMaxWidth()
+								.fillMaxHeight(0.95f),
 						) {
 
 							UserInfo(
@@ -83,7 +109,9 @@ class LoginActivity : ComponentActivity() {
 								onButtonClick = {
 									loginViewModel.signUp()
 								},
-								onCreateAccountClick = {}
+								onCreateAccountClick = {},
+								composition,
+								progress
 							)
 						}
 					}
@@ -105,7 +133,25 @@ class LoginActivity : ComponentActivity() {
 								coroutineScope.launch {
 									sheetState.show()
 								}
-							}
+							},
+							composition = composition,
+							progress = progress
+						)
+					}
+				}
+
+				uiState.showLoading?.let {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.background(Color.Black.copy(alpha = 0.3f))
+							.pointerInput(Unit) {},
+						contentAlignment = Alignment.Center
+					) {
+						LottieAnimation(
+							compositionLoading,
+							progress,
+							modifier = modifier.size(200.dp)
 						)
 					}
 				}
@@ -121,7 +167,9 @@ fun UserInfo(
 	uiState: LoginUiState,
 	viewModel: LoginViewModel,
 	onButtonClick: () -> Unit,
-	onCreateAccountClick: () -> Unit
+	onCreateAccountClick: () -> Unit,
+	composition: LottieComposition?,
+	progress: Float,
 ) {
 	Column(
 		modifier = modifier
@@ -130,8 +178,16 @@ fun UserInfo(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Center
 	) {
+		LottieAnimation(
+			composition,
+			progress,
+			modifier = Modifier.size(300.dp)
+		)
+
 		OutlinedTextField(
-			modifier = modifier.fillMaxWidth(),
+			modifier = modifier
+				.fillMaxWidth()
+				.padding(top = 30.dp),
 			value = if (isSignUp) uiState.newId else uiState.loginId,
 			onValueChange = { if (isSignUp) viewModel.setNewId(it) else viewModel.setLoginId(it) },
 			label = { Text(text = "ID") },
