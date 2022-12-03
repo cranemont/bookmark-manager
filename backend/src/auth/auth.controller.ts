@@ -4,7 +4,6 @@ import {
   HttpException,
   InternalServerErrorException,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
@@ -18,7 +17,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login() {
-    return 'success'
+    return {}
   }
 
   @Post('register')
