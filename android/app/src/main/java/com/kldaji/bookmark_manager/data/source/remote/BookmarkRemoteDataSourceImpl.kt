@@ -47,4 +47,10 @@ class BookmarkRemoteDataSourceImpl @Inject constructor(
 			bookmarkApi.queryBookmarks(query)
 		}
 	}
+
+	override suspend fun deleteBookmarks(id: String): Result<Unit> {
+		return safeApiCall(ioDispatcher) {
+			bookmarkApi.deleteBookmark(id)
+		}
+	}
 }

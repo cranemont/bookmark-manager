@@ -17,8 +17,8 @@ interface BookmarkApi {
 	@PUT("/bookmark/{id}/")
 	suspend fun updateBookmark(@Path("id") id: String, @Body newBookmark: NewBookmark): BookmarkResponse
 
-//	@DELETE("/bookmark/{id}/")
-//	suspend fun deleteBookmark(@Path("id") id: String)
+	@DELETE("/bookmark/{id}/")
+	suspend fun deleteBookmark(@Path("id") id: String): Unit
 
 	@GET("/bookmark/{id}/")
 	suspend fun getBookmarkById(@Path("id") id: String): BookmarkResponse

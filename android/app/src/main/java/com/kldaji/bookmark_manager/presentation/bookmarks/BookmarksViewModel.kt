@@ -30,6 +30,8 @@ class BookmarksViewModel @Inject constructor(
 
 	init {
 		viewModelScope.launch {
+			setShowLoading(Unit)
+
 			when (val result = groupRepository.getGroups()) {
 				is Result.NetworkError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
 				is Result.GenericError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
@@ -40,6 +42,8 @@ class BookmarksViewModel @Inject constructor(
 					setSelectedGroup(groups.firstOrNull())
 				}
 			}
+
+			setShowLoading(null)
 		}
 
 		viewModelScope.launch {
@@ -62,11 +66,18 @@ class BookmarksViewModel @Inject constructor(
 		)
 	}
 
+	private fun setShowLoading(showLoading: Unit?) {
+		bookmarksUiState = bookmarksUiState.copy(showLoading = showLoading)
+	}
+
+
 	fun setSelectedGroup(name: String?) {
 		name?.let {
 			bookmarksUiState = bookmarksUiState.copy(selectedGroup = it)
 
 			viewModelScope.launch {
+				setShowLoading(Unit)
+
 				bookmarksUiState = when (val result = bookmarkRepository.getBookmarksByGroup(it)) {
 					is Result.NetworkError -> bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
 					is Result.GenericError -> bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
@@ -75,12 +86,16 @@ class BookmarksViewModel @Inject constructor(
 						bookmarksUiState.copy(bookmarkResponses = bookmarkResponses)
 					}
 				}
+
+				setShowLoading(null)
 			}
 		}
 	}
 
 	fun getNewBookmarkResponses() {
 		viewModelScope.launch {
+			setShowLoading(Unit)
+
 			bookmarksUiState = when (val result = bookmarkRepository.getBookmarksByGroup(bookmarksUiState.selectedGroup)) {
 				is Result.NetworkError -> bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
 				is Result.GenericError -> bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
@@ -89,6 +104,8 @@ class BookmarksViewModel @Inject constructor(
 					bookmarksUiState.copy(bookmarkResponses = bookmarkResponses)
 				}
 			}
+
+			setShowLoading(null)
 		}
 	}
 
@@ -98,6 +115,23 @@ class BookmarksViewModel @Inject constructor(
 
 	fun setQuery(query: String) {
 		_query.value = query
-		bookmarksUiState = bookmarksUiState.copy(query = query)
+		bookmarksUiState = bookmarksUiState.copy(
+			query = query,
+			queriedBookmarks = null
+		)
+	}
+
+	fun deleteBookmark(id: String) {
+		viewModelScope.launch {
+			setShowLoading(Unit)
+
+			when (val result = bookmarkRepository.deleteBookmark(id)) {
+				is Result.NetworkError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
+				is Result.GenericError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
+				is Result.Success -> getNewBookmarkResponses()
+			}
+
+			setShowLoading(null)
+		}
 	}
 }

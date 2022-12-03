@@ -23,10 +23,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,12 +33,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.*
 import com.kldaji.bookmark_manager.R
 import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
@@ -72,6 +71,16 @@ class BookmarksActivity : ComponentActivity() {
 				val searchState = rememberScaffoldState()
 				val focusManager = LocalFocusManager.current
 				val focusRequester: FocusRequester = remember { FocusRequester() }
+				var isPlaying by remember { mutableStateOf(true) }
+				var speed by remember { mutableStateOf(1f) }
+				val compositionLoading by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+				val progress by animateLottieCompositionAsState(
+					compositionLoading,
+					iterations = LottieConstants.IterateForever,
+					isPlaying = isPlaying,
+					speed = speed,
+					restartOnPlay = false
+				)
 
 				LaunchedEffect(key1 = bookmarksUiState.bookmarksUserMessage) {
 					bookmarksUiState.bookmarksUserMessage?.let {
@@ -140,15 +149,22 @@ class BookmarksActivity : ComponentActivity() {
 								}
 							},
 							content = {
-								if (bookmarksUiState.queriedBookmarks.isEmpty()) {
+								// TODO: query empty -> show all bookmarks
+
+								if (bookmarksUiState.queriedBookmarks?.isEmpty() == true) {
 									Column(
 										modifier = modifier
-											.fillMaxSize()
 											.padding(it)
-											.padding(vertical = 8.dp, horizontal = 16.dp),
+											.padding(vertical = 50.dp, horizontal = 16.dp)
+											.fillMaxWidth(),
+										verticalArrangement = Arrangement.Center,
 										horizontalAlignment = Alignment.CenterHorizontally
 									) {
-										Text(text = "NO RESULT")
+										Image(
+											painter = painterResource(R.drawable.no_data),
+											contentDescription = "",
+											modifier = modifier.size(150.dp),
+										)
 									}
 								} else {
 									LazyColumn(
@@ -157,8 +173,10 @@ class BookmarksActivity : ComponentActivity() {
 											.padding(it)
 											.padding(vertical = 8.dp, horizontal = 16.dp)
 									) {
-										items(items = bookmarksUiState.queriedBookmarks) { bookmarkResponse ->
-											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit)
+										bookmarksUiState.queriedBookmarks?.let { queriedBookmarks ->
+											items(items = queriedBookmarks) { bookmarkResponse ->
+												BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
+											}
 										}
 									}
 								}
@@ -166,13 +184,40 @@ class BookmarksActivity : ComponentActivity() {
 						)
 					}
 				) {
-					BottomSheetContent(modifier, bookmarksUiState, coroutineScope, ::startActivity, ::startActivityEdit, bookmarksViewModel, clickSearchButton = {
-						coroutineScope.launch {
-							sheetState.show()
-						}
-					}, state = bookmarksState)
+					BottomSheetContent(
+						modifier = modifier,
+						bookmarksUiState = bookmarksUiState,
+						coroutineScope = coroutineScope,
+						clickFloatingButton = ::startActivity,
+						clickEditButton = ::startActivityEdit,
+						clickDeleteButton = bookmarksViewModel::deleteBookmark,
+						bookmarksViewModel = bookmarksViewModel,
+						clickSearchButton = {
+							coroutineScope.launch {
+								sheetState.show()
+							}
+						},
+						state = bookmarksState,
+					)
+				}
+
+				bookmarksUiState.showLoading?.let {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.background(Color.Black.copy(alpha = 0.3f))
+							.pointerInput(Unit) {},
+						contentAlignment = Alignment.Center
+					) {
+						LottieAnimation(
+							compositionLoading,
+							progress,
+							modifier = modifier.size(200.dp)
+						)
+					}
 				}
 			}
+
 		}
 	}
 
@@ -203,9 +248,10 @@ fun BottomSheetContent(
 	coroutineScope: CoroutineScope,
 	clickFloatingButton: () -> Unit,
 	clickEditButton: (id: String) -> Unit,
+	clickDeleteButton: (id: String) -> Unit,
 	bookmarksViewModel: BookmarksViewModel,
 	clickSearchButton: () -> Unit,
-	state: ScaffoldState
+	state: ScaffoldState,
 ) {
 
 	Scaffold(
@@ -340,14 +386,30 @@ fun BottomSheetContent(
 		backgroundColor = background
 	) { paddingValues ->
 
-		LazyColumn(
-			modifier = modifier
-				.padding(paddingValues)
-				.fillMaxSize(),
-			contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
-		) {
-			items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
-				BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, clickEditButton)
+		if (bookmarksUiState.bookmarkResponses.isEmpty()) {
+			Column(
+				modifier = modifier
+					.padding(paddingValues)
+					.fillMaxSize(),
+				verticalArrangement = Arrangement.Center,
+				horizontalAlignment = Alignment.CenterHorizontally
+			) {
+				Image(
+					modifier = modifier.padding(bottom = 50.dp),
+					painter = painterResource(R.drawable.empty),
+					contentDescription = "",
+				)
+			}
+		} else {
+			LazyColumn(
+				modifier = modifier
+					.padding(paddingValues)
+					.fillMaxSize(),
+				contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
+			) {
+				items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
+					BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, clickEditButton, clickDeleteButton)
+				}
 			}
 		}
 	}
@@ -359,7 +421,8 @@ fun BookmarkItem(
 	bookmarksUiState: BookmarksUiState,
 	bookmarkResponse: BookmarkResponse,
 	bookmarksViewModel: BookmarksViewModel,
-	clickEditButton: (id: String) -> Unit
+	clickEditButton: (id: String) -> Unit,
+	clickDeleteButton: (id: String) -> Unit,
 ) {
 	Column(modifier = modifier.fillMaxWidth()) {
 		Column(
@@ -493,7 +556,7 @@ fun BookmarkItem(
 				}
 				IconButton(
 					modifier = modifier.clip(CircleShape),
-					onClick = { /*TODO*/ }
+					onClick = { clickDeleteButton(bookmarkResponse.id) }
 				) {
 					Icon(imageVector = Icons.Default.Delete, contentDescription = "")
 				}

@@ -10,7 +10,6 @@ import com.kldaji.bookmark_manager.data.source.remote.BookmarkRemoteDataSource
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
 import com.kldaji.bookmark_manager.util.Result
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -61,5 +60,9 @@ class BookmarkRepositoryImpl @Inject constructor(
 
 	override suspend fun queryBookmarks(query: String): Result<List<BookmarkResponse>> {
 		return bookmarkRemoteDataSource.queryBookmarks(query)
+	}
+
+	override suspend fun deleteBookmark(id: String): Result<Unit> {
+		return bookmarkRemoteDataSource.deleteBookmarks(id)
 	}
 }
