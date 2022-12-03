@@ -6,7 +6,7 @@ import com.kldaji.bookmark_manager.util.Result
 
 interface LoginRepository {
 
-	suspend fun signIn(userInfo: UserInfo): Result<String>
+	suspend fun signIn(userInfo: UserInfo): Result<Unit>
 
 	suspend fun signUp(userInfo: UserInfo): Result<LoginResponse>
 }

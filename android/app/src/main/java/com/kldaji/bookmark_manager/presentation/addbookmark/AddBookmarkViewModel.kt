@@ -31,8 +31,6 @@ class AddBookmarkViewModel @Inject constructor(
 
 	private fun getGroups() {
 		viewModelScope.launch {
-			setShowLoading(Unit)
-
 			addBookmarkUiState = when (val result = groupRepository.getGroups()) {
 				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
 				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
@@ -42,8 +40,6 @@ class AddBookmarkViewModel @Inject constructor(
 					addBookmarkUiState.copy(groups = groups)
 				}
 			}
-
-			setShowLoading(null)
 		}
 	}
 
@@ -51,13 +47,13 @@ class AddBookmarkViewModel @Inject constructor(
 		addBookmarkUiState = addBookmarkUiState.copy(bookmarkId = id)
 	}
 
-	private fun setShowLoading(showLoading: Unit?) {
+	private fun setShowLoading(showLoading: Boolean) {
 		addBookmarkUiState = addBookmarkUiState.copy(showLoading = showLoading)
 	}
 
 	fun getBookmarkById(id: String) {
 		viewModelScope.launch {
-			setShowLoading(Unit)
+			setShowLoading(true)
 
 			addBookmarkUiState = when (val result = bookmarkRepository.getBookmarkById(id)) {
 				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
@@ -75,13 +71,13 @@ class AddBookmarkViewModel @Inject constructor(
 				}
 			}
 
-			setShowLoading(null)
+			setShowLoading(false)
 		}
 	}
 
 	fun addBookmark() {
 		viewModelScope.launch {
-			setShowLoading(Unit)
+			setShowLoading(true)
 
 			val newBookmark = NewBookmark().copy(
 				url = addBookmarkUiState.url.text,
@@ -97,13 +93,13 @@ class AddBookmarkViewModel @Inject constructor(
 				is Result.Success -> addBookmarkUiState.copy(navigateToMain = Unit)
 			}
 
-			setShowLoading(null)
+			setShowLoading(false)
 		}
 	}
 
 	fun updateBookmark() {
 		viewModelScope.launch {
-			setShowLoading(Unit)
+			setShowLoading(true)
 
 			val newBookmark = NewBookmark().copy(
 				url = addBookmarkUiState.url.text,
@@ -119,7 +115,7 @@ class AddBookmarkViewModel @Inject constructor(
 				is Result.Success -> addBookmarkUiState.copy(navigateToMain = Unit)
 			}
 
-			setShowLoading(null)
+			setShowLoading(false)
 		}
 	}
 
@@ -159,7 +155,7 @@ class AddBookmarkViewModel @Inject constructor(
 
 	fun addGroup(group: String) {
 		viewModelScope.launch {
-			setShowLoading(Unit)
+			setShowLoading(true)
 
 			when (val result = groupRepository.addGroup(Group(group))) {
 				is Result.NetworkError -> addBookmarkUiState = addBookmarkUiState.copy(userMessage = "please check network connection")
@@ -167,7 +163,7 @@ class AddBookmarkViewModel @Inject constructor(
 				is Result.Success -> getGroups()
 			}
 
-			setShowLoading(null)
+			setShowLoading(false)
 		}
 	}
 
@@ -188,16 +184,16 @@ class AddBookmarkViewModel @Inject constructor(
 
 	fun setBookmarkResponse(url: Url) {
 		viewModelScope.launch {
-			setShowLoading(Unit)
+			setShowLoading(true)
 
 			val result = bookmarkRepository.getBookmarkNlpResult(url)
 			addBookmarkUiState = when (result) {
-				is Result.NetworkError -> addBookmarkUiState.copy(isNetworkError = true)
-				is Result.GenericError -> addBookmarkUiState.copy(isNetworkError = true)
+				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
 				is Result.Success -> addBookmarkUiState.copy(bookmarkNlp = result.data)
 			}
 
-			setShowLoading(null)
+			setShowLoading(false)
 		}
 	}
 

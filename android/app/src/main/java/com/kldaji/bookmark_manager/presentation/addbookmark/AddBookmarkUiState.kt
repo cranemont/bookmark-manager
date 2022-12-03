@@ -2,8 +2,6 @@ package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import androidx.compose.ui.text.input.TextFieldValue
 import com.kldaji.bookmark_manager.data.entity.BookmarkNlp
-import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarkUiState
-import com.kldaji.bookmark_manager.presentation.bookmarks.GroupUiState
 
 data class AddBookmarkUiState(
 	val tags: List<String> = emptyList(),
@@ -23,7 +21,7 @@ data class AddBookmarkUiState(
 	val bookmarkId: String = "",
 	val navigateToMain: Unit? = null,
 	val userMessage: String? = null,
-	val showLoading: Unit? = null,
+	val showLoading: Boolean = false,
 ) {
 
 	val isEdit: Boolean = bookmarkId.isNotEmpty()

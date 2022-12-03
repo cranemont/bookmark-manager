@@ -2,6 +2,7 @@ package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
@@ -314,7 +315,7 @@ class AddBookmarkActivity : ComponentActivity() {
 					}
 				}
 
-				addBookmarkUiState.showLoading?.let {
+				if (addBookmarkUiState.showLoading) {
 					Box(
 						modifier = Modifier
 							.fillMaxSize()
