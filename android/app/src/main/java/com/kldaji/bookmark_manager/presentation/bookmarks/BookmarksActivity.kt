@@ -82,8 +82,10 @@ class BookmarksActivity : ComponentActivity() {
 					restartOnPlay = false
 				)
 
-				if (sheetState.isVisible.not()) {
-					focusManager.clearFocus()
+				LaunchedEffect(key1 = sheetState.isVisible) {
+					if (sheetState.isVisible.not()) {
+						focusManager.clearFocus()
+					}
 				}
 
 				LaunchedEffect(key1 = bookmarksUiState.bookmarksUserMessage) {
@@ -154,14 +156,31 @@ class BookmarksActivity : ComponentActivity() {
 							},
 							content = {
 								if (bookmarksUiState.queriedBookmarks == null) {
-									LazyColumn(
-										modifier = modifier
-											.fillMaxSize()
-											.padding(it)
-											.padding(vertical = 8.dp, horizontal = 16.dp)
-									) {
-										items(items = bookmarksUiState.allBookmarks) { bookmarkResponse ->
-											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
+									if (bookmarksUiState.allBookmarks.isEmpty()) {
+										Column(
+											modifier = modifier
+												.padding(it)
+												.padding(vertical = 50.dp, horizontal = 16.dp)
+												.fillMaxWidth(),
+											verticalArrangement = Arrangement.Center,
+											horizontalAlignment = Alignment.CenterHorizontally
+										) {
+											Image(
+												painter = painterResource(R.drawable.empty),
+												contentDescription = "",
+												modifier = modifier.size(150.dp),
+											)
+										}
+									} else {
+										LazyColumn(
+											modifier = modifier
+												.fillMaxSize()
+												.padding(it)
+												.padding(vertical = 8.dp, horizontal = 16.dp)
+										) {
+											items(items = bookmarksUiState.allBookmarks) { bookmarkResponse ->
+												BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
+											}
 										}
 									}
 								} else if (bookmarksUiState.queriedBookmarks.isEmpty()) {
@@ -174,7 +193,7 @@ class BookmarksActivity : ComponentActivity() {
 										horizontalAlignment = Alignment.CenterHorizontally
 									) {
 										Image(
-											painter = painterResource(R.drawable.no_data),
+											painter = painterResource(R.drawable.empty),
 											contentDescription = "",
 											modifier = modifier.size(150.dp),
 										)
@@ -270,7 +289,11 @@ fun BottomSheetContent(
 		topBar = {
 			TopAppBar(
 				title = {
-					Text(text = bookmarksUiState.selectedGroup)
+					if (bookmarksUiState.selectedGroup.isEmpty()) {
+						Text(text = "Please Add New Bookmark")
+					} else {
+						Text(text = bookmarksUiState.selectedGroup)
+					}
 				},
 				actions = {
 					IconButton(
