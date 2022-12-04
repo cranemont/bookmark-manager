@@ -72,8 +72,11 @@ class LoginActivity : ComponentActivity() {
 					restartOnPlay = false
 				)
 
-				if (!sheetState.isVisible) {
-					LocalFocusManager.current.clearFocus()
+				val focusManager = LocalFocusManager.current
+				LaunchedEffect(key1 = sheetState.isVisible) {
+					if (sheetState.isVisible.not()) {
+						focusManager.clearFocus()
+					}
 				}
 
 				LaunchedEffect(key1 = uiState.signInSuccess) {

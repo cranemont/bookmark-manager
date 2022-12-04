@@ -82,6 +82,10 @@ class BookmarksActivity : ComponentActivity() {
 					restartOnPlay = false
 				)
 
+				if (sheetState.isVisible.not()) {
+					focusManager.clearFocus()
+				}
+
 				LaunchedEffect(key1 = bookmarksUiState.bookmarksUserMessage) {
 					bookmarksUiState.bookmarksUserMessage?.let {
 						bookmarksState.snackbarHostState.showSnackbar(it)
