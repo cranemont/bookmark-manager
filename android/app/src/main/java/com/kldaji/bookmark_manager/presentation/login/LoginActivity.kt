@@ -5,10 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Key
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -44,7 +47,7 @@ class LoginActivity : ComponentActivity() {
 			BookmarkmanagerTheme {
 				val modifier = Modifier
 				val coroutineScope = rememberCoroutineScope()
-				val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+				val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true, animationSpec = TweenSpec(durationMillis = 700))
 				val uiState = loginViewModel.loginUiState
 				val signInState = rememberScaffoldState()
 				val signUpState = rememberScaffoldState()
@@ -69,6 +72,13 @@ class LoginActivity : ComponentActivity() {
 					restartOnPlay = false
 				)
 
+				val focusManager = LocalFocusManager.current
+				LaunchedEffect(key1 = sheetState.isVisible) {
+					if (sheetState.isVisible.not()) {
+						focusManager.clearFocus()
+					}
+				}
+
 				LaunchedEffect(key1 = uiState.signInSuccess) {
 					uiState.signInSuccess?.let {
 						startActivity(Intent(this@LoginActivity, BookmarksActivity::class.java))
@@ -81,6 +91,7 @@ class LoginActivity : ComponentActivity() {
 						coroutineScope.launch {
 							sheetState.hide()
 						}
+						signInState.snackbarHostState.showSnackbar("Successfully Signed Up!!!")
 					}
 				}
 
@@ -179,6 +190,8 @@ fun UserInfo(
 	composition: LottieComposition?,
 	progress: Float,
 ) {
+	val focusManager = LocalFocusManager.current
+
 	Column(
 		modifier = modifier
 			.fillMaxSize()
@@ -211,6 +224,7 @@ fun UserInfo(
 				Icon(imageVector = Icons.Default.Person, contentDescription = "")
 			},
 			placeholder = { Text("Please enter id") },
+			keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
 		)
 
 		OutlinedTextField(
@@ -239,14 +253,18 @@ fun UserInfo(
 				IconButton(onClick = { viewModel.setIsPasswordVisible(!uiState.isPasswordVisible) }) {
 					Icon(imageVector = imageVector, "")
 				}
-			}
+			},
+			keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
 		)
 
 		Button(
 			modifier = modifier
 				.fillMaxWidth()
 				.padding(top = 16.dp),
-			onClick = { onButtonClick() },
+			onClick = {
+				focusManager.clearFocus()
+				onButtonClick()
+			},
 		) {
 			val buttonText = if (isSignUp) "SIGN UP" else "SIGN IN"
 			Text(text = buttonText)

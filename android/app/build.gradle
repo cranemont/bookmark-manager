@@ -88,6 +88,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp-urlconnection:4.9.1"
 
     implementation "com.airbnb.android:lottie-compose:5.2.0"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.27.0"
+
 }
 
 kapt {
