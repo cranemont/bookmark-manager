@@ -2,13 +2,13 @@ package com.kldaji.bookmark_manager.presentation.addbookmark
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -18,9 +18,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +28,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.airbnb.lottie.compose.*
+import com.kldaji.bookmark_manager.R
 import com.kldaji.bookmark_manager.data.entity.Url
 import com.kldaji.bookmark_manager.presentation.bookmarks.BookmarksActivity
 import com.kldaji.bookmark_manager.presentation.theme.BookmarkmanagerTheme
@@ -68,6 +68,16 @@ class AddBookmarkActivity : ComponentActivity() {
 				val modifier = Modifier
 				val addBookmarkUiState = addBookmarkViewModel.addBookmarkUiState
 				val scaffoldState = rememberScaffoldState()
+				var isPlaying by remember { mutableStateOf(true) }
+				var speed by remember { mutableStateOf(1f) }
+				val compositionLoading by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+				val progress by animateLottieCompositionAsState(
+					compositionLoading,
+					iterations = LottieConstants.IterateForever,
+					isPlaying = isPlaying,
+					speed = speed,
+					restartOnPlay = false
+				)
 
 				LaunchedEffect(key1 = addBookmarkUiState.bookmarkId) {
 					if (addBookmarkUiState.bookmarkId.isNotEmpty()) {
@@ -202,17 +212,20 @@ class AddBookmarkActivity : ComponentActivity() {
 									expanded = addBookmarkUiState.isShowGroups,
 									onDismissRequest = { addBookmarkViewModel.hideGroups() }
 								) {
-									addBookmarkUiState.groupUiStates.forEach { groupUiState ->
+									addBookmarkUiState.groups.forEach { group ->
 										DropdownMenuItem(
 											onClick = {
-												addBookmarkViewModel.setSelectedGroup(groupUiState.name)
+												addBookmarkViewModel.setSelectedGroup(group)
 												addBookmarkViewModel.hideGroups()
 											}
 										) {
-											Text(text = groupUiState.name)
+											Text(text = group)
 										}
 									}
-									DropdownMenuItem(onClick = { addBookmarkViewModel.showAddGroupDialog() }) {
+									DropdownMenuItem(onClick = {
+										addBookmarkViewModel.hideGroups()
+										addBookmarkViewModel.showAddGroupDialog()
+									}) {
 										Row {
 											Icon(imageVector = Icons.Default.AddCircle, contentDescription = "그룹 추가")
 											Text(
@@ -305,14 +318,19 @@ class AddBookmarkActivity : ComponentActivity() {
 					}
 				}
 
-				if (addBookmarkUiState.isShowProgressBar) {
-					Box(modifier = Modifier
-						.fillMaxSize()
-						.background(Color.Black.copy(alpha = 0.3f))
-						.pointerInput(Unit) {},
+				if (addBookmarkUiState.showLoading) {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.background(Color.Black.copy(alpha = 0.3f))
+							.pointerInput(Unit) {},
 						contentAlignment = Alignment.Center
 					) {
-						CircularProgressIndicator()
+						LottieAnimation(
+							compositionLoading,
+							progress,
+							modifier = modifier.size(200.dp)
+						)
 					}
 				}
 			}

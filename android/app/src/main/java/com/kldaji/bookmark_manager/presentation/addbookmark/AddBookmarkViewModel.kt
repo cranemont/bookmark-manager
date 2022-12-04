@@ -1,17 +1,16 @@
 package com.kldaji.bookmark_manager.presentation.addbookmark
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kldaji.bookmark_manager.data.entity.Group
 import com.kldaji.bookmark_manager.data.entity.NewBookmark
 import com.kldaji.bookmark_manager.data.entity.Url
 import com.kldaji.bookmark_manager.data.repository.BookmarkRepository
 import com.kldaji.bookmark_manager.data.repository.GroupRepository
-import com.kldaji.bookmark_manager.presentation.bookmarks.GroupUiState
 import com.kldaji.bookmark_manager.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -27,12 +26,20 @@ class AddBookmarkViewModel @Inject constructor(
 		private set
 
 	init {
+		getGroups()
+	}
+
+	private fun getGroups() {
 		viewModelScope.launch {
-			groupRepository
-				.getAll()
-				.collect { groupUiStates ->
-					addBookmarkUiState = addBookmarkUiState.copy(groupUiStates = groupUiStates)
+			addBookmarkUiState = when (val result = groupRepository.getGroups()) {
+				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
+				is Result.Success -> {
+					val groups = result.data
+
+					addBookmarkUiState.copy(groups = groups)
 				}
+			}
 		}
 	}
 
@@ -40,15 +47,21 @@ class AddBookmarkViewModel @Inject constructor(
 		addBookmarkUiState = addBookmarkUiState.copy(bookmarkId = id)
 	}
 
+	private fun setShowLoading(showLoading: Boolean) {
+		addBookmarkUiState = addBookmarkUiState.copy(showLoading = showLoading)
+	}
+
 	fun getBookmarkById(id: String) {
 		viewModelScope.launch {
-			when (val result = bookmarkRepository.getBookmarkById(id)) {
-				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
-				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
+			setShowLoading(true)
+
+			addBookmarkUiState = when (val result = bookmarkRepository.getBookmarkById(id)) {
+				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
 				is Result.Success -> {
 					val bookmarkResponse = result.data
 
-					addBookmarkUiState = addBookmarkUiState.copy(
+					addBookmarkUiState.copy(
 						url = TextFieldValue(bookmarkResponse.url),
 						title = TextFieldValue(bookmarkResponse.title),
 						description = TextFieldValue(bookmarkResponse.summary),
@@ -57,11 +70,15 @@ class AddBookmarkViewModel @Inject constructor(
 					)
 				}
 			}
+
+			setShowLoading(false)
 		}
 	}
 
 	fun addBookmark() {
 		viewModelScope.launch {
+			setShowLoading(true)
+
 			val newBookmark = NewBookmark().copy(
 				url = addBookmarkUiState.url.text,
 				title = addBookmarkUiState.title.text,
@@ -70,19 +87,20 @@ class AddBookmarkViewModel @Inject constructor(
 				group = addBookmarkUiState.selectedGroup
 			)
 
-			when (val result = bookmarkRepository.addBookmark(newBookmark)) {
-				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
-				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
-				is Result.Success -> {
-					Log.d("AddBookmarkActivity", result.data.toString())
-					addBookmarkUiState = addBookmarkUiState.copy(navigateToMain = Unit)
-				}
+			addBookmarkUiState = when (val result = bookmarkRepository.addBookmark(newBookmark)) {
+				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
+				is Result.Success -> addBookmarkUiState.copy(navigateToMain = Unit)
 			}
+
+			setShowLoading(false)
 		}
 	}
 
 	fun updateBookmark() {
 		viewModelScope.launch {
+			setShowLoading(true)
+
 			val newBookmark = NewBookmark().copy(
 				url = addBookmarkUiState.url.text,
 				title = addBookmarkUiState.title.text,
@@ -91,15 +109,13 @@ class AddBookmarkViewModel @Inject constructor(
 				group = addBookmarkUiState.selectedGroup
 			)
 
-			Log.d("AddBookmarkActivity", newBookmark.toString())
-			when (val result = bookmarkRepository.updateBookmark(addBookmarkUiState.bookmarkId, newBookmark)) {
-				is Result.NetworkError -> Log.d("AddBookmarkActivity", result.toString())
-				is Result.GenericError -> Log.d("AddBookmarkActivity", result.errorResponse?.message.toString())
-				is Result.Success -> {
-					Log.d("AddBookmarkActivity", result.data.toString())
-					addBookmarkUiState = addBookmarkUiState.copy(navigateToMain = Unit)
-				}
+			addBookmarkUiState = when (val result = bookmarkRepository.updateBookmark(addBookmarkUiState.bookmarkId, newBookmark)) {
+				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
+				is Result.Success -> addBookmarkUiState.copy(navigateToMain = Unit)
 			}
+
+			setShowLoading(false)
 		}
 	}
 
@@ -139,7 +155,15 @@ class AddBookmarkViewModel @Inject constructor(
 
 	fun addGroup(group: String) {
 		viewModelScope.launch {
-			groupRepository.insert(GroupUiState(name = group))
+			setShowLoading(true)
+
+			when (val result = groupRepository.addGroup(Group(group))) {
+				is Result.NetworkError -> addBookmarkUiState = addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState = addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
+				is Result.Success -> getGroups()
+			}
+
+			setShowLoading(false)
 		}
 	}
 
@@ -160,25 +184,17 @@ class AddBookmarkViewModel @Inject constructor(
 
 	fun setBookmarkResponse(url: Url) {
 		viewModelScope.launch {
-			showProgressBar()
+			setShowLoading(true)
 
 			val result = bookmarkRepository.getBookmarkNlpResult(url)
 			addBookmarkUiState = when (result) {
-				is Result.NetworkError -> addBookmarkUiState.copy(isNetworkError = true)
-				is Result.GenericError -> addBookmarkUiState.copy(isNetworkError = true)
+				is Result.NetworkError -> addBookmarkUiState.copy(userMessage = "please check network connection")
+				is Result.GenericError -> addBookmarkUiState.copy(userMessage = result.errorResponse?.message)
 				is Result.Success -> addBookmarkUiState.copy(bookmarkNlp = result.data)
 			}
 
-			hideProgressBar()
+			setShowLoading(false)
 		}
-	}
-
-	private fun showProgressBar() {
-		addBookmarkUiState = addBookmarkUiState.copy(isShowProgressBar = true)
-	}
-
-	private fun hideProgressBar() {
-		addBookmarkUiState = addBookmarkUiState.copy(isShowProgressBar = false)
 	}
 
 	fun showGroups() {

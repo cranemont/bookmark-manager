@@ -13,7 +13,7 @@ class LoginRemoteDataSourceImpl @Inject constructor(
 	@IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ): LoginRemoteDataSource {
 
-	override suspend fun signIn(userInfo: UserInfo): Result<String> {
+	override suspend fun signIn(userInfo: UserInfo): Result<Unit> {
 		return safeApiCall(ioDispatcher) {
 			loginApi.signIn(userInfo)
 		}

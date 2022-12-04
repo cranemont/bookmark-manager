@@ -2,11 +2,13 @@ package com.kldaji.bookmark_manager.presentation.bookmarks
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,9 +23,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,11 +33,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.*
+import com.kldaji.bookmark_manager.R
 import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
 import com.kldaji.bookmark_manager.presentation.theme.*
@@ -63,8 +67,34 @@ class BookmarksActivity : ComponentActivity() {
 					initialValue = ModalBottomSheetValue.Hidden,
 					skipHalfExpanded = true
 				)
+				val bookmarksState = rememberScaffoldState()
+				val searchState = rememberScaffoldState()
 				val focusManager = LocalFocusManager.current
 				val focusRequester: FocusRequester = remember { FocusRequester() }
+				var isPlaying by remember { mutableStateOf(true) }
+				var speed by remember { mutableStateOf(1f) }
+				val compositionLoading by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+				val progress by animateLottieCompositionAsState(
+					compositionLoading,
+					iterations = LottieConstants.IterateForever,
+					isPlaying = isPlaying,
+					speed = speed,
+					restartOnPlay = false
+				)
+
+				LaunchedEffect(key1 = bookmarksUiState.bookmarksUserMessage) {
+					bookmarksUiState.bookmarksUserMessage?.let {
+						bookmarksState.snackbarHostState.showSnackbar(it)
+						bookmarksViewModel.hideUserMessage()
+					}
+				}
+
+				LaunchedEffect(key1 = bookmarksUiState.searchUserMessage) {
+					bookmarksUiState.searchUserMessage?.let {
+						searchState.snackbarHostState.showSnackbar(it)
+						bookmarksViewModel.hideUserMessage()
+					}
+				}
 
 				ModalBottomSheetLayout(
 					sheetContentColor = background,
@@ -75,6 +105,7 @@ class BookmarksActivity : ComponentActivity() {
 							modifier = modifier
 								.fillMaxWidth()
 								.fillMaxHeight(0.95f),
+							scaffoldState = searchState,
 							topBar = {
 								Surface(
 									modifier = modifier.fillMaxWidth(),
@@ -118,15 +149,31 @@ class BookmarksActivity : ComponentActivity() {
 								}
 							},
 							content = {
-								if (bookmarksUiState.queriedBookmarks.isEmpty()) {
-									Column(
+								if (bookmarksUiState.queriedBookmarks == null) {
+									LazyColumn(
 										modifier = modifier
 											.fillMaxSize()
 											.padding(it)
-											.padding(vertical = 8.dp, horizontal = 16.dp),
+											.padding(vertical = 8.dp, horizontal = 16.dp)
+									) {
+										items(items = bookmarksUiState.allBookmarks) { bookmarkResponse ->
+											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
+										}
+									}
+								} else if (bookmarksUiState.queriedBookmarks.isEmpty()) {
+									Column(
+										modifier = modifier
+											.padding(it)
+											.padding(vertical = 50.dp, horizontal = 16.dp)
+											.fillMaxWidth(),
+										verticalArrangement = Arrangement.Center,
 										horizontalAlignment = Alignment.CenterHorizontally
 									) {
-										Text(text = "NO RESULT")
+										Image(
+											painter = painterResource(R.drawable.no_data),
+											contentDescription = "",
+											modifier = modifier.size(150.dp),
+										)
 									}
 								} else {
 									LazyColumn(
@@ -136,7 +183,7 @@ class BookmarksActivity : ComponentActivity() {
 											.padding(vertical = 8.dp, horizontal = 16.dp)
 									) {
 										items(items = bookmarksUiState.queriedBookmarks) { bookmarkResponse ->
-											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit)
+											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark)
 										}
 									}
 								}
@@ -144,20 +191,46 @@ class BookmarksActivity : ComponentActivity() {
 						)
 					}
 				) {
-					BottomSheetContent(modifier, bookmarksUiState, coroutineScope, ::startActivity, ::startActivityEdit, bookmarksViewModel) {
-						coroutineScope.launch {
-							sheetState.show()
-						}
+					BottomSheetContent(
+						modifier = modifier,
+						bookmarksUiState = bookmarksUiState,
+						coroutineScope = coroutineScope,
+						clickFloatingButton = ::startActivity,
+						clickEditButton = ::startActivityEdit,
+						clickDeleteButton = bookmarksViewModel::deleteBookmark,
+						bookmarksViewModel = bookmarksViewModel,
+						clickSearchButton = {
+							coroutineScope.launch {
+								sheetState.show()
+							}
+						},
+						state = bookmarksState,
+					)
+				}
+
+				bookmarksUiState.showLoading?.let {
+					Box(
+						modifier = Modifier
+							.fillMaxSize()
+							.background(Color.Black.copy(alpha = 0.3f))
+							.pointerInput(Unit) {},
+						contentAlignment = Alignment.Center
+					) {
+						LottieAnimation(
+							compositionLoading,
+							progress,
+							modifier = modifier.size(200.dp)
+						)
 					}
 				}
 			}
+
 		}
 	}
 
 	override fun onStart() {
 		super.onStart()
 
-		Log.d("AddBookmarkActivity", "onStart()")
 		bookmarksViewModel.getNewBookmarkResponses()
 	}
 
@@ -182,12 +255,14 @@ fun BottomSheetContent(
 	coroutineScope: CoroutineScope,
 	clickFloatingButton: () -> Unit,
 	clickEditButton: (id: String) -> Unit,
+	clickDeleteButton: (id: String) -> Unit,
 	bookmarksViewModel: BookmarksViewModel,
-	clickSearchButton: () -> Unit
+	clickSearchButton: () -> Unit,
+	state: ScaffoldState,
 ) {
-	val scaffoldState = rememberScaffoldState()
 
 	Scaffold(
+		scaffoldState = state,
 		topBar = {
 			TopAppBar(
 				title = {
@@ -209,7 +284,7 @@ fun BottomSheetContent(
 				navigationIcon = {
 					IconButton(onClick = {
 						coroutineScope.launch {
-							scaffoldState.drawerState.open()
+							state.drawerState.open()
 						}
 					}) {
 						Icon(imageVector = Icons.Default.Menu, contentDescription = "드로우어")
@@ -230,85 +305,118 @@ fun BottomSheetContent(
 			}
 		},
 		drawerContent = {
-			Row(
-				modifier = modifier
-					.fillMaxWidth()
-					.background(drawer_header_background)
-					.padding(vertical = 24.dp),
-				horizontalArrangement = Arrangement.Center,
-				verticalAlignment = Alignment.CenterVertically
+			Column(
+				modifier = modifier.fillMaxSize(),
+				verticalArrangement = Arrangement.SpaceBetween
 			) {
-				Icon(
-					imageVector = Icons.Default.MenuBook,
-					contentDescription = "북마크 이미지",
-					tint = Color.White
-				)
-
-				Text(
-					modifier = modifier.padding(start = 8.dp),
-					text = "Bookmark Manager",
-					fontWeight = FontWeight.Bold,
-					color = Color.White,
-					fontSize = 20.sp
-				)
-			}
-
-			LazyColumn(
-				modifier = modifier
-					.fillMaxSize()
-					.padding(24.dp)
-			) {
-				item {
-					Text(
-						modifier = modifier.padding(bottom = 16.dp),
-						text = "Group",
-						color = Color.White,
-						fontSize = 18.sp,
-						fontWeight = FontWeight.Bold
-					)
-				}
-
-				items(items = bookmarksViewModel.bookmarksUiState.groups) { group: String ->
+				Column(modifier = modifier.fillMaxWidth()) {
 					Row(
 						modifier = modifier
 							.fillMaxWidth()
-							.clickable {
-								bookmarksViewModel.setSelectedGroup(group)
-								coroutineScope.launch {
-									scaffoldState.drawerState.close()
-								}
-							}
-							.padding(vertical = 12.dp),
+							.background(drawer_header_background)
+							.padding(vertical = 24.dp),
+						horizontalArrangement = Arrangement.Center,
 						verticalAlignment = Alignment.CenterVertically
 					) {
-						Icon(
-							imageVector = Icons.Default.Bookmarks,
-							contentDescription = "북마크 이미지",
-							tint = Color.White
+						Image(
+							painterResource(R.drawable.bookmark),
+							"",
+							modifier = modifier.size(25.dp)
 						)
+
 						Text(
 							modifier = modifier.padding(start = 12.dp),
-							text = group,
+							text = "Bookmarks",
+							fontWeight = FontWeight.Bold,
 							color = Color.White,
-							fontSize = 16.sp
+							fontSize = 20.sp
 						)
 					}
+
+					LazyColumn(
+						modifier = modifier.padding(24.dp)
+					) {
+						item {
+							Text(
+								modifier = modifier.padding(bottom = 16.dp),
+								text = "Group",
+								color = Color.White,
+								fontSize = 18.sp,
+								fontWeight = FontWeight.Bold
+							)
+						}
+
+						items(items = bookmarksViewModel.bookmarksUiState.groups) { group: String ->
+							Row(
+								modifier = modifier
+									.fillMaxWidth()
+									.clickable {
+										bookmarksViewModel.setSelectedGroup(group)
+										coroutineScope.launch {
+											state.drawerState.close()
+										}
+									}
+									.padding(vertical = 12.dp),
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								Icon(
+									imageVector = Icons.Default.Bookmarks,
+									contentDescription = "북마크 이미지",
+									tint = Color.White
+								)
+								Text(
+									modifier = modifier.padding(start = 12.dp),
+									text = group,
+									color = Color.White,
+									fontSize = 16.sp
+								)
+							}
+						}
+					}
+				}
+
+				Row(
+					modifier = modifier
+						.fillMaxWidth()
+						.padding(vertical = 16.dp, horizontal = 24.dp)
+						.clickable { },
+					verticalAlignment = Alignment.CenterVertically,
+				) {
+					Icon(modifier = modifier.padding(end = 16.dp), imageVector = Icons.Default.Logout, contentDescription = "", tint = Color.White)
+
+					Text(text = "LOGOUT", color = Color.White)
 				}
 			}
+
 		},
 		drawerBackgroundColor = drawer_body_background,
-		scaffoldState = scaffoldState,
 		backgroundColor = background
 	) { paddingValues ->
 
-		LazyColumn(
-			modifier = modifier
-				.padding(paddingValues)
-				.fillMaxSize(),
-			contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
-		) {
-			items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
-				BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, clickEditButton)
+		if (bookmarksUiState.bookmarkResponses.isEmpty()) {
+			Column(
+				modifier = modifier
+					.padding(paddingValues)
+					.fillMaxSize(),
+				verticalArrangement = Arrangement.Center,
+				horizontalAlignment = Alignment.CenterHorizontally
+			) {
+				Image(
+					modifier = modifier.padding(bottom = 50.dp),
+					painter = painterResource(R.drawable.empty),
+					contentDescription = "",
+				)
+			}
+		} else {
+			LazyColumn(
+				modifier = modifier
+					.padding(paddingValues)
+					.fillMaxSize(),
+				contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
+			) {
+				items(items = bookmarksUiState.bookmarkResponses) { bookmarkResponse ->
+					BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, clickEditButton, clickDeleteButton)
+				}
 			}
 		}
 	}
@@ -320,7 +428,8 @@ fun BookmarkItem(
 	bookmarksUiState: BookmarksUiState,
 	bookmarkResponse: BookmarkResponse,
 	bookmarksViewModel: BookmarksViewModel,
-	clickEditButton: (id: String) -> Unit
+	clickEditButton: (id: String) -> Unit,
+	clickDeleteButton: (id: String) -> Unit,
 ) {
 	Column(modifier = modifier.fillMaxWidth()) {
 		Column(
@@ -330,7 +439,7 @@ fun BookmarkItem(
 				.shadow(elevation = 8.dp, shape = RoundedCornerShape(12.dp))
 				.clip(RoundedCornerShape(12.dp))
 				.background(color = Color.White)
-				.animateContentSize(),
+				.animateContentSize(spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
 		) {
 
 			if (bookmarksUiState.selectedBookmarkId != bookmarkResponse.id) {
@@ -454,7 +563,7 @@ fun BookmarkItem(
 				}
 				IconButton(
 					modifier = modifier.clip(CircleShape),
-					onClick = { /*TODO*/ }
+					onClick = { clickDeleteButton(bookmarkResponse.id) }
 				) {
 					Icon(imageVector = Icons.Default.Delete, contentDescription = "")
 				}

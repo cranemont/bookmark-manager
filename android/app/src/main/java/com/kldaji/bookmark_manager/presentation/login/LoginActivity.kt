@@ -61,6 +61,14 @@ class LoginActivity : ComponentActivity() {
 					restartOnPlay = false
 				)
 
+				val progressLoading by animateLottieCompositionAsState(
+					compositionLoading,
+					iterations = LottieConstants.IterateForever,
+					isPlaying = isPlaying,
+					speed = speed,
+					restartOnPlay = false
+				)
+
 				LaunchedEffect(key1 = uiState.signInSuccess) {
 					uiState.signInSuccess?.let {
 						startActivity(Intent(this@LoginActivity, BookmarksActivity::class.java))
@@ -150,7 +158,7 @@ class LoginActivity : ComponentActivity() {
 					) {
 						LottieAnimation(
 							compositionLoading,
-							progress,
+							progressLoading,
 							modifier = modifier.size(200.dp)
 						)
 					}

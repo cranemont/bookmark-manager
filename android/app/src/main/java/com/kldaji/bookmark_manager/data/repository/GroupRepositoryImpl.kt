@@ -1,6 +1,7 @@
 package com.kldaji.bookmark_manager.data.repository
 
 import com.kldaji.bookmark_manager.data.Mapper
+import com.kldaji.bookmark_manager.data.entity.Group
 import com.kldaji.bookmark_manager.data.entity.GroupResponse
 import com.kldaji.bookmark_manager.data.source.local.GroupLocalDataSource
 import com.kldaji.bookmark_manager.data.source.remote.GroupRemoteDataSource
@@ -35,7 +36,7 @@ class GroupRepositoryImpl @Inject constructor(
 		return groupRemoteDataSource.getGroups()
 	}
 
-	override suspend fun addGroup(group: String): Result<GroupResponse> {
+	override suspend fun addGroup(group: Group): Result<GroupResponse> {
 		return groupRemoteDataSource.addGroup(group)
 	}
 }
