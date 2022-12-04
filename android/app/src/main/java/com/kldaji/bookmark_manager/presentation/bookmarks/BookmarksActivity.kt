@@ -41,11 +41,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import com.airbnb.lottie.compose.*
 import com.kldaji.bookmark_manager.R
 import com.kldaji.bookmark_manager.data.entity.BookmarkResponse
 import com.kldaji.bookmark_manager.presentation.addbookmark.AddBookmarkActivity
+import com.kldaji.bookmark_manager.presentation.login.LoginActivity
 import com.kldaji.bookmark_manager.presentation.theme.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -181,7 +181,14 @@ class BookmarksActivity : ComponentActivity() {
 												.padding(vertical = 8.dp, horizontal = 16.dp)
 										) {
 											items(items = bookmarksUiState.allBookmarks) { bookmarkResponse ->
-												BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark, clickItem = ::startWebView)
+												BookmarkItem(
+													modifier,
+													bookmarksUiState,
+													bookmarkResponse,
+													bookmarksViewModel,
+													::startActivityEdit,
+													bookmarksViewModel::deleteBookmark,
+													clickItem = ::startWebView)
 											}
 										}
 									}
@@ -208,7 +215,14 @@ class BookmarksActivity : ComponentActivity() {
 											.padding(vertical = 8.dp, horizontal = 16.dp)
 									) {
 										items(items = bookmarksUiState.queriedBookmarks) { bookmarkResponse ->
-											BookmarkItem(modifier, bookmarksUiState, bookmarkResponse, bookmarksViewModel, ::startActivityEdit, bookmarksViewModel::deleteBookmark, clickItem = ::startWebView)
+											BookmarkItem(
+												modifier,
+												bookmarksUiState,
+												bookmarkResponse,
+												bookmarksViewModel,
+												::startActivityEdit,
+												bookmarksViewModel::deleteBookmark,
+												clickItem = ::startWebView)
 										}
 									}
 								}
@@ -230,7 +244,8 @@ class BookmarksActivity : ComponentActivity() {
 							}
 						},
 						state = bookmarksState,
-						startWebView = ::startWebView
+						startWebView = ::startWebView,
+						logout = ::startLogin
 					)
 				}
 
@@ -276,6 +291,12 @@ class BookmarksActivity : ComponentActivity() {
 		val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
 		startActivity(webIntent)
 	}
+
+	private fun startLogin() {
+		val intent = Intent(this, LoginActivity::class.java)
+		startActivity(intent)
+		finish()
+	}
 }
 
 @Composable
@@ -289,7 +310,8 @@ fun BottomSheetContent(
 	bookmarksViewModel: BookmarksViewModel,
 	clickSearchButton: () -> Unit,
 	state: ScaffoldState,
-	startWebView: (url: String) -> Unit
+	startWebView: (url: String) -> Unit,
+	logout: () -> Unit
 ) {
 	Scaffold(
 		scaffoldState = state,
@@ -297,7 +319,7 @@ fun BottomSheetContent(
 			TopAppBar(
 				title = {
 					if (bookmarksUiState.selectedGroup.isEmpty()) {
-						Text(text = "Please Add New Bookmark")
+						Text(text = "no group...")
 					} else {
 						Text(text = bookmarksUiState.selectedGroup)
 					}
@@ -413,7 +435,7 @@ fun BottomSheetContent(
 					modifier = modifier
 						.fillMaxWidth()
 						.padding(vertical = 16.dp, horizontal = 24.dp)
-						.clickable { },
+						.clickable { logout() },
 					verticalAlignment = Alignment.CenterVertically,
 				) {
 					Icon(modifier = modifier.padding(end = 16.dp), imageVector = Icons.Default.Logout, contentDescription = "", tint = Color.White)
