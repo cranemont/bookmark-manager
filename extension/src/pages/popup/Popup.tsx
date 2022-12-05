@@ -174,7 +174,10 @@ const Popup = () => {
             aria-label="Panel Link"
             icon={<FaIcon icon={faTableColumns} />}
             variant="ghost"
-            onClick={() => send("open-panel")}
+            onClick={() => {
+              send("open-panel");
+              window.close();
+            }}
             zIndex={9999}
           />
         </Flex>
