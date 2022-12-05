@@ -7,7 +7,7 @@ console.log("background loaded");
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   (async () => {
     switch (request.type) {
-      case "panel": {
+      case "open-panel": {
         const panelUrl = `chrome-extension://${chrome.runtime.id}/src/pages/panel/index.html`;
         const tabs = await chrome.tabs.query({ url: panelUrl });
 
@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         break;
       }
-      case "add": {
+      case "add-bookmark": {
         // add bookmark
         const res = await fetch("http://43.201.119.242/bookmark", {
           method: "POST",

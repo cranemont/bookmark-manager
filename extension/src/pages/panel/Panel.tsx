@@ -1,7 +1,7 @@
 import {
+  Avatar,
   Box,
   Button,
-  ButtonGroup,
   ButtonProps,
   Card,
   CardBody,
@@ -53,12 +53,50 @@ const Title = (props: FlexProps) => (
   </DarkMode>
 );
 
+const Login = (props: { user: any }) => (
+  <Flex>
+    {props.user ? (
+      <Flex
+        width={"100%"}
+        alignItems="center"
+        justifyContent="flex-start"
+        gap={2}
+        height={14}
+        paddingX={4}
+        bg={"gray.600"}
+        borderRadius={"md"}
+      >
+        <Avatar size={"xs"} bg="gray.500" />
+        <Text fontWeight={"bold"} noOfLines={1}>
+          {props.user?.username}
+        </Text>
+        {/*<Button>로그아웃</Button>*/}
+      </Flex>
+    ) : (
+      <Button
+        as={Flex}
+        height={14}
+        width={"100%"}
+        alignItems="center"
+        justifyContent="flex-start"
+        gap={2}
+        cursor={"pointer"}
+      >
+        <Avatar size={"xs"} bg="gray.500" />
+        <Text fontWeight={"bold"} noOfLines={1}>
+          로그인
+        </Text>
+      </Button>
+    )}
+  </Flex>
+);
+
 const SectionContainer = (props: FlexProps) => (
   <Flex
     boxSizing={"border-box"}
     flexDirection={"column"}
     paddingY={5}
-    paddingX={2}
+    paddingX={4}
     sx={{
       "& > *": {
         fontSize: "md",
@@ -100,7 +138,7 @@ const TagContainer = (props: FlexProps) => (
   </Flex>
 );
 
-const BookmarkCard = (props: CardProps) => (
+const BookmarkCard = (props: CardProps & { bookmark: any }) => (
   <Card width={"100%"} {...props}>
     <CardBody>
       <Img
@@ -110,22 +148,22 @@ const BookmarkCard = (props: CardProps) => (
       />
       <Stack mt={6} spacing={4}>
         <Heading size="md" noOfLines={1}>
-          Gradescope
+          {props.bookmark.title}
         </Heading>
         <Text
           as={Link}
           size="xs"
           mt="2 !important"
           noOfLines={1}
-          href="https://www.gradescope.com/"
+          href={props.bookmark.url}
           target="_blank"
         >
-          https://www.gradescope.com/
+          {props.bookmark.url}
         </Text>
         <Divider />
         <Heading size={"xs"}>
           <Flex alignItems={"center"} gap={2}>
-            <FaIcon icon={faFolder} /> group
+            <FaIcon icon={faFolder} /> {props.bookmark.group}
           </Flex>
         </Heading>
         <Box
@@ -133,22 +171,12 @@ const BookmarkCard = (props: CardProps) => (
           sx={{ "::-webkit-scrollbar": { display: "none" } }}
         >
           <TagContainer width={"max-content"}>
-            <Tag>tag1</Tag>
-            <Tag>tag2</Tag>
-            <Tag>tag3</Tag>
-            <Tag>tag1</Tag>
-            <Tag>tag2</Tag>
-            <Tag>tag3</Tag>
-            <Tag>tag1</Tag>
-            <Tag>tag2</Tag>
-            <Tag>tag3</Tag>
+            {props.bookmark.tags.map((value, index) => (
+              <Tag key={index}>{value}</Tag>
+            ))}
           </TagContainer>
         </Box>
-        <Text noOfLines={2}>
-          This sofa is perfect for modern tropical spaces, baroque inspired
-          spaces, earthy toned spaces and for people who love a chic design with
-          a sprinkle of vintage design.
-        </Text>
+        <Text noOfLines={2}>{props.bookmark.summary}</Text>
       </Stack>
     </CardBody>
     <CardFooter
@@ -171,34 +199,40 @@ const BookmarkCard = (props: CardProps) => (
 );
 
 const Panel = () => {
-  const [groups, setGroups] = useState([]);
-  const [tags, setTags] = useState([
-    "taggggg1",
-    "tag2",
-    "tttag3",
-    "tag4",
-    "taggg5",
-    "tagg6",
-    "tttttag7",
-  ]);
-  const [board, setBoard] = useState({
-    bookmarks: [{}, {}, {}, {}, {}, {}],
-    filter: {
-      type: "all",
-      value: "",
+  const myAxios = axios.create({
+    baseURL: "https://nother.ml",
+    headers: {
+      "Content-Type": "application/json",
     },
+    withCredentials: true,
   });
+
+  const [user, setUser] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [filter, setFilter] = useState("All");
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const init = async () => {
+    // check user
+    const cookie = await chrome.cookies.get({
+      url: "https://nother.ml",
+      name: "connect.sid",
+    });
+    if (cookie) {
+      const { status, message, user } = await chrome.runtime.sendMessage({
+        type: "get-user",
+      });
+      setUser(user);
+    }
+
     // request APIs
-    const [groupsRes] = await Promise.allSettled([
-      axios.get("http://43.201.119.242/groups", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+    const [groupsRes, tagsRes, bookmarksRes] = await Promise.allSettled([
+      myAxios.get("groups"),
+      myAxios.get("bookmark/tags"),
+      myAxios.get("bookmarks"),
     ]);
 
     // update UI
@@ -206,6 +240,18 @@ const Panel = () => {
       console.log("group err");
     } else {
       groupsRes.value.data && setGroups(groupsRes.value.data);
+    }
+
+    if (tagsRes.status == "rejected") {
+      console.log("tags err");
+    } else {
+      tagsRes.value.data && setTags(tagsRes.value.data);
+    }
+
+    if (bookmarksRes.status == "rejected") {
+      console.log("bookmarks err");
+    } else {
+      bookmarksRes.value.data && setBookmarks(bookmarksRes.value.data);
     }
   };
 
@@ -218,9 +264,9 @@ const Panel = () => {
       <PanelModal isOpen={isOpen} onClose={onClose} />
       <Grid gridTemplateColumns="320px auto" minHeight="100vh">
         <GridItem
+          height={"100vh"}
           display="flex"
           flexDirection="column"
-          height="100%"
           bg={"gray.600"}
           color={"gray.50"}
         >
@@ -228,43 +274,61 @@ const Panel = () => {
             <Img src={logo} height={6} />
             Bookmarker
           </Title>
-          <SectionContainer>
-            <SectionIconBtn
-              leftIcon={<FaIcon icon={faSearch} />}
-              onClick={onOpen}
-            >
-              Search
-            </SectionIconBtn>
-            <SectionIconBtn leftIcon={<FaIcon icon={faGear} />} isDisabled>
-              Settings
-            </SectionIconBtn>
-          </SectionContainer>
-          <SectionContainer>
-            <SectionTitle>Groups</SectionTitle>
-            {groups.map((value, index) => (
-              <SectionIconBtn key={index} leftIcon={<FaIcon icon={faFolder} />}>
-                {value}
+          <Flex flexDirection="column" height={"100%"} overflowY={"scroll"}>
+            <SectionContainer>
+              <Login user={user} />
+              <SectionIconBtn
+                leftIcon={<FaIcon icon={faSearch} />}
+                onClick={onOpen}
+              >
+                Search
               </SectionIconBtn>
-            ))}
-          </SectionContainer>
-          <SectionContainer>
-            <SectionTitle>Tags</SectionTitle>
-            <TagContainer paddingX={4} paddingY={2} flexWrap={"wrap"}>
-              {tags.map((value, index) => (
-                <Tag as={Button} key={index} height={"auto"}>
-                  <TagLabel>{value}</TagLabel>
-                </Tag>
+              <SectionIconBtn leftIcon={<FaIcon icon={faGear} />} isDisabled>
+                Settings
+              </SectionIconBtn>
+            </SectionContainer>
+            <SectionContainer>
+              <SectionTitle>Groups</SectionTitle>
+              {groups.map((value, index) => (
+                <SectionIconBtn
+                  key={index}
+                  leftIcon={<FaIcon icon={faFolder} />}
+                >
+                  {value}
+                </SectionIconBtn>
               ))}
-            </TagContainer>
-          </SectionContainer>
+            </SectionContainer>
+            <SectionContainer>
+              <SectionTitle>Tags</SectionTitle>
+              <TagContainer paddingX={4} paddingY={2} flexWrap={"wrap"}>
+                {tags.map((value, index) => (
+                  <Tag as={Button} key={index} height={"auto"}>
+                    <TagLabel>{value}</TagLabel>
+                  </Tag>
+                ))}
+              </TagContainer>
+            </SectionContainer>
+          </Flex>
         </GridItem>
-        <GridItem display="flex" flexDirection="column" padding={6}>
-          <Heading as={"h1"} size={"lg"} textTransform={"capitalize"} mb={6}>
-            {board.filter.value ? board.filter.value : board.filter.type}
+        <GridItem height={"100vh"} display="flex" flexDirection="column">
+          <Heading
+            as={"h1"}
+            size={"lg"}
+            textTransform={"capitalize"}
+            padding={6}
+          >
+            {filter}
           </Heading>
-          <SimpleGrid minChildWidth="280px" spacing={4}>
-            {board.bookmarks.map((value, index) => (
-              <BookmarkCard key={index} />
+          <SimpleGrid
+            minChildWidth="280px"
+            spacing={4}
+            height={"100%"}
+            overflowY={"scroll"}
+            paddingX={6}
+            pb={6}
+          >
+            {bookmarks.map((value) => (
+              <BookmarkCard key={value.id} bookmark={value} />
             ))}
           </SimpleGrid>
         </GridItem>

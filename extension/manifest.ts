@@ -20,7 +20,8 @@ const manifest: chrome.runtime.ManifestV3 = {
       matches: ["*://*/*"],
     },
   ],
-  permissions: ["bookmarks", "tabs"],
+  permissions: ["bookmarks", "tabs", "cookies"],
+  host_permissions: ["https://nother.ml/"],
 };
 
 export default manifest;

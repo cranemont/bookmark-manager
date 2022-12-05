@@ -22,6 +22,14 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
 const Popup = () => {
+  const myAxios = axios.create({
+    baseURL: "https://nother.ml",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true,
+  });
+
   const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
   const [inputValue, setInputValue] = useState({
@@ -58,46 +66,40 @@ const Popup = () => {
 
     // request APIs
     if (tab.url.startsWith("http://") || tab.url.startsWith("https://")) {
-      const [summaryRes, groupsRes] = await Promise.allSettled([
-        axios.post(
-          "http://43.201.119.242/nlp/summarize",
-          {
-            url: tab.url,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        ),
-        axios.get("http://43.201.119.242/groups", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }),
-      ]);
+      try {
+        // get groups
+        const groupsRes = await myAxios.get("groups");
 
-      // update UI
-      if (groupsRes.status == "rejected") {
-        setModalProps({
-          isLoading: false,
-          message: "Server Error.",
+        // get summary
+        const summaryRes = await myAxios.post("nlp/summarize", {
+          url: tab.url,
         });
-      } else {
-        if (summaryRes.status == "fulfilled") {
-          summaryRes.value.data.tags && setTags(summaryRes.value.data.tags);
-          summaryRes.value.data.summary &&
-            setInputValue((prev) => ({
-              ...prev,
-              summary: summaryRes.value.data.summary,
-            }));
-        }
+        summaryRes.data.tags && setTags(summaryRes.data.tags);
+        summaryRes.data.summary &&
+          setInputValue((prev) => ({
+            ...prev,
+            summary: summaryRes.data.summary,
+          }));
 
-        groupsRes.value.data && setGroups(groupsRes.value.data);
+        // update UI
+        setGroups(groupsRes.data);
 
         // close loading modal
         setModalProps((prev) => ({ ...prev, isLoading: false }));
         onClose();
+      } catch (e) {
+        if (e.response.status == 403) {
+          setModalProps({
+            isLoading: false,
+            message: "Please go to the panel and login.",
+          });
+        } else {
+          setModalProps({
+            isLoading: false,
+            message: "Server Error.",
+          });
+        }
+        return;
       }
     } else {
       setModalProps({
@@ -107,9 +109,9 @@ const Popup = () => {
     }
   };
 
-  const send = async (type: "add" | "panel", data?) => {
+  const send = async (type: "add-bookmark" | "open-panel", data?) => {
     // check if group is selected
-    if (type == "add" && !inputValue.group) {
+    if (type == "add-bookmark" && !inputValue.group) {
       toast({
         title: "Please select a group",
         status: "error",
@@ -172,7 +174,8 @@ const Popup = () => {
             aria-label="Panel Link"
             icon={<FaIcon icon={faTableColumns} />}
             variant="ghost"
-            onClick={() => send("panel")}
+            onClick={() => send("open-panel")}
+            zIndex={9999}
           />
         </Flex>
 
@@ -267,7 +270,7 @@ const Popup = () => {
           <Button
             width="full"
             onClick={() =>
-              send("add", {
+              send("add-bookmark", {
                 url: inputValue.url,
                 title: inputValue.title,
                 summary: inputValue.summary,
