@@ -26,10 +26,16 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { faFolder } from "@fortawesome/free-regular-svg-icons";
-import { faGear, faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faGear,
+  faSearch,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FaIcon } from "@src/components/common/FaIcon";
 import theme from "@src/components/common/GlobalTheme";
-import { PanelModal } from "@src/components/panel/PanelModal";
+import { PanelBookmarkEditModal } from "@src/components/panel/PanelBookmarkEditModal";
+import { PanelSearchModal } from "@src/components/panel/PanelSearchModal";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import logo from "../../assets/img/logo.png";
@@ -138,18 +144,18 @@ const TagContainer = (props: FlexProps) => (
   </Flex>
 );
 
-const BookmarkCard = (props: CardProps & { bookmark: any }) => (
+const BookmarkCard = (
+  props: CardProps & { bookmark: any; edit: any; delete: any }
+) => (
   <Card width={"100%"} {...props}>
     <CardBody>
-      <Img
-        src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-        alt="Green double couch with wooden legs"
-        borderRadius="lg"
-      />
-      <Stack mt={6} spacing={4}>
-        <Heading size="md" noOfLines={1}>
-          {props.bookmark.title}
-        </Heading>
+      {/*<Img*/}
+      {/*  src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"*/}
+      {/*  alt="Green double couch with wooden legs"*/}
+      {/*  borderRadius="lg"*/}
+      {/*/>*/}
+      <Stack spacing={4}>
+        <Heading size="sm">{props.bookmark.title}</Heading>
         <Text
           as={Link}
           size="xs"
@@ -170,13 +176,13 @@ const BookmarkCard = (props: CardProps & { bookmark: any }) => (
           overflowX={"scroll"}
           sx={{ "::-webkit-scrollbar": { display: "none" } }}
         >
-          <TagContainer width={"max-content"}>
+          <TagContainer flexWrap={"wrap"}>
             {props.bookmark.tags.map((value, index) => (
               <Tag key={index}>{value}</Tag>
             ))}
           </TagContainer>
         </Box>
-        <Text noOfLines={2}>{props.bookmark.summary}</Text>
+        <Text>{props.bookmark.summary}</Text>
       </Stack>
     </CardBody>
     <CardFooter
@@ -188,11 +194,11 @@ const BookmarkCard = (props: CardProps & { bookmark: any }) => (
         },
       }}
     >
-      <Button minWidth="0 !important" flex="1">
-        View
+      <Button minWidth="0 !important" flex="1" onClick={props.edit}>
+        <FaIcon icon={faEdit} />
       </Button>
-      <Button minWidth="0 !important" flex="1">
-        Edit
+      <Button minWidth="0 !important" flex="1" onClick={props.delete}>
+        <FaIcon icon={faTrash} />
       </Button>
     </CardFooter>
   </Card>
@@ -211,9 +217,19 @@ const Panel = () => {
   const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
-  const [filter, setFilter] = useState("All");
+  const [selected, setSelected] = useState(null);
+  const [filter, setFilter] = useState({ type: null, value: "All" });
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isSearchOpen,
+    onOpen: onSearchOpen,
+    onClose: onSearchClose,
+  } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
 
   const init = async () => {
     // check user
@@ -229,10 +245,9 @@ const Panel = () => {
     }
 
     // request APIs
-    const [groupsRes, tagsRes, bookmarksRes] = await Promise.allSettled([
+    const [groupsRes, tagsRes] = await Promise.allSettled([
       myAxios.get("groups"),
       myAxios.get("bookmark/tags"),
-      myAxios.get("bookmarks"),
     ]);
 
     // update UI
@@ -247,21 +262,71 @@ const Panel = () => {
     } else {
       tagsRes.value.data && setTags(tagsRes.value.data);
     }
+  };
 
-    if (bookmarksRes.status == "rejected") {
-      console.log("bookmarks err");
-    } else {
-      bookmarksRes.value.data && setBookmarks(bookmarksRes.value.data);
+  const updateBookmarks = async () => {
+    switch (filter.type) {
+      case null: {
+        const res = await myAxios.get("bookmarks");
+        setBookmarks(res.data);
+        break;
+      }
+      case "search": {
+        const res = await myAxios.get(`bookmarks/search?query=${filter.value}`);
+        setBookmarks(res.data);
+        break;
+      }
+      case "tag": {
+        const res = await myAxios.get(`bookmarks/tag?names=${filter.value}`);
+        setBookmarks(res.data);
+        break;
+      }
+      case "group": {
+        const res = await myAxios.get(`bookmarks/group?name=${filter.value}`);
+        setBookmarks(res.data);
+        break;
+      }
     }
+  };
+
+  const onBookmarkEdit = async (bookmark) => {
+    setSelected(bookmark);
+    onEditOpen();
+  };
+
+  const onBookmarkDelete = async (id: string) => {
+    await myAxios.delete(`bookmark/${id}`);
+    await updateBookmarks();
+  };
+
+  const updateBookmark = async (id, updateBody) => {
+    await myAxios.put(`bookmark/${id}`, updateBody);
   };
 
   useEffect(() => {
     init();
   }, []);
 
+  useEffect(() => {
+    updateBookmarks();
+  }, [filter]);
+
+  useEffect(() => {
+    if (isEditOpen == false) {
+      updateBookmarks();
+    }
+  }, [isEditOpen]);
+
   return (
     <ChakraProvider theme={theme}>
-      <PanelModal isOpen={isOpen} onClose={onClose} />
+      <PanelSearchModal isOpen={isSearchOpen} onClose={onSearchClose} />
+      <PanelBookmarkEditModal
+        isOpen={isEditOpen}
+        onClose={onEditClose}
+        bookmark={selected}
+        update={updateBookmark}
+        groups={groups}
+      />
       <Grid gridTemplateColumns="320px auto" minHeight="100vh">
         <GridItem
           height={"100vh"}
@@ -279,7 +344,7 @@ const Panel = () => {
               <Login user={user} />
               <SectionIconBtn
                 leftIcon={<FaIcon icon={faSearch} />}
-                onClick={onOpen}
+                onClick={onSearchOpen}
               >
                 Search
               </SectionIconBtn>
@@ -317,7 +382,7 @@ const Panel = () => {
             textTransform={"capitalize"}
             padding={6}
           >
-            {filter}
+            {filter.value}
           </Heading>
           <SimpleGrid
             minChildWidth="280px"
@@ -327,8 +392,13 @@ const Panel = () => {
             paddingX={6}
             pb={6}
           >
-            {bookmarks.map((value) => (
-              <BookmarkCard key={value.id} bookmark={value} />
+            {bookmarks.map((value, index) => (
+              <BookmarkCard
+                key={index}
+                bookmark={value}
+                edit={() => onBookmarkEdit(value)}
+                delete={() => onBookmarkDelete(value.id)}
+              />
             ))}
           </SimpleGrid>
         </GridItem>

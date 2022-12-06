@@ -43,6 +43,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         break;
       }
+      case "get-user": {
+        const { user } = await chrome.storage.local.get(["user"]);
+        console.log(user);
+        if (user) {
+          sendResponse({ status: "success", message: null, user });
+        } else {
+          sendResponse({
+            status: "error",
+            message: "Please go to the panel and login.",
+            user: null,
+          });
+        }
+        break;
+      }
+      case "set-user": {
+        await chrome.storage.local.set({ user: request.data });
+        break;
+      }
     }
   })();
   return true;

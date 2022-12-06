@@ -13,7 +13,7 @@ import {
 
 type Props = Omit<ModalProps, "children">;
 
-export const PanelModal = ({ isOpen, onClose, ...props }: Props) => {
+export const PanelSearchModal = ({ isOpen, onClose, ...props }: Props) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} {...props}>
       <ModalOverlay />
