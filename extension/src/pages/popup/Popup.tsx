@@ -175,8 +175,7 @@ const Popup = () => {
             icon={<FaIcon icon={faTableColumns} />}
             variant="ghost"
             onClick={() => {
-              send("open-panel");
-              window.close();
+              send("open-panel").then(() => window.close());
             }}
             zIndex={9999}
           />
