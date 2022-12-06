@@ -303,6 +303,24 @@ const Panel = () => {
     await myAxios.put(`bookmark/${id}`, updateBody);
   };
 
+  const toggleTagFilter = (value) => {
+    if (filter.type !== "tag" || filter.value === "") {
+      setFilter({ type: "tag", value: value });
+    } else {
+      const tags = filter.value.split(",");
+      if (tags.includes(value)) {
+        if (tags.length > 1) {
+          setFilter({
+            type: "tag",
+            value: tags.filter((t) => t != value).join(","),
+          });
+        }
+      } else {
+        setFilter({ type: "tag", value: tags.concat([value]).join(",") });
+      }
+    }
+  };
+
   useEffect(() => {
     init();
   }, []);
@@ -319,7 +337,11 @@ const Panel = () => {
 
   return (
     <ChakraProvider theme={theme}>
-      <PanelSearchModal isOpen={isSearchOpen} onClose={onSearchClose} />
+      <PanelSearchModal
+        isOpen={isSearchOpen}
+        onClose={onSearchClose}
+        search={(query: string) => setFilter({ type: "search", value: query })}
+      />
       <PanelBookmarkEditModal
         isOpen={isEditOpen}
         onClose={onEditClose}
@@ -358,6 +380,7 @@ const Panel = () => {
                 <SectionIconBtn
                   key={index}
                   leftIcon={<FaIcon icon={faFolder} />}
+                  onClick={() => setFilter({ type: "group", value: value })}
                 >
                   {value}
                 </SectionIconBtn>
@@ -367,7 +390,12 @@ const Panel = () => {
               <SectionTitle>Tags</SectionTitle>
               <TagContainer paddingX={4} paddingY={2} flexWrap={"wrap"}>
                 {tags.map((value, index) => (
-                  <Tag as={Button} key={index} height={"auto"}>
+                  <Tag
+                    as={Button}
+                    key={index}
+                    height={"auto"}
+                    onClick={() => toggleTagFilter(value)}
+                  >
                     <TagLabel>{value}</TagLabel>
                   </Tag>
                 ))}
@@ -375,19 +403,32 @@ const Panel = () => {
             </SectionContainer>
           </Flex>
         </GridItem>
-        <GridItem height={"100vh"} display="flex" flexDirection="column">
-          <Heading
-            as={"h1"}
-            size={"lg"}
-            textTransform={"capitalize"}
+        <GridItem
+          height={"100vh"}
+          width={"100%"}
+          display="flex"
+          flexDirection="column"
+        >
+          <Flex
+            width={"100%"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
             padding={6}
+            gap={4}
           >
-            {filter.value}
-          </Heading>
+            <Heading size={"lg"}>{filter.value}</Heading>
+            {filter.type && (
+              <Button
+                size={"xs"}
+                onClick={() => setFilter({ type: null, value: "All" })}
+              >
+                Initialize Filter
+              </Button>
+            )}
+          </Flex>
           <SimpleGrid
             minChildWidth="280px"
             spacing={4}
-            height={"100%"}
             overflowY={"scroll"}
             paddingX={6}
             pb={6}
