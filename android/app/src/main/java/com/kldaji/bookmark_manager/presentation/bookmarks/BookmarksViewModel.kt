@@ -29,22 +29,7 @@ class BookmarksViewModel @Inject constructor(
 	val query: StateFlow<String> = _query.asStateFlow()
 
 	init {
-		viewModelScope.launch {
-			setShowLoading(Unit)
-
-			when (val result = groupRepository.getGroups()) {
-				is Result.NetworkError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
-				is Result.GenericError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
-				is Result.Success -> {
-					val groups = result.data
-
-					bookmarksUiState = bookmarksUiState.copy(groups = groups)
-					setSelectedGroup(groups.firstOrNull())
-				}
-			}
-
-			setShowLoading(null)
-		}
+		getGroups()
 
 		viewModelScope.launch {
 			query.debounce(1000L).collect {
@@ -73,6 +58,24 @@ class BookmarksViewModel @Inject constructor(
 		}
 	}
 
+	fun getGroups() {
+		viewModelScope.launch {
+			setShowLoading(Unit)
+
+			when (val result = groupRepository.getGroups()) {
+				is Result.NetworkError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = "please check network connection")
+				is Result.GenericError -> bookmarksUiState = bookmarksUiState.copy(bookmarksUserMessage = result.errorResponse?.message)
+				is Result.Success -> {
+					val groups = result.data
+
+					bookmarksUiState = bookmarksUiState.copy(groups = groups)
+					setSelectedGroup(groups.firstOrNull())
+				}
+			}
+
+			setShowLoading(null)
+		}
+	}
 	fun hideUserMessage() {
 		bookmarksUiState = bookmarksUiState.copy(
 			bookmarksUserMessage = null,
