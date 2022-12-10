@@ -272,6 +272,7 @@ class BookmarksActivity : ComponentActivity() {
 	override fun onStart() {
 		super.onStart()
 
+		bookmarksViewModel.getGroups()
 		bookmarksViewModel.getNewBookmarkResponses()
 	}
 
